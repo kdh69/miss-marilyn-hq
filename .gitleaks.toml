@@ -1,0 +1,8 @@
+# Extra rules on top of gitleaks defaults: Google service-account keys.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "gcp-service-account-key"
+description = "Google service account private key"
+regex = '''"private_key":\s*"-----BEGIN PRIVATE KEY-----'''

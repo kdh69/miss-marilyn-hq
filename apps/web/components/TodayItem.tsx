@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { answerItem } from "@/app/actions";
+import { PhotoUpload } from "./PhotoUpload";
 
 const VERB: Record<string, string> = { approve: "Approve", photos: "Send photos", rewrite: "Rewrite story", kdp_publish: "Publish on KDP" };
 
@@ -31,6 +32,7 @@ export function TodayItem({ item }: { item: Record<string, string> }) {
           {primary}
         </button>
       </div>
+      {item.item_type === "photos" && <div className="mt-3"><PhotoUpload taskId={item.task_id} label="Upload photos" /></div>}
       {item.item_type === "approve" && (
         <div className="mt-3 text-sm">
           {!open ? (

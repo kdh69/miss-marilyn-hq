@@ -17,9 +17,14 @@ Rules that hold everywhere:
 - `pages.text_draft` is AI; `pages.text_final` is Clara's. Print files use text_final only.
 - Times: ISO 8601 UTC in cells; the daily spend cap resets on the New York day.
 
-Commands: `npm run typecheck`, `npm run backend` (one tick, needs .env),
-`npm run web`, `python3 -I apps/backend/preflight/preflight.py interior file.pdf`.
+Commands: `npm run check` (typecheck + tests + panel build), `npm run doctor`, `npm run dryrun`,
+`npm run backend` (one tick), `npm run web`, `npm run sheet:setup`.
+Scripts load `.env` automatically (Node `--env-file-if-exists`).
 
-Next up, in order: wire preflight into the gatekeeper for interior_layout / cover_wrap /
-kdp_packet;
-"Done" follow-ups in momSync; remaining rubrics; image downscale for QC.
+- Drive file creation goes through `driveWriter()` (owner token if set, else service account);
+  reads go through `driveReader()`. See `packages/core/src/drive.ts` for why.
+- Backend steps are isolated in `apps/backend/src/run.ts`; add new jobs with `step(...)`.
+- New tab or column: edit `schema.json`, run `npm test` (integrity tests), then `sheet:setup`.
+
+Next up: bot API fallback if the Grok row test fails; Etsy publish once API access lands;
+KDP report + Etsy sales import for the Money tab; register photos dropped straight into Drive.

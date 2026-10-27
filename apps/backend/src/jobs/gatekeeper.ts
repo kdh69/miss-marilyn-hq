@@ -6,6 +6,7 @@ import { Core, isLegalTransition, nowIso, type Row } from "@mm/core";
 import { notifyKyle } from "../lib/notify";
 import { runQc } from "../lib/qc";
 import { pushToMom } from "./momSync";
+import { needsPreflight, preflight } from "../lib/preflight";
 
 const QC_PER_RUN = 5;
 
@@ -65,7 +66,7 @@ async function revert(core: Core, task: Row, to: string, why: string) {
   await notifyKyle(`${task.task_id} reverted to ${to} — ${why}`);
 }
 
-export async function qcGate(core: Core, qcBudgetLeft: boolean): Promise<void> {
+export async function qcGate(core: Core, qcBudgetLeft: boolean, onlyTaskId?: string): Promise<void> {
   if (!qcBudgetLeft) return;
   const types = new Map(core.rows("task_types").map((t) => [t.task_type, t]));
   const assets = new Map(core.rows("assets").map((a) => [a.asset_id, a]));
@@ -73,7 +74,7 @@ export async function qcGate(core: Core, qcBudgetLeft: boolean): Promise<void> {
 
   const queue = core
     .rows("tasks")
-    .filter((t) => t.status === "ready_for_qc")
+    .filter((t) => t.status === "ready_for_qc" && (!onlyTaskId || t.task_id === onlyTaskId))
     .sort((a, b) => (a.priority || "P9").localeCompare(b.priority || "P9") || a.updated_at.localeCompare(b.updated_at))
     .slice(0, QC_PER_RUN);
 
@@ -90,7 +91,13 @@ export async function qcGate(core: Core, qcBudgetLeft: boolean): Promise<void> {
     }
 
     const type = types.get(task.task_type);
-    const result = await runQc(core, task, ids.map((id) => assets.get(id)!), type?.qc_rubric ?? "");
+    const taskAssets = ids.map((id) => assets.get(id)!);
+
+    // KDP preflight (job 3): deterministic checks first; a failure skips the Claude call.
+    const pre = needsPreflight(task.task_type) ? await preflight(core, task, taskAssets).catch((e) => [`preflight error: ${String(e).slice(0, 150)}`]) : [];
+    const result = pre.length
+      ? { result: "fail" as const, notes: `PREFLIGHT (KDP specs):\n${pre.join("\n")}`, summaryForMom: "" }
+      : await runQc(core, task, taskAssets, type?.qc_rubric ?? "");
     const attempts = (Number(task.qc_attempts) || 0) + 1;
     const patch = { qc_result: result.result, qc_notes: result.notes, qc_at: nowIso(), qc_attempts: String(attempts) };
 

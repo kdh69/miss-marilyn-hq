@@ -64,6 +64,30 @@ export class Core {
     return this.data.get(tab)?.rows ?? [];
   }
 
+  /**
+   * Physically remove rows matching `match`. Only for test scaffolding (dry run) —
+   * production code retires rows with a status, never deletes (spec §2).
+   * Re-reads the tab first so indexes are current; deletes bottom-up.
+   */
+  async deleteWhere(tab: string, match: (r: Row) => boolean): Promise<number> {
+    const meta = await this.api.spreadsheets.get({ spreadsheetId: this.id, fields: "sheets(properties(sheetId,title))" });
+    const gid = meta.data.sheets?.find((s) => s.properties?.title === tab)?.properties?.sheetId;
+    if (gid === undefined || gid === null) throw new Error(`no tab ${tab}`);
+    const res = await this.api.spreadsheets.values.get({ spreadsheetId: this.id, range: tab });
+    const [headers = [], ...body] = (res.data.values ?? []) as string[][];
+    const idx = body
+      .map((r, i) => ({ i, row: Object.fromEntries(headers.map((h, j) => [h, r[j] ?? ""])) as Row }))
+      .filter(({ row }) => match(row))
+      .map(({ i }) => i + 1) // +1 for the header row (0-based grid index)
+      .sort((a, b) => b - a);
+    if (!idx.length) return 0;
+    await this.api.spreadsheets.batchUpdate({
+      spreadsheetId: this.id,
+      requestBody: { requests: idx.map((i) => ({ deleteDimension: { range: { sheetId: gid, dimension: "ROWS", startIndex: i, endIndex: i + 1 } } })) },
+    });
+    return idx.length;
+  }
+
   config(key: string): string {
     return this.rows("config").find((r) => r.key === key)?.value ?? "";
   }

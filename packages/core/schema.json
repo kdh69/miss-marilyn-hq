@@ -390,6 +390,383 @@
       }
     },
     {
+      "name": "accounts",
+      "group": "work",
+      "id": "account_id",
+      "headers": [
+        "account_id",
+        "service",
+        "owner",
+        "login_email",
+        "purpose",
+        "phase",
+        "status",
+        "two_factor",
+        "used_by",
+        "notes",
+        "updated_at",
+        "updated_by"
+      ],
+      "dropdowns": {
+        "phase": "phase",
+        "status": "account_status",
+        "updated_by": "role"
+      },
+      "seed": [
+        [
+          "A01",
+          "Business Gmail",
+          "Clara",
+          "",
+          "owns every store and social account",
+          "now",
+          "todo",
+          true,
+          "all Clara's accounts",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A02",
+          "Bot Gmail",
+          "Kyle",
+          "",
+          "Grok's Google connection; shared only on MM Core + MM Work",
+          "now",
+          "todo",
+          true,
+          "Grok bots",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A03",
+          "Password manager",
+          "Clara + Kyle",
+          "",
+          "shared vault for every login",
+          "now",
+          "todo",
+          true,
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A04",
+          "GitHub",
+          "Kyle",
+          "",
+          "repo, scheduled backend, secrets",
+          "now",
+          "done",
+          true,
+          "backend",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A05",
+          "Google Cloud project",
+          "Clara + Kyle",
+          "",
+          "service account + sign-in key",
+          "now",
+          "todo",
+          true,
+          "backend, panel",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A06",
+          "Service account mm-backend",
+          "Kyle",
+          "",
+          "backend and panel read/write the Sheet and Drive",
+          "now",
+          "todo",
+          false,
+          "backend, panel",
+          "email goes in doctor output",
+          "",
+          ""
+        ],
+        [
+          "A07",
+          "OAuth client",
+          "Kyle",
+          "",
+          "Google sign-in on Clara's panel",
+          "now",
+          "todo",
+          false,
+          "panel",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A08",
+          "Anthropic Console",
+          "Kyle",
+          "",
+          "Claude QC API key, $20/month cap",
+          "now",
+          "todo",
+          true,
+          "backend QC",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A09",
+          "Grok",
+          "Kyle",
+          "",
+          "the 6 bots + Scout",
+          "now",
+          "done",
+          true,
+          "bots",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A10",
+          "Vercel",
+          "Kyle",
+          "",
+          "hosts Clara's panel",
+          "now",
+          "todo",
+          true,
+          "panel",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A11",
+          "LLC + EIN",
+          "Clara",
+          "",
+          "legal entity, tax ID",
+          "phase_0",
+          "todo",
+          false,
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A12",
+          "Business bank + card",
+          "Clara",
+          "",
+          "fees out, payouts in",
+          "phase_0",
+          "todo",
+          true,
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A13",
+          "Domain registrar",
+          "Clara",
+          "",
+          "brand domain, email sending",
+          "phase_0",
+          "todo",
+          true,
+          "Resend",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A14",
+          "Resend",
+          "Kyle",
+          "",
+          "Kyle alerts + Clara's Sunday email",
+          "phase_1",
+          "todo",
+          true,
+          "backend notify",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A15",
+          "Amazon KDP",
+          "Clara",
+          "",
+          "publish paperbacks",
+          "phase_0",
+          "todo",
+          true,
+          "KDP packet",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A16",
+          "Etsy shop",
+          "Clara",
+          "",
+          "sell printables",
+          "phase_0",
+          "todo",
+          true,
+          "Etsy publish",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A17",
+          "Etsy developer app",
+          "Clara",
+          "",
+          "backend publishes on her Approve",
+          "phase_0",
+          "todo",
+          false,
+          "Etsy publish",
+          "API approval pending",
+          "",
+          ""
+        ],
+        [
+          "A18",
+          "Meta Business (FB + IG)",
+          "Clara",
+          "",
+          "social pages",
+          "phase_1",
+          "todo",
+          true,
+          "Growth",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A19",
+          "Pinterest business",
+          "Clara",
+          "",
+          "pins drive traffic",
+          "phase_1",
+          "todo",
+          true,
+          "Growth",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A20",
+          "Email list tool",
+          "Clara",
+          "",
+          "list + lead magnet",
+          "phase_1",
+          "todo",
+          true,
+          "Growth",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A21",
+          "Social scheduler",
+          "Clara",
+          "",
+          "schedules approved posts",
+          "phase_1",
+          "todo",
+          true,
+          "Growth",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A22",
+          "Meta + Pinterest developer apps",
+          "Clara",
+          "",
+          "automatic posting",
+          "phase_2",
+          "todo",
+          false,
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A23",
+          "Printify or Printful",
+          "Clara",
+          "",
+          "merch",
+          "phase_3",
+          "todo",
+          true,
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A24",
+          "Shopify",
+          "Clara",
+          "",
+          "own storefront",
+          "phase_3",
+          "todo",
+          true,
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "A25",
+          "Amazon Merch on Demand",
+          "Clara",
+          "",
+          "merch on Amazon",
+          "phase_3",
+          "todo",
+          true,
+          "",
+          "",
+          "",
+          ""
+        ]
+      ],
+      "backendOnly": true
+    },
+    {
       "name": "costs",
       "group": "money",
       "id": "cost_id",
@@ -536,6 +913,56 @@
           "requests_default_to",
           "kyle",
           "who Clara's messages go to first: kyle (you triage) or orchestrator (straight to the bots)"
+        ],
+        [
+          "bot_account_email",
+          "",
+          "the bot Gmail; doctor checks the Sheet is shared with it"
+        ],
+        [
+          "drive_root_folder_id",
+          "1Wpn7U0oQDztKn6X69pDGAtlpd7vO4HPV",
+          "Miss Marilyn Business"
+        ],
+        [
+          "drive_work_folder_id",
+          "1BJgOLiOGwQIdKyIyZYm9flE7Z1kZklA6",
+          "MM Work"
+        ],
+        [
+          "drive_brand_folder_id",
+          "1aRYqc0i4Plqh0pj1fS9fGNrQOsx7SefX",
+          "MM Brand"
+        ],
+        [
+          "drive_photos_inbox_id",
+          "1fbw_h8kG2vM1cw1lG8s8hN5Wu1R15Hib",
+          "MM Brand/photos/inbox \u2014 panel uploads land here"
+        ],
+        [
+          "drive_backups_folder_id",
+          "1Z0LJibtXQh-CvbBhVUobsegT3r0kJIgD",
+          "weekly copy of MM Core"
+        ],
+        [
+          "digest_day",
+          "Sun",
+          "day Clara's summary email goes out (New York time, after 5pm)"
+        ],
+        [
+          "last_digest_date",
+          "",
+          "set by backend"
+        ],
+        [
+          "last_backup_date",
+          "",
+          "set by backend"
+        ],
+        [
+          "last_request_alert_at",
+          "",
+          "set by backend"
         ]
       ]
     },
@@ -656,6 +1083,14 @@
           true,
           "photos",
           ""
+        ],
+        [
+          "dryrun",
+          "backend",
+          true,
+          true,
+          "approve",
+          "dryrun"
         ]
       ]
     },
@@ -713,7 +1148,8 @@
       "social_batch",
       "email",
       "lead_magnet",
-      "photo_request"
+      "photo_request",
+      "dryrun"
     ],
     "line": [
       "MM",
@@ -885,6 +1321,20 @@
       "in_progress",
       "done",
       "wont_do"
+    ],
+    "phase": [
+      "now",
+      "phase_0",
+      "phase_1",
+      "phase_2",
+      "phase_3"
+    ],
+    "account_status": [
+      "todo",
+      "in_progress",
+      "waiting",
+      "done",
+      "not_needed"
     ]
   },
   "transitions": {

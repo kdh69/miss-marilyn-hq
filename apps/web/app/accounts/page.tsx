@@ -1,29 +1,33 @@
-import { Card } from "@/components/ui";
+import { me } from "@/auth";
+import { AccountRow } from "@/components/AccountRow";
+import { Bar, Card, Empty } from "@/components/ui";
+import { getSnapshot } from "@/lib/data";
 
-// Static for now; becomes live once each channel's connection is stored in config.
-const CHANNELS = [
-  { name: "Amazon KDP", how: "Clara publishes by hand from a ready packet (KDP has no API)", status: "Manual" },
-  { name: "Etsy", how: "Publishes automatically when Clara approves, once Etsy approves our app", status: "Waiting on Etsy API approval" },
-  { name: "Instagram & Facebook", how: "Needs Meta to approve our app", status: "Not connected" },
-  { name: "Pinterest", how: "Phase 1 add-on", status: "Not connected" },
-  { name: "Email list", how: "Bought tool; Growth drafts, Clara approves", status: "Not set up" },
-  { name: "Print-on-demand merch", how: "Phase 3, after human-owned Miss M art", status: "Later" },
-];
+const PHASES: [string, string][] = [["now", "Set up now"], ["phase_0", "Business basics"], ["phase_1", "Selling and social"], ["phase_2", "Automation"], ["phase_3", "Merch and storefront"]];
 
-export default function Accounts() {
+export default async function Accounts() {
+  const [s, who] = await Promise.all([getSnapshot(), me()]);
+  const all = s.accounts.filter((a) => a.status !== "not_needed");
+  const done = all.filter((a) => a.status === "done").length;
   return (
-    <Card title="Where we sell and post">
-      <div className="flex flex-col divide-y divide-black/5">
-        {CHANNELS.map((c) => (
-          <div key={c.name} className="flex items-start justify-between gap-4 py-3">
-            <div>
-              <p className="font-semibold">{c.name}</p>
-              <p className="text-sm text-[var(--quiet)]">{c.how}</p>
+    <div className="flex flex-col gap-4">
+      <Card>
+        <p className="text-sm font-semibold">{done} of {all.length} accounts set up</p>
+        <div className="mt-2"><Bar pct={all.length ? Math.round((done / all.length) * 100) : 0} /></div>
+        <p className="mt-2 text-xs text-[var(--quiet)]">Passwords never go here — they live in the shared password manager.</p>
+      </Card>
+      {PHASES.map(([phase, title]) => {
+        const rows = s.accounts.filter((a) => a.phase === phase);
+        if (!rows.length) return null;
+        return (
+          <Card key={phase} title={title}>
+            <div className="flex flex-col divide-y divide-black/5">
+              {rows.map((a) => <AccountRow key={a.account_id} a={a} canEdit={who?.role === "kyle"} />)}
             </div>
-            <span className="shrink-0 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-[var(--quiet)]">{c.status}</span>
-          </div>
-        ))}
-      </div>
-    </Card>
+          </Card>
+        );
+      })}
+      {!s.accounts.length && <Empty>No accounts listed yet — run npm run sheet:setup.</Empty>}
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 import { Bar, Card, Empty, Stat } from "@/components/ui";
 import { TodayItem } from "@/components/TodayItem";
 import { MessageBox } from "@/components/MessageBox";
+import { PhotoUpload } from "@/components/PhotoUpload";
 import { MessageItem } from "@/components/Messages";
 import { bookProgress, getSnapshot, spendToday } from "@/lib/data";
 import { me } from "@/auth";
@@ -49,6 +50,9 @@ export default async function Today() {
           )}
           <Card title="Tell the team">
             <MessageBox />
+          </Card>
+          <Card title="Photos of Miss M">
+            <PhotoUpload />
           </Card>
         </div>
         <div className="flex flex-col gap-4 lg:col-span-2">

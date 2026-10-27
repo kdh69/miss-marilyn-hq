@@ -3,7 +3,13 @@ name: MM backend tick
 on:
   schedule:
     - cron: "7,37 * * * *"   # every 30 min (off the hour; GitHub delays :00 runs)
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "What to run"
+        type: choice
+        options: [tick, doctor, dryrun]
+        default: tick
 
 concurrency:
   group: mm-backend
@@ -18,6 +24,13 @@ jobs:
       MM_CORE_SHEET_ID: ${{ secrets.MM_CORE_SHEET_ID }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       KYLE_EMAIL: ${{ secrets.KYLE_EMAIL }}
+      CLARA_EMAIL: ${{ secrets.CLARA_EMAIL }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      NOTIFY_FROM: ${{ secrets.NOTIFY_FROM }}
+      PANEL_URL: ${{ secrets.PANEL_URL }}
+      AUTH_GOOGLE_ID: ${{ secrets.AUTH_GOOGLE_ID }}
+      AUTH_GOOGLE_SECRET: ${{ secrets.AUTH_GOOGLE_SECRET }}
+      GOOGLE_OWNER_REFRESH_TOKEN: ${{ secrets.GOOGLE_OWNER_REFRESH_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - name: Skip until secrets are set
@@ -28,7 +41,7 @@ jobs:
           fi
       - uses: actions/setup-node@v4
         if: steps.gate.outputs.skip != 'true'
-        with: { node-version: 22, cache: npm }
+        with: { node-version-file: .nvmrc, cache: npm }
       - uses: actions/setup-python@v5
         if: steps.gate.outputs.skip != 'true'
         with: { python-version: "3.12" }
@@ -37,4 +50,4 @@ jobs:
       - if: steps.gate.outputs.skip != 'true'
         run: pip install -r apps/backend/preflight/requirements.txt
       - if: steps.gate.outputs.skip != 'true'
-        run: npm run backend
+        run: npm run ${{ github.event.inputs.job == 'doctor' && 'doctor' || github.event.inputs.job == 'dryrun' && 'dryrun' || 'backend' }}

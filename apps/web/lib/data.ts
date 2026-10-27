@@ -2,7 +2,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import { Core, type Row } from "@mm/core";
 
-const TABS = ["tasks", "assets", "products", "skus", "listings", "content", "mom_queue", "pages", "requests", "research", "costs", "transactions", "log", "config"] as const;
+const TABS = ["tasks", "assets", "products", "skus", "listings", "content", "mom_queue", "pages", "requests", "research", "accounts", "costs", "transactions", "log", "config"] as const;
 type Tab = (typeof TABS)[number];
 export type Snapshot = Record<Tab, Row[]> & { _sample?: boolean };
 
@@ -66,8 +66,14 @@ function sample(): Snapshot {
       { request_id: "Q-20261027-01", created_at: "2026-10-27T14:02:00Z", from: "orchestrator", to: "mom", product_id: "MM-B01", page_number: "", kind: "question", body: "For Book 1, should Miss M's first adventure be flying to see Nonna and Poppy, or the first day of school?", status: "new", reply: "" },
       { request_id: "Q-20261026-03", created_at: "2026-10-26T19:40:00Z", from: "mom", to: "kyle", product_id: "OL-B01", page_number: "3", kind: "change", body: "Papa should look happier here, not worried.", status: "seen", reply: "" },
     ] as Row[],
+    accounts: [
+      { account_id: "A01", service: "Business Gmail", owner: "Clara", purpose: "owns every store and social account", phase: "now", status: "todo", two_factor: "TRUE" },
+      { account_id: "A04", service: "GitHub", owner: "Kyle", purpose: "repo, scheduled backend, secrets", phase: "now", status: "done", two_factor: "TRUE" },
+      { account_id: "A15", service: "Amazon KDP", owner: "Clara", purpose: "publish paperbacks", phase: "phase_0", status: "todo", two_factor: "TRUE" },
+      { account_id: "A16", service: "Etsy shop", owner: "Clara", purpose: "sell printables", phase: "phase_0", status: "todo", two_factor: "TRUE" },
+    ] as Row[],
     assets: [], skus: [], listings: [], content: [], transactions: [], log: [],
-    config: [{ key: "daily_bot_cap_usd", value: "15" }] as Row[],
+    config: [{ key: "daily_bot_cap_usd", value: "15" }, { key: "system_status", value: "RUN" }] as Row[],
   };
 }
 

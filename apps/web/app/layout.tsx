@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
 import { authConfigured, me, signOut } from "@/auth";
+import { SystemBanner } from "@/components/SystemBanner";
+import { getSnapshot } from "@/lib/data";
 
 async function UserChip() {
   if (!authConfigured()) return <p className="mt-6 hidden text-xs text-[var(--quiet)] md:block">Preview mode — sign-in not set up, editing off.</p>;
@@ -18,7 +20,9 @@ async function UserChip() {
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Miss Marilyn HQ", description: "Clara's control panel" };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const [s, who] = await Promise.all([getSnapshot().catch(() => null), me()]);
+  const halted = s?.config.find((c) => c.key === "system_status")?.value === "HALT";
   return (
     <html lang="en">
       <body>
@@ -35,7 +39,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Nav />
             <UserChip />
           </aside>
-          <main className="min-w-0 flex-1">{children}</main>
+          <main className="min-w-0 flex-1">
+            <SystemBanner halted={halted} viewer={who?.role ?? null} />
+            {children}
+          </main>
         </div>
       </body>
     </html>

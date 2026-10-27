@@ -5,7 +5,8 @@
  * messages; the backend and the Orchestrator act on them.
  */
 import { revalidateTag } from "next/cache";
-import { Core, nowIso } from "@mm/core";
+import { headers } from "next/headers";
+import { Core, nowIso, startResumableUpload } from "@mm/core";
 import { me, type PanelRole } from "@/auth";
 
 type Result = { ok: boolean; error?: string };
@@ -70,4 +71,70 @@ export async function savePageText(pageId: string, text: string): Promise<Result
   const ok = await core.update("pages", pageId, { text_final: text.trim(), text_final_by: who.role, text_final_at: nowIso() }, who.role);
   refresh();
   return ok ? { ok } : { ok, error: "A bot just updated this page — refresh to see it, then save again." };
+}
+
+// ---------- Photos & videos (Clara → MM Brand/photos/inbox) ----------
+
+const PHOTO_TYPES = /^(image\/(jpeg|png|heic|heif|webp)|video\/(mp4|quicktime))$/;
+const MAX_UPLOAD = 500 * 1024 * 1024;
+
+/** Step 1: get a one-time Drive upload URL; the browser sends the file straight to Google. */
+export async function startPhotoUpload(name: string, mimeType: string, size: number): Promise<Result & { uploadUrl?: string }> {
+  const who = await me();
+  if (!who) return NOT_SIGNED_IN;
+  if (!PHOTO_TYPES.test(mimeType)) return { ok: false, error: `${name}: only photos (JPG, PNG, HEIC) and videos (MP4, MOV)` };
+  if (size > MAX_UPLOAD) return { ok: false, error: `${name} is over 500 MB` };
+  const core = await Core.load(["config"]);
+  const folderId = core.config("drive_photos_inbox_id");
+  if (!folderId) return { ok: false, error: "Photo folder isn't set in config (drive_photos_inbox_id)." };
+  const h = await headers();
+  const origin = h.get("origin") ?? `https://${h.get("host")}`;
+  try {
+    const safe = name.replace(/[^\w.\- ]+/g, "_").slice(0, 80);
+    const uploadUrl = await startResumableUpload({ folderId, name: `${stamp()}_${who.role}_${safe}`, mimeType, size, origin });
+    return { ok: true, uploadUrl };
+  } catch (e) {
+    return { ok: false, error: `Upload couldn't start: ${String((e as Error).message).slice(0, 120)}` };
+  }
+}
+
+/** Step 2: record the uploaded file as a photo/video asset (rights_source=photo). */
+export async function registerPhoto(fileId: string, name: string, mimeType: string, taskId = ""): Promise<Result> {
+  const who = await me();
+  if (!who) return NOT_SIGNED_IN;
+  const core = await Core.load(["assets"]);
+  const n = core.rows("assets").filter((a) => a.asset_id.startsWith(`P-${stamp().slice(0, 8)}`)).length + 1;
+  const now = nowIso();
+  await core.append("assets", [{
+    asset_id: `P-${stamp().slice(0, 8)}-${String(n).padStart(3, "0")}`, task_id: taskId, product_id: "", sku: "",
+    asset_type: mimeType.startsWith("video/") ? "video" : "photo", version: "1",
+    file_url: `https://drive.google.com/file/d/${fileId}/view`, file_name: name,
+    rights_source: "photo", rights_note: `Clara's own photo of Miss Marilyn, uploaded via panel by ${who.role}`,
+    made_with: "camera", status: "final", created_by: who.role, created_at: now, updated_at: now, updated_by: who.role,
+  }]);
+  refresh();
+  return { ok: true };
+}
+
+// ---------- Kyle-only controls ----------
+
+export async function setSystemStatus(value: "RUN" | "HALT"): Promise<Result> {
+  const who = await me();
+  if (who?.role !== "kyle") return { ok: false, error: "Only Kyle can pause or resume the bots." };
+  const core = await Core.load(["config", "log"]);
+  const ok = await core.update("config", "system_status", { value }, "kyle");
+  await core.log("kyle", "", "", "", `system_status set to ${value} from the panel`);
+  refresh();
+  return { ok };
+}
+
+export async function setAccountStatus(accountId: string, status: string, loginEmail?: string): Promise<Result> {
+  const who = await me();
+  if (who?.role !== "kyle") return { ok: false, error: "Only Kyle can update accounts." };
+  const core = await Core.load(["accounts"]);
+  const patch: Record<string, string> = { status };
+  if (loginEmail !== undefined) patch.login_email = loginEmail.trim();
+  const ok = await core.update("accounts", accountId, patch, "kyle");
+  refresh();
+  return { ok };
 }

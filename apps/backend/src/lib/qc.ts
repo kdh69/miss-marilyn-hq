@@ -4,13 +4,13 @@
  */
 import Anthropic from "@anthropic-ai/sdk";
 import { readFile } from "node:fs/promises";
-import { google } from "googleapis";
-import { Core, googleAuth, nowIso, type Row } from "@mm/core";
+import sharp from "sharp";
+import { Core, driveReader, nowIso, type Row } from "@mm/core";
 
 export type QcResult = { result: "pass" | "fail"; notes: string; summaryForMom: string };
 
 const RUBRIC_DIR = new URL("../../rubrics/", import.meta.url);
-const MAX_ATTACH_BYTES = 4_500_000; // stay under the API's 5 MB per-image limit
+const MAX_PDF_BYTES = 25_000_000; // API request limit is 32 MB
 const anthropic = new Anthropic();
 
 export async function runQc(core: Core, task: Row, assets: Row[], rubric: string): Promise<QcResult> {
@@ -65,19 +65,22 @@ async function attachment(fileUrl: string): Promise<Anthropic.ContentBlockParam 
   const id = fileUrl.match(/[-\w]{25,}/)?.[0];
   if (!id) return null;
   try {
-    const drive = google.drive({ version: "v3", auth: googleAuth() });
+    const drive = driveReader();
     const meta = await drive.files.get({ fileId: id, fields: "mimeType,size" });
     const mime = meta.data.mimeType ?? "";
-    if (Number(meta.data.size ?? 0) > MAX_ATTACH_BYTES) return null; // TODO: downscale to ~1500px with sharp
     if (mime === "application/vnd.google-apps.document") {
       const doc = await drive.files.export({ fileId: id, mimeType: "text/plain" }, { responseType: "text" });
-      return { type: "text", text: String(doc.data) };
+      return { type: "text", text: String(doc.data).slice(0, 60_000) };
     }
+    if (mime === "application/pdf" && Number(meta.data.size ?? 0) > MAX_PDF_BYTES) return null;
     const bin = await drive.files.get({ fileId: id, alt: "media" }, { responseType: "arraybuffer" });
-    const data = Buffer.from(bin.data as ArrayBuffer).toString("base64");
-    if (mime === "application/pdf") return { type: "document", source: { type: "base64", media_type: "application/pdf", data } };
-    if (["image/png", "image/jpeg", "image/webp", "image/gif"].includes(mime))
-      return { type: "image", source: { type: "base64", media_type: mime as "image/png", data } };
+    let buf = Buffer.from(bin.data as ArrayBuffer);
+    if (mime === "application/pdf") return { type: "document", source: { type: "base64", media_type: "application/pdf", data: buf.toString("base64") } };
+    if (mime.startsWith("image/")) {
+      // Claude sees ~1.5k px anyway; print resolution is checked by preflight, not here.
+      buf = await sharp(buf).resize({ width: 1500, height: 1500, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
+      return { type: "image", source: { type: "base64", media_type: "image/jpeg", data: buf.toString("base64") } };
+    }
   } catch {
     return null;
   }
