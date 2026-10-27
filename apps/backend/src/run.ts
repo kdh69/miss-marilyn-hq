@@ -5,7 +5,7 @@
  */
 import { Core } from "@mm/core";
 import { integrityCheck, qcGate, spendGuard } from "./jobs/gatekeeper";
-import { momSync } from "./jobs/momSync";
+import { momSync, processRequests } from "./jobs/momSync";
 import { etsyPublish } from "./jobs/etsyPublish";
 
 async function main() {
@@ -18,6 +18,7 @@ async function main() {
   }
   await qcGate(core, qcBudgetLeft);
   await momSync(core);
+  await processRequests(core);
   await etsyPublish(core);
   console.log("tick complete");
 }

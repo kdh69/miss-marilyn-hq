@@ -1,7 +1,21 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
+import { authConfigured, me, signOut } from "@/auth";
 
+async function UserChip() {
+  if (!authConfigured()) return <p className="mt-6 hidden text-xs text-[var(--quiet)] md:block">Preview mode — sign-in not set up, editing off.</p>;
+  const who = await me();
+  if (!who) return null;
+  return (
+    <form className="mt-6 hidden md:block" action={async () => { "use server"; await signOut({ redirectTo: "/signin" }); }}>
+      <p className="text-xs text-[var(--quiet)]">Signed in as {who.role === "mom" ? "Clara" : "Kyle"}</p>
+      <button className="text-xs text-[var(--quiet)] underline">Sign out</button>
+    </form>
+  );
+}
+
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Miss Marilyn HQ", description: "Clara's control panel" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -19,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <p className="text-[15px] font-semibold">Miss Marilyn</p>
             <p className="mb-4 text-xs text-[var(--quiet)]">Control panel</p>
             <Nav />
+            <UserChip />
           </aside>
           <main className="min-w-0 flex-1">{children}</main>
         </div>

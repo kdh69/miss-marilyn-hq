@@ -97,7 +97,11 @@ export async function qcGate(core: Core, qcBudgetLeft: boolean): Promise<void> {
     if (result.result === "pass") {
       const toMom = type?.needs_mom === "TRUE";
       await finish(core, task, toMom ? "awaiting_mom" : "done", patch);
-      if (toMom) await pushToMom(core, task, type!.mom_item_type, result.summaryForMom, ids.map((id) => assets.get(id)!.file_url)[0] ?? "");
+      if (toMom) {
+        // Story drafts are rewritten page by page in the panel's book workspace.
+        const preview = type!.mom_item_type === "rewrite" ? `/books/${task.product_id}` : (assets.get(ids[0])?.file_url ?? "");
+        await pushToMom(core, task, type!.mom_item_type, result.summaryForMom, preview);
+      }
     } else {
       const to = attempts >= maxAttempts ? "escalated" : "qc_fail";
       await finish(core, task, to, patch);

@@ -5,144 +5,658 @@
       "name": "tasks",
       "group": "work",
       "id": "task_id",
-      "headers": ["task_id", "parent_task_id", "product_id", "sku", "task_type", "title", "brief", "input_refs", "owner", "status", "priority", "due_date", "output_asset_ids", "blocked_reason", "created_by", "created_at", "updated_at", "updated_by", "qc_attempts", "qc_result", "qc_notes", "qc_at", "mom_decision", "mom_note"],
-      "dropdowns": { "task_type": "task_type", "owner": "role", "status": "task_status", "priority": "priority", "created_by": "role", "updated_by": "role", "qc_result": "qc_result", "mom_decision": "mom_answer" },
+      "headers": [
+        "task_id",
+        "parent_task_id",
+        "product_id",
+        "sku",
+        "task_type",
+        "title",
+        "brief",
+        "input_refs",
+        "owner",
+        "status",
+        "priority",
+        "due_date",
+        "output_asset_ids",
+        "blocked_reason",
+        "created_by",
+        "created_at",
+        "updated_at",
+        "updated_by",
+        "qc_attempts",
+        "qc_result",
+        "qc_notes",
+        "qc_at",
+        "mom_decision",
+        "mom_note"
+      ],
+      "dropdowns": {
+        "task_type": "task_type",
+        "owner": "role",
+        "status": "task_status",
+        "priority": "priority",
+        "created_by": "role",
+        "updated_by": "role",
+        "qc_result": "qc_result",
+        "mom_decision": "mom_answer"
+      },
       "backendOnlyFrom": "qc_attempts"
     },
     {
       "name": "assets",
       "group": "work",
       "id": "asset_id",
-      "headers": ["asset_id", "task_id", "product_id", "sku", "asset_type", "page_number", "version", "file_url", "file_name", "rights_source", "rights_note", "made_with", "prompt_ref", "status", "created_by", "created_at", "updated_at", "updated_by", "qc_result"],
-      "dropdowns": { "asset_type": "asset_type", "rights_source": "rights_source", "status": "asset_status", "created_by": "role", "updated_by": "role", "qc_result": "qc_result" },
+      "headers": [
+        "asset_id",
+        "task_id",
+        "product_id",
+        "sku",
+        "asset_type",
+        "page_number",
+        "version",
+        "file_url",
+        "file_name",
+        "rights_source",
+        "rights_note",
+        "made_with",
+        "prompt_ref",
+        "status",
+        "created_by",
+        "created_at",
+        "updated_at",
+        "updated_by",
+        "qc_result"
+      ],
+      "dropdowns": {
+        "asset_type": "asset_type",
+        "rights_source": "rights_source",
+        "status": "asset_status",
+        "created_by": "role",
+        "updated_by": "role",
+        "qc_result": "qc_result"
+      },
       "backendOnlyFrom": "qc_result"
     },
     {
       "name": "products",
       "group": "work",
       "id": "product_id",
-      "headers": ["product_id", "line", "series_no", "title", "subtitle", "lesson_theme", "age_range", "author_name", "status", "bible_url", "notes", "created_at", "updated_at", "updated_by"],
-      "dropdowns": { "line": "line", "status": "product_status", "updated_by": "role" },
+      "headers": [
+        "product_id",
+        "line",
+        "series_no",
+        "title",
+        "subtitle",
+        "lesson_theme",
+        "age_range",
+        "author_name",
+        "status",
+        "bible_url",
+        "notes",
+        "created_at",
+        "updated_at",
+        "updated_by"
+      ],
+      "dropdowns": {
+        "line": "line",
+        "status": "product_status",
+        "updated_by": "role"
+      },
       "seed": [
-        ["OL-B01", "OL", 1, "Ollie and the New Baby", "", "welcoming a new sibling", "2-6", "", "in_production", "", "Practice book; art passed QC", "", "", "kyle"],
-        ["MM-B01", "MM", 1, "The Adventures of Miss Marilyn: Book 1", "", "", "2-6", "", "concept", "", "Title and lesson TBD", "", "", "kyle"]
+        [
+          "OL-B01",
+          "OL",
+          1,
+          "Ollie and the New Baby",
+          "",
+          "welcoming a new sibling",
+          "2-6",
+          "",
+          "in_production",
+          "",
+          "Practice book; art passed QC",
+          "",
+          "",
+          "kyle"
+        ],
+        [
+          "MM-B01",
+          "MM",
+          1,
+          "The Adventures of Miss Marilyn: Book 1",
+          "",
+          "",
+          "2-6",
+          "",
+          "concept",
+          "",
+          "Title and lesson TBD",
+          "",
+          "",
+          "kyle"
+        ]
       ]
     },
     {
       "name": "skus",
       "group": "work",
       "id": "sku",
-      "headers": ["sku", "product_id", "format", "trim_size", "page_count", "interior", "paper", "list_price", "print_cost", "status", "notes", "created_at", "updated_at", "updated_by"],
-      "dropdowns": { "format": "format", "status": "sku_status", "updated_by": "role" },
+      "headers": [
+        "sku",
+        "product_id",
+        "format",
+        "trim_size",
+        "page_count",
+        "interior",
+        "paper",
+        "list_price",
+        "print_cost",
+        "status",
+        "notes",
+        "created_at",
+        "updated_at",
+        "updated_by"
+      ],
+      "dropdowns": {
+        "format": "format",
+        "status": "sku_status",
+        "updated_by": "role"
+      },
       "seed": [
-        ["OL-B01-PB", "OL-B01", "PB", "8.5x8.5", 32, "premium color", "white", 10.99, "", "draft", "", "", "", "kyle"],
-        ["OL-B01-PRT", "OL-B01", "PRT", "letter+a4", "", "", "", 3.99, 0, "draft", "Etsy printable bundle", "", "", "kyle"],
-        ["MM-B01-PB", "MM-B01", "PB", "8.5x8.5", 32, "premium color", "white", "", "", "draft", "", "", "", "kyle"]
+        [
+          "OL-B01-PB",
+          "OL-B01",
+          "PB",
+          "8.5x8.5",
+          32,
+          "premium color",
+          "white",
+          10.99,
+          "",
+          "draft",
+          "",
+          "",
+          "",
+          "kyle"
+        ],
+        [
+          "OL-B01-PRT",
+          "OL-B01",
+          "PRT",
+          "letter+a4",
+          "",
+          "",
+          "",
+          3.99,
+          0,
+          "draft",
+          "Etsy printable bundle",
+          "",
+          "",
+          "kyle"
+        ],
+        [
+          "MM-B01-PB",
+          "MM-B01",
+          "PB",
+          "8.5x8.5",
+          32,
+          "premium color",
+          "white",
+          "",
+          "",
+          "draft",
+          "",
+          "",
+          "",
+          "kyle"
+        ]
       ]
     },
     {
       "name": "listings",
       "group": "work",
       "id": "listing_id",
-      "headers": ["listing_id", "sku", "channel", "status", "title", "price", "packet_url", "created_at", "updated_at", "updated_by", "external_id", "live_url", "published_at", "last_synced_at", "error"],
-      "dropdowns": { "channel": "channel", "status": "listing_status", "updated_by": "role" },
+      "headers": [
+        "listing_id",
+        "sku",
+        "channel",
+        "status",
+        "title",
+        "price",
+        "packet_url",
+        "created_at",
+        "updated_at",
+        "updated_by",
+        "external_id",
+        "live_url",
+        "published_at",
+        "last_synced_at",
+        "error"
+      ],
+      "dropdowns": {
+        "channel": "channel",
+        "status": "listing_status",
+        "updated_by": "role"
+      },
       "backendOnlyFrom": "external_id"
     },
     {
       "name": "content",
       "group": "work",
       "id": "content_id",
-      "headers": ["content_id", "product_id", "task_id", "channel", "content_type", "scheduled_for", "hook", "body", "asset_ids", "link_url", "status", "created_at", "updated_at", "updated_by", "posted_url"],
-      "dropdowns": { "channel": "channel", "content_type": "content_type", "status": "content_status", "updated_by": "role" },
+      "headers": [
+        "content_id",
+        "product_id",
+        "task_id",
+        "channel",
+        "content_type",
+        "scheduled_for",
+        "hook",
+        "body",
+        "asset_ids",
+        "link_url",
+        "status",
+        "created_at",
+        "updated_at",
+        "updated_by",
+        "posted_url"
+      ],
+      "dropdowns": {
+        "channel": "channel",
+        "content_type": "content_type",
+        "status": "content_status",
+        "updated_by": "role"
+      },
       "backendOnlyFrom": "posted_url"
     },
     {
       "name": "mom_queue",
       "group": "work",
       "id": "item_id",
-      "headers": ["item_id", "task_id", "item_type", "summary", "preview_url", "qc_summary", "requested_at", "answer", "mom_note", "answered_at", "processed_at"],
-      "dropdowns": { "item_type": "mom_item_type", "answer": "mom_answer" },
+      "headers": [
+        "item_id",
+        "task_id",
+        "item_type",
+        "summary",
+        "preview_url",
+        "qc_summary",
+        "requested_at",
+        "answer",
+        "mom_note",
+        "answered_at",
+        "processed_at"
+      ],
+      "dropdowns": {
+        "item_type": "mom_item_type",
+        "answer": "mom_answer"
+      },
       "backendOnly": true
+    },
+    {
+      "name": "pages",
+      "group": "work",
+      "id": "page_id",
+      "headers": [
+        "page_id",
+        "product_id",
+        "page_number",
+        "text_draft",
+        "art_brief",
+        "characters",
+        "art_asset_id",
+        "updated_at",
+        "updated_by",
+        "text_final",
+        "text_final_by",
+        "text_final_at"
+      ],
+      "dropdowns": {
+        "updated_by": "role",
+        "text_final_by": "role"
+      },
+      "backendOnlyFrom": "text_final"
+    },
+    {
+      "name": "requests",
+      "group": "work",
+      "id": "request_id",
+      "headers": [
+        "request_id",
+        "created_at",
+        "from",
+        "to",
+        "product_id",
+        "page_number",
+        "kind",
+        "body",
+        "status",
+        "task_id",
+        "reply",
+        "reply_by",
+        "replied_at",
+        "updated_at",
+        "updated_by"
+      ],
+      "dropdowns": {
+        "from": "role",
+        "to": "role",
+        "kind": "request_kind",
+        "status": "request_status",
+        "reply_by": "role",
+        "updated_by": "role"
+      }
     },
     {
       "name": "lessons",
       "group": "work",
       "id": "lesson_id",
-      "headers": ["lesson_id", "date", "applies_to", "rule", "evidence_task_id", "source", "status"],
-      "dropdowns": { "source": "lesson_source", "status": "lesson_status" }
+      "headers": [
+        "lesson_id",
+        "date",
+        "applies_to",
+        "rule",
+        "evidence_task_id",
+        "source",
+        "status"
+      ],
+      "dropdowns": {
+        "source": "lesson_source",
+        "status": "lesson_status"
+      }
     },
     {
       "name": "research",
       "group": "work",
       "id": "research_id",
-      "headers": ["research_id", "date", "topic", "research_type", "finding", "numbers", "source_url", "confidence", "suggested_action", "status", "reviewed_by"],
-      "dropdowns": { "research_type": "research_type", "confidence": "confidence", "status": "research_status" }
+      "headers": [
+        "research_id",
+        "date",
+        "topic",
+        "research_type",
+        "finding",
+        "numbers",
+        "source_url",
+        "confidence",
+        "suggested_action",
+        "status",
+        "reviewed_by"
+      ],
+      "dropdowns": {
+        "research_type": "research_type",
+        "confidence": "confidence",
+        "status": "research_status"
+      }
     },
     {
       "name": "costs",
       "group": "money",
       "id": "cost_id",
-      "headers": ["cost_id", "date", "category", "vendor", "amount_usd", "estimated", "product_id", "sku", "task_id", "role", "note", "entered_by", "created_at"],
-      "dropdowns": { "category": "cost_category", "role": "role", "entered_by": "role" }
+      "headers": [
+        "cost_id",
+        "date",
+        "category",
+        "vendor",
+        "amount_usd",
+        "estimated",
+        "product_id",
+        "sku",
+        "task_id",
+        "role",
+        "note",
+        "entered_by",
+        "created_at"
+      ],
+      "dropdowns": {
+        "category": "cost_category",
+        "role": "role",
+        "entered_by": "role"
+      }
     },
     {
       "name": "transactions",
       "group": "money",
       "id": "txn_id",
-      "headers": ["txn_id", "date", "channel", "txn_type", "sku", "external_order_id", "qty", "gross_usd", "fees_usd", "net_usd", "source_file", "imported_at"],
-      "dropdowns": { "channel": "channel", "txn_type": "txn_type" },
+      "headers": [
+        "txn_id",
+        "date",
+        "channel",
+        "txn_type",
+        "sku",
+        "external_order_id",
+        "qty",
+        "gross_usd",
+        "fees_usd",
+        "net_usd",
+        "source_file",
+        "imported_at"
+      ],
+      "dropdowns": {
+        "channel": "channel",
+        "txn_type": "txn_type"
+      },
       "backendOnly": true
     },
     {
       "name": "log",
       "group": "system",
       "id": null,
-      "headers": ["ts", "actor", "task_id", "from_status", "to_status", "message"],
-      "dropdowns": { "actor": "role", "from_status": "task_status", "to_status": "task_status" }
+      "headers": [
+        "ts",
+        "actor",
+        "task_id",
+        "from_status",
+        "to_status",
+        "message"
+      ],
+      "dropdowns": {
+        "actor": "role",
+        "from_status": "task_status",
+        "to_status": "task_status"
+      }
     },
     {
       "name": "config",
       "group": "system",
       "id": "key",
-      "headers": ["key", "value", "note"],
+      "headers": [
+        "key",
+        "value",
+        "note"
+      ],
       "backendOnly": true,
       "seed": [
-        ["system_status", "RUN", "RUN or HALT; backend sets HALT; only Kyle sets RUN"],
-        ["daily_bot_cap_usd", 15, "Grok credit cap"],
-        ["daily_qc_cap_usd", 5, "Claude QC cap; also set a limit in the Anthropic console"],
-        ["qc_model", "claude-sonnet-5-5", "model for QC calls"],
-        ["qc_max_attempts", 2, "second fail escalates to Kyle"],
-        ["qc_price_in_per_mtok", 3, "USD per million input tokens for qc_model; verify against current pricing"],
-        ["qc_price_out_per_mtok", 15, "USD per million output tokens for qc_model; verify against current pricing"],
-        ["kdp_trim_in", "8.5x8.5", ""],
-        ["kdp_bleed_in", 0.125, ""],
-        ["kdp_page_with_bleed_in", "8.625x8.75", ""],
-        ["kdp_spine_per_page_in", 0.002347, "premium color paper"],
-        ["kdp_min_pages", 24, ""],
-        ["min_dpi", 300, ""],
-        ["panel_allowed_emails", "", "Clara's and Kyle's sign-in emails for the control panel, comma-separated"]
+        [
+          "system_status",
+          "RUN",
+          "RUN or HALT; backend sets HALT; only Kyle sets RUN"
+        ],
+        [
+          "daily_bot_cap_usd",
+          15,
+          "Grok credit cap"
+        ],
+        [
+          "daily_qc_cap_usd",
+          5,
+          "Claude QC cap; also set a limit in the Anthropic console"
+        ],
+        [
+          "qc_model",
+          "claude-sonnet-5-5",
+          "model for QC calls"
+        ],
+        [
+          "qc_max_attempts",
+          2,
+          "second fail escalates to Kyle"
+        ],
+        [
+          "qc_price_in_per_mtok",
+          3,
+          "USD per million input tokens for qc_model; verify against current pricing"
+        ],
+        [
+          "qc_price_out_per_mtok",
+          15,
+          "USD per million output tokens for qc_model; verify against current pricing"
+        ],
+        [
+          "kdp_trim_in",
+          "8.5x8.5",
+          ""
+        ],
+        [
+          "kdp_bleed_in",
+          0.125,
+          ""
+        ],
+        [
+          "kdp_page_with_bleed_in",
+          "8.625x8.75",
+          ""
+        ],
+        [
+          "kdp_spine_per_page_in",
+          0.002347,
+          "premium color paper"
+        ],
+        [
+          "kdp_min_pages",
+          24,
+          ""
+        ],
+        [
+          "min_dpi",
+          300,
+          ""
+        ],
+        [
+          "requests_default_to",
+          "kyle",
+          "who Clara's messages go to first: kyle (you triage) or orchestrator (straight to the bots)"
+        ]
       ]
     },
     {
       "name": "task_types",
       "group": "system",
       "id": "task_type",
-      "headers": ["task_type", "default_owner", "needs_qc", "needs_mom", "mom_item_type", "qc_rubric"],
+      "headers": [
+        "task_type",
+        "default_owner",
+        "needs_qc",
+        "needs_mom",
+        "mom_item_type",
+        "qc_rubric"
+      ],
       "kyleOnly": true,
       "seed": [
-        ["book_plan", "orchestrator", false, false, "", ""],
-        ["story_draft", "story_producer", true, true, "rewrite", "story"],
-        ["art_page", "illustrator", true, false, "", "art_page"],
-        ["art_cover", "illustrator", true, true, "approve", "art_cover"],
-        ["interior_layout", "builder", true, true, "approve", "interior"],
-        ["cover_wrap", "builder", true, false, "", "cover_wrap"],
-        ["printable_set", "builder", true, true, "approve", "printable"],
-        ["kdp_packet", "publisher", true, true, "kdp_publish", "kdp_packet"],
-        ["etsy_listing", "publisher", true, true, "approve", "etsy_listing"],
-        ["social_batch", "growth", true, true, "approve", "social"],
-        ["email", "growth", true, true, "approve", "email"],
-        ["lead_magnet", "growth", true, true, "approve", "lead_magnet"],
-        ["photo_request", "mom", false, true, "photos", ""]
+        [
+          "book_plan",
+          "orchestrator",
+          false,
+          false,
+          "",
+          ""
+        ],
+        [
+          "story_draft",
+          "story_producer",
+          true,
+          true,
+          "rewrite",
+          "story"
+        ],
+        [
+          "art_page",
+          "illustrator",
+          true,
+          false,
+          "",
+          "art_page"
+        ],
+        [
+          "art_cover",
+          "illustrator",
+          true,
+          true,
+          "approve",
+          "art_cover"
+        ],
+        [
+          "interior_layout",
+          "builder",
+          true,
+          true,
+          "approve",
+          "interior"
+        ],
+        [
+          "cover_wrap",
+          "builder",
+          true,
+          false,
+          "",
+          "cover_wrap"
+        ],
+        [
+          "printable_set",
+          "builder",
+          true,
+          true,
+          "approve",
+          "printable"
+        ],
+        [
+          "kdp_packet",
+          "publisher",
+          true,
+          true,
+          "kdp_publish",
+          "kdp_packet"
+        ],
+        [
+          "etsy_listing",
+          "publisher",
+          true,
+          true,
+          "approve",
+          "etsy_listing"
+        ],
+        [
+          "social_batch",
+          "growth",
+          true,
+          true,
+          "approve",
+          "social"
+        ],
+        [
+          "email",
+          "growth",
+          true,
+          true,
+          "approve",
+          "email"
+        ],
+        [
+          "lead_magnet",
+          "growth",
+          true,
+          true,
+          "approve",
+          "lead_magnet"
+        ],
+        [
+          "photo_request",
+          "mom",
+          false,
+          true,
+          "photos",
+          ""
+        ]
       ]
     },
     {
@@ -154,60 +668,322 @@
     }
   ],
   "lists": {
-    "task_status": ["todo", "in_progress", "blocked", "ready_for_qc", "in_qc", "qc_fail", "escalated", "awaiting_mom", "changes_requested", "approved", "publishing", "done", "cancelled"],
-    "role": ["orchestrator", "story_producer", "illustrator", "builder", "publisher", "growth", "scout", "kyle", "mom", "backend"],
-    "priority": ["P1", "P2", "P3"],
-    "task_type": ["book_plan", "story_draft", "art_page", "art_cover", "interior_layout", "cover_wrap", "printable_set", "kdp_packet", "etsy_listing", "social_batch", "email", "lead_magnet", "photo_request"],
-    "line": ["MM", "OL"],
-    "format": ["PB", "PRT", "HC", "EB", "MERCH"],
-    "channel": ["KDP", "ETSY", "SHOPIFY", "POD", "AMZ_MERCH", "PINTEREST", "INSTAGRAM", "TIKTOK", "FACEBOOK", "EMAIL"],
-    "asset_type": ["manuscript", "page_plan", "page_art", "cover_art", "interior_pdf", "cover_pdf", "printable_pdf", "mockup", "listing_copy", "social_image", "social_video", "email_copy", "character_sheet", "style_guide", "photo", "video"],
-    "rights_source": ["AI", "human", "photo"],
-    "asset_status": ["draft", "final", "superseded"],
-    "qc_result": ["pass", "fail"],
-    "product_status": ["concept", "in_production", "live", "retired"],
-    "sku_status": ["draft", "ready", "live", "retired"],
-    "listing_status": ["draft", "packet_ready", "approved", "publishing", "live", "paused", "error", "retired"],
-    "content_status": ["draft", "approved", "scheduled", "posted", "killed"],
-    "content_type": ["pin", "reel", "short", "post", "story", "email", "lead_magnet"],
-    "mom_item_type": ["approve", "photos", "rewrite", "kdp_publish"],
-    "mom_answer": ["Approve", "Changes", "Reject", "Done"],
-    "cost_category": ["ai_credits", "qc_api", "print_proof", "software", "listing_fees", "ads", "legal", "contractor", "other"],
-    "txn_type": ["sale", "refund", "royalty", "fee", "payout", "adjustment"],
-    "research_type": ["keyword", "competitor", "trend", "pricing", "idea"],
-    "confidence": ["high", "med", "low"],
-    "research_status": ["new", "reviewed", "actioned", "discarded"],
-    "lesson_source": ["qc_fail", "mom", "sales", "kyle"],
-    "lesson_status": ["active", "retired"],
-    "system_status": ["RUN", "HALT"]
+    "task_status": [
+      "todo",
+      "in_progress",
+      "blocked",
+      "ready_for_qc",
+      "in_qc",
+      "qc_fail",
+      "escalated",
+      "awaiting_mom",
+      "changes_requested",
+      "approved",
+      "publishing",
+      "done",
+      "cancelled"
+    ],
+    "role": [
+      "orchestrator",
+      "story_producer",
+      "illustrator",
+      "builder",
+      "publisher",
+      "growth",
+      "scout",
+      "kyle",
+      "mom",
+      "backend"
+    ],
+    "priority": [
+      "P1",
+      "P2",
+      "P3"
+    ],
+    "task_type": [
+      "book_plan",
+      "story_draft",
+      "art_page",
+      "art_cover",
+      "interior_layout",
+      "cover_wrap",
+      "printable_set",
+      "kdp_packet",
+      "etsy_listing",
+      "social_batch",
+      "email",
+      "lead_magnet",
+      "photo_request"
+    ],
+    "line": [
+      "MM",
+      "OL"
+    ],
+    "format": [
+      "PB",
+      "PRT",
+      "HC",
+      "EB",
+      "MERCH"
+    ],
+    "channel": [
+      "KDP",
+      "ETSY",
+      "SHOPIFY",
+      "POD",
+      "AMZ_MERCH",
+      "PINTEREST",
+      "INSTAGRAM",
+      "TIKTOK",
+      "FACEBOOK",
+      "EMAIL"
+    ],
+    "asset_type": [
+      "manuscript",
+      "page_plan",
+      "page_art",
+      "cover_art",
+      "interior_pdf",
+      "cover_pdf",
+      "printable_pdf",
+      "mockup",
+      "listing_copy",
+      "social_image",
+      "social_video",
+      "email_copy",
+      "character_sheet",
+      "style_guide",
+      "photo",
+      "video",
+      "page_text"
+    ],
+    "rights_source": [
+      "AI",
+      "human",
+      "photo"
+    ],
+    "asset_status": [
+      "draft",
+      "final",
+      "superseded"
+    ],
+    "qc_result": [
+      "pass",
+      "fail"
+    ],
+    "product_status": [
+      "concept",
+      "in_production",
+      "live",
+      "retired"
+    ],
+    "sku_status": [
+      "draft",
+      "ready",
+      "live",
+      "retired"
+    ],
+    "listing_status": [
+      "draft",
+      "packet_ready",
+      "approved",
+      "publishing",
+      "live",
+      "paused",
+      "error",
+      "retired"
+    ],
+    "content_status": [
+      "draft",
+      "approved",
+      "scheduled",
+      "posted",
+      "killed"
+    ],
+    "content_type": [
+      "pin",
+      "reel",
+      "short",
+      "post",
+      "story",
+      "email",
+      "lead_magnet"
+    ],
+    "mom_item_type": [
+      "approve",
+      "photos",
+      "rewrite",
+      "kdp_publish"
+    ],
+    "mom_answer": [
+      "Approve",
+      "Changes",
+      "Reject",
+      "Done"
+    ],
+    "cost_category": [
+      "ai_credits",
+      "qc_api",
+      "print_proof",
+      "software",
+      "listing_fees",
+      "ads",
+      "legal",
+      "contractor",
+      "other"
+    ],
+    "txn_type": [
+      "sale",
+      "refund",
+      "royalty",
+      "fee",
+      "payout",
+      "adjustment"
+    ],
+    "research_type": [
+      "keyword",
+      "competitor",
+      "trend",
+      "pricing",
+      "idea"
+    ],
+    "confidence": [
+      "high",
+      "med",
+      "low"
+    ],
+    "research_status": [
+      "new",
+      "reviewed",
+      "actioned",
+      "discarded"
+    ],
+    "lesson_source": [
+      "qc_fail",
+      "mom",
+      "sales",
+      "kyle"
+    ],
+    "lesson_status": [
+      "active",
+      "retired"
+    ],
+    "system_status": [
+      "RUN",
+      "HALT"
+    ],
+    "request_kind": [
+      "note",
+      "change",
+      "question",
+      "idea",
+      "rule"
+    ],
+    "request_status": [
+      "new",
+      "seen",
+      "in_progress",
+      "done",
+      "wont_do"
+    ]
   },
   "transitions": {
     "bot": [
-      ["todo", "in_progress"],
-      ["in_progress", "blocked"],
-      ["blocked", "in_progress"],
-      ["in_progress", "ready_for_qc"],
-      ["in_progress", "done", "needs_qc=false"],
-      ["qc_fail", "todo"],
-      ["changes_requested", "todo"],
-      ["blocked", "todo"],
-      ["*", "cancelled"]
+      [
+        "todo",
+        "in_progress"
+      ],
+      [
+        "in_progress",
+        "blocked"
+      ],
+      [
+        "blocked",
+        "in_progress"
+      ],
+      [
+        "in_progress",
+        "ready_for_qc"
+      ],
+      [
+        "in_progress",
+        "done",
+        "needs_qc=false"
+      ],
+      [
+        "qc_fail",
+        "todo"
+      ],
+      [
+        "changes_requested",
+        "todo"
+      ],
+      [
+        "blocked",
+        "todo"
+      ],
+      [
+        "*",
+        "cancelled"
+      ]
     ],
     "backend": [
-      ["ready_for_qc", "in_qc"],
-      ["in_qc", "qc_fail"],
-      ["in_qc", "escalated"],
-      ["in_qc", "awaiting_mom"],
-      ["in_qc", "done"],
-      ["awaiting_mom", "approved"],
-      ["awaiting_mom", "changes_requested"],
-      ["awaiting_mom", "cancelled"],
-      ["awaiting_mom", "done"],
-      ["approved", "publishing"],
-      ["approved", "done"],
-      ["publishing", "done"],
-      ["publishing", "escalated"],
-      ["ready_for_qc", "qc_fail"]
+      [
+        "ready_for_qc",
+        "in_qc"
+      ],
+      [
+        "in_qc",
+        "qc_fail"
+      ],
+      [
+        "in_qc",
+        "escalated"
+      ],
+      [
+        "in_qc",
+        "awaiting_mom"
+      ],
+      [
+        "in_qc",
+        "done"
+      ],
+      [
+        "awaiting_mom",
+        "approved"
+      ],
+      [
+        "awaiting_mom",
+        "changes_requested"
+      ],
+      [
+        "awaiting_mom",
+        "cancelled"
+      ],
+      [
+        "awaiting_mom",
+        "done"
+      ],
+      [
+        "approved",
+        "publishing"
+      ],
+      [
+        "approved",
+        "done"
+      ],
+      [
+        "publishing",
+        "done"
+      ],
+      [
+        "publishing",
+        "escalated"
+      ],
+      [
+        "ready_for_qc",
+        "qc_fail"
+      ]
     ]
   }
 }

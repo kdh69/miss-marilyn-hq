@@ -12,12 +12,14 @@ Rules that hold everywhere:
 - Use `Core.update`, which refuses if `updated_at` moved since the snapshot; on `false`, skip
   the row this tick rather than overwriting a bot's write.
 - Nothing publishes, spends money or creates accounts without Clara's Approve in `mom_queue`.
-- The control panel only ever writes Clara's answers to `mom_queue`; the backend applies them.
+- The control panel writes only: answers in `mom_queue`, rows/replies in `requests`, and
+  `pages.text_final*`. It never writes `tasks`; the backend and the Orchestrator act on those rows.
+- `pages.text_draft` is AI; `pages.text_final` is Clara's. Print files use text_final only.
 - Times: ISO 8601 UTC in cells; the daily spend cap resets on the New York day.
 
 Commands: `npm run typecheck`, `npm run backend` (one tick, needs .env),
 `npm run web`, `python3 -I apps/backend/preflight/preflight.py interior file.pdf`.
 
 Next up, in order: wire preflight into the gatekeeper for interior_layout / cover_wrap /
-kdp_packet; Google sign-in for the panel (allowlist = config `panel_allowed_emails`);
+kdp_packet;
 "Done" follow-ups in momSync; remaining rubrics; image downscale for QC.

@@ -1,9 +1,14 @@
 import { Bar, Card, Empty, Stat } from "@/components/ui";
 import { TodayItem } from "@/components/TodayItem";
+import { MessageBox } from "@/components/MessageBox";
+import { MessageItem } from "@/components/Messages";
 import { bookProgress, getSnapshot, spendToday } from "@/lib/data";
+import { me } from "@/auth";
 
 export default async function Today() {
-  const s = await getSnapshot();
+  const [s, who] = await Promise.all([getSnapshot(), me()]);
+  const viewer = who?.role ?? (s._sample ? "mom" : null); // sample data previews Clara's view
+  const questions = s.requests.filter((r) => r.to === viewer && !r.reply && !["done", "wont_do"].includes(r.status));
   const waiting = s.mom_queue.filter((m) => !m.answer && !m.processed_at);
   const spend = spendToday(s);
   const active = s.products.filter((p) => p.status !== "retired");
@@ -15,23 +20,37 @@ export default async function Today() {
       <header className="px-1 pt-2">
         <h1 className="text-2xl font-semibold">{greet}, Clara</h1>
         <p className="text-sm text-[var(--quiet)]">
-          {waiting.length ? `${waiting.length} thing${waiting.length > 1 ? "s" : ""} need you today.` : "Nothing needs you right now."} Everything else is moving.
+          {waiting.length + questions.length
+            ? `${waiting.length + questions.length} thing${waiting.length + questions.length > 1 ? "s" : ""} need you today.`
+            : "Nothing needs you right now."} Everything else is moving.
           {s._sample && " (Sample data — the Sheet isn't connected yet.)"}
         </p>
       </header>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <Stat label="Waiting on you" value={String(waiting.length)} tone="accent" />
+        <Stat label="Waiting on you" value={String(waiting.length + questions.length)} tone="accent" />
         <Stat label="Books in progress" value={String(active.filter((p) => p.status === "in_production").length)} />
         <Stat label="Bot spend today" value={`$${spend.bots.toFixed(2)}`} sub={`of $${spend.cap}`} tone="accent-2" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
-        <Card title="Needs your OK" className="lg:col-span-3">
-          <div className="flex flex-col gap-3">
-            {waiting.length ? waiting.map((m) => <TodayItem key={m.item_id} item={m} />) : <Empty>All caught up.</Empty>}
-          </div>
-        </Card>
+        <div className="flex flex-col gap-4 lg:col-span-3">
+          <Card title="Needs your OK">
+            <div className="flex flex-col gap-3">
+              {waiting.length ? waiting.map((m) => <TodayItem key={m.item_id} item={m} />) : <Empty>All caught up.</Empty>}
+            </div>
+          </Card>
+          {questions.length > 0 && (
+            <Card title="Questions for you">
+              <div className="flex flex-col gap-3">
+                {questions.map((r) => <MessageItem key={r.request_id} r={r} viewer={viewer} />)}
+              </div>
+            </Card>
+          )}
+          <Card title="Tell the team">
+            <MessageBox />
+          </Card>
+        </div>
         <div className="flex flex-col gap-4 lg:col-span-2">
           <Card title="Book progress">
             <div className="flex flex-col gap-4">
