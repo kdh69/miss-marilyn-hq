@@ -32,7 +32,7 @@ jobs:
       AUTH_GOOGLE_SECRET: ${{ secrets.AUTH_GOOGLE_SECRET }}
       GOOGLE_OWNER_REFRESH_TOKEN: ${{ secrets.GOOGLE_OWNER_REFRESH_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Skip until secrets are set
         id: gate
         run: |
