@@ -1,0 +1,40 @@
+name: MM backend tick
+
+on:
+  schedule:
+    - cron: "7,37 * * * *"   # every 30 min (off the hour; GitHub delays :00 runs)
+  workflow_dispatch: {}
+
+concurrency:
+  group: mm-backend
+  cancel-in-progress: false   # never run two ticks against the Sheet at once
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+      MM_CORE_SHEET_ID: ${{ secrets.MM_CORE_SHEET_ID }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      KYLE_EMAIL: ${{ secrets.KYLE_EMAIL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip until secrets are set
+        id: gate
+        run: |
+          if [ -z "$GOOGLE_SERVICE_ACCOUNT_JSON" ] || [ -z "$MM_CORE_SHEET_ID" ]; then
+            echo "Secrets not set yet; skipping."; echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.skip != 'true'
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-python@v5
+        if: steps.gate.outputs.skip != 'true'
+        with: { python-version: "3.12" }
+      - if: steps.gate.outputs.skip != 'true'
+        run: npm ci --workspace @mm/backend --include-workspace-root
+      - if: steps.gate.outputs.skip != 'true'
+        run: pip install -r apps/backend/preflight/requirements.txt
+      - if: steps.gate.outputs.skip != 'true'
+        run: npm run backend

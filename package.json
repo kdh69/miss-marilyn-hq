@@ -1,0 +1,17 @@
+{
+  "name": "miss-marilyn",
+  "private": true,
+  "workspaces": ["packages/*", "apps/*"],
+  "scripts": {
+    "sheet:setup": "tsx scripts/setup-sheet.ts",
+    "sheet:xlsx": "python3 scripts/build_sheet_xlsx.py",
+    "backend": "npm run run -w @mm/backend",
+    "web": "npm run dev -w @mm/web",
+    "typecheck": "tsc -p packages/core && tsc -p apps/backend && tsc -p scripts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
