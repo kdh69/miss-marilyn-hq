@@ -42,7 +42,7 @@ jobs:
       - uses: actions/setup-node@v4
         if: steps.gate.outputs.skip != 'true'
         with: { node-version-file: .nvmrc, cache: npm }
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         if: steps.gate.outputs.skip != 'true'
         with: { python-version: "3.12" }
       - if: steps.gate.outputs.skip != 'true'
