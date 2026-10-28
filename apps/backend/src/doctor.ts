@@ -7,6 +7,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { Readable } from "node:stream";
 import { Core, driveReader, driveWriter, headersOf, schema, sheetId, sheetsClient, writerIdentity } from "@mm/core";
+import { python } from "./lib/python";
 
 const run = promisify(execFile);
 let red = 0;
@@ -128,8 +129,8 @@ async function main() {
 
   section("KDP preflight");
   try {
-    await run("python3", ["-I", "-c", "import pymupdf"]);
-    ok("python3 + PyMuPDF available");
+    await run(python, ["-I", "-c", "import pymupdf"]);
+    ok(`${python} + PyMuPDF available`);
   } catch {
     warn("PyMuPDF not installed here", "pip install -r apps/backend/preflight/requirements.txt (GitHub Actions installs it automatically)");
   }

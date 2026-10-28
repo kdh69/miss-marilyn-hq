@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "sheet:setup": "tsx --env-file-if-exists=.env scripts/setup-sheet.ts",
-    "sheet:xlsx": "python3 scripts/build_sheet_xlsx.py",
+    "sheet:xlsx": "node --env-file-if-exists=.env scripts/py.mjs scripts/build_sheet_xlsx.py",
     "backend": "npm run run -w @mm/backend",
     "web": "npm run dev -w @mm/web",
     "typecheck": "tsc -p packages/core && tsc -p apps/backend && tsc -p scripts",
@@ -15,7 +15,7 @@
     "dryrun": "npm run dryrun -w @mm/backend",
     "google:authorize": "tsx --env-file-if-exists=.env scripts/google-authorize.ts",
     "test": "vitest run",
-    "test:preflight": "python3 -m unittest discover -s apps/backend/preflight/tests -v",
+    "test:preflight": "node --env-file-if-exists=.env scripts/py.mjs -m unittest discover -s apps/backend/preflight/tests -v",
     "check": "npm run typecheck && npm test && npm run test:preflight && npm run build -w @mm/web"
   },
   "devDependencies": {
