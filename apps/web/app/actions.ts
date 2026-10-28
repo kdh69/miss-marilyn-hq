@@ -5,9 +5,10 @@
  * messages; the backend and the Orchestrator act on them.
  */
 import { revalidateTag } from "next/cache";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { Core, nowIso, startResumableUpload } from "@mm/core";
-import { me, type PanelRole } from "@/auth";
+import { authConfigured, me, type PanelRole } from "@/auth";
+import { PREVIEW_COOKIE } from "@/lib/viewer";
 
 type Result = { ok: boolean; error?: string };
 const NOT_SIGNED_IN: Result = { ok: false, error: "Sign-in isn't set up yet, so changes can't be saved." };
@@ -113,6 +114,15 @@ export async function registerPhoto(fileId: string, name: string, mimeType: stri
     made_with: "camera", status: "final", created_by: who.role, created_at: now, updated_at: now, updated_by: who.role,
   }]);
   refresh();
+  return { ok: true };
+}
+
+// ---------- Preview mode (sign-in not set up) ----------
+
+/** Switches whose view the preview shows. Sets a cookie only; never touches the Sheet. */
+export async function previewAs(role: PanelRole): Promise<Result> {
+  if (authConfigured()) return { ok: false, error: "Preview switching is off once sign-in is set up." };
+  (await cookies()).set(PREVIEW_COOKIE, role === "kyle" ? "kyle" : "mom", { path: "/", sameSite: "lax" });
   return { ok: true };
 }
 

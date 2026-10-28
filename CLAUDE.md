@@ -1,6 +1,6 @@
 # Notes for Claude Code
 
-Read the README first, then the spec it links (sections 2–7, 9, 9b are the build contract).
+Read [docs/HANDOFF.md](docs/HANDOFF.md) for current state, then the README, then the spec it links (sections 2–7, 9, 9b are the build contract).
 
 Rules that hold everywhere:
 - `packages/core/schema.json` is the source of truth for tabs, headers, dropdowns, ID columns

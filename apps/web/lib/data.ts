@@ -1,6 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { Core, type Row } from "@mm/core";
+import { sample } from "./sample";
 
 const TABS = ["tasks", "assets", "products", "skus", "listings", "content", "mom_queue", "pages", "requests", "research", "accounts", "costs", "transactions", "log", "config"] as const;
 type Tab = (typeof TABS)[number];
@@ -18,64 +19,6 @@ export const getSnapshot = unstable_cache(
 );
 
 const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
-
-/** Shown until the Sheet is connected, so the panel renders from day one. */
-function sample(): Snapshot {
-  return {
-    _sample: true,
-    tasks: [
-      { task_id: "T-0012", product_id: "OL-B01", title: "Ollie interior layout", task_type: "interior_layout", owner: "builder", status: "awaiting_mom", due_date: "2026-11-03", updated_at: "" },
-      { task_id: "T-0014", product_id: "OL-B01", title: "Ollie KDP packet", task_type: "kdp_packet", owner: "publisher", status: "in_progress", due_date: "2026-11-05", updated_at: "" },
-      { task_id: "T-0021", product_id: "MM-B01", title: "Miss M Book 1 story draft", task_type: "story_draft", owner: "story_producer", status: "ready_for_qc", due_date: "2026-11-10", updated_at: "" },
-    ] as Row[],
-    mom_queue: [
-      { item_id: "M-T-0012-1", task_id: "T-0012", item_type: "approve", summary: "Ollie interior: all 32 pages laid out", preview_url: "", answer: "", processed_at: "" },
-      { item_id: "M-T-0019-1", task_id: "T-0019", item_type: "rewrite", summary: "Book 1 story: make the words yours", preview_url: "", answer: "", processed_at: "" },
-      { item_id: "M-T-0016-1", task_id: "T-0016", item_type: "photos", summary: "Send 5 photos of Miss M playing", preview_url: "", answer: "", processed_at: "" },
-    ] as Row[],
-    products: [
-      { product_id: "OL-B01", title: "Ollie and the New Baby", status: "in_production" },
-      { product_id: "MM-B01", title: "The Adventures of Miss Marilyn: Book 1", status: "concept" },
-    ] as Row[],
-    costs: [
-      { date: today(), category: "ai_credits", amount_usd: "5.10" },
-      { date: today(), category: "qc_api", amount_usd: "1.30" },
-    ] as Row[],
-    research: [{ research_id: "R-20261027-01", topic: "Sibling printables", finding: "Searches for new-sibling activity pages are rising this month.", confidence: "med", status: "new" }] as Row[],
-    pages: Array.from({ length: 6 }, (_, i) => ({
-      page_id: `OL-B01-P${String(i + 1).padStart(2, "0")}`,
-      product_id: "OL-B01",
-      page_number: String(i + 1),
-      text_draft: [
-        "Ollie the otter lived by the bend in the river.",
-        "One morning, Mama's tummy was round as a river stone.",
-        "\"A baby is coming,\" said Papa. Ollie's whiskers drooped.",
-        "Would there be room on the rock for one more otter?",
-        "Ollie found the smoothest shell in the whole river.",
-        "\"For you,\" he whispered. The baby squeaked hello.",
-      ][i],
-      art_brief: ["Ollie floating on his back at sunrise", "Mama otter, round belly, gentle smile", "Papa explaining; Ollie looking unsure", "The family rock, a little crowded", "Ollie diving for shells", "Ollie handing the shell to the new baby"][i],
-      characters: "Ollie, Mama, Papa",
-      art_asset_id: "",
-      text_final: i === 0 ? "Ollie the otter lived where the river bends and the cattails wave." : "",
-      text_final_by: i === 0 ? "mom" : "",
-      text_final_at: "",
-      updated_at: "",
-    })) as Row[],
-    requests: [
-      { request_id: "Q-20261027-01", created_at: "2026-10-27T14:02:00Z", from: "orchestrator", to: "mom", product_id: "MM-B01", page_number: "", kind: "question", body: "For Book 1, should Miss M's first adventure be flying to see Nonna and Poppy, or the first day of school?", status: "new", reply: "" },
-      { request_id: "Q-20261026-03", created_at: "2026-10-26T19:40:00Z", from: "mom", to: "kyle", product_id: "OL-B01", page_number: "3", kind: "change", body: "Papa should look happier here, not worried.", status: "seen", reply: "" },
-    ] as Row[],
-    accounts: [
-      { account_id: "A01", service: "Business Gmail", owner: "Clara", purpose: "owns every store and social account", phase: "now", status: "todo", two_factor: "TRUE" },
-      { account_id: "A04", service: "GitHub", owner: "Kyle", purpose: "repo, scheduled backend, secrets", phase: "now", status: "done", two_factor: "TRUE" },
-      { account_id: "A15", service: "Amazon KDP", owner: "Clara", purpose: "publish paperbacks", phase: "phase_0", status: "todo", two_factor: "TRUE" },
-      { account_id: "A16", service: "Etsy shop", owner: "Clara", purpose: "sell printables", phase: "phase_0", status: "todo", two_factor: "TRUE" },
-    ] as Row[],
-    assets: [], skus: [], listings: [], content: [], transactions: [], log: [],
-    config: [{ key: "daily_bot_cap_usd", value: "15" }, { key: "system_status", value: "RUN" }] as Row[],
-  };
-}
 
 export const STAGES = ["story_draft", "art_page", "art_cover", "interior_layout", "cover_wrap", "kdp_packet"];
 
@@ -112,4 +55,41 @@ export function bookPages(s: Snapshot, productId: string) {
       const art = assets.get(p.art_asset_id) ?? latestArt.get(p.page_number);
       return { ...p, art_id: driveId(art?.file_url), text: p.text_final || p.text_draft } as Row;
     });
+}
+
+/** One step per production stage: done, active (has open work), or still to come. */
+export function bookStages(s: Snapshot, productId: string) {
+  const tasks = s.tasks.filter((t) => t.product_id === productId && t.status !== "cancelled");
+  return STAGES.map((type) => {
+    const ts = tasks.filter((t) => t.task_type === type);
+    const open = ts.find((t) => t.status !== "done");
+    const state = open ? "active" : ts.length ? "done" : "upcoming";
+    return { type, state, status: open?.status ?? "" };
+  });
+}
+
+/** What each bot is doing now, busiest first. */
+export function teamNow(s: Snapshot, bots: string[]) {
+  const open = s.tasks.filter((t) => !["done", "cancelled"].includes(t.status));
+  return bots.map((role) => {
+    const mine = open.filter((t) => t.owner === role);
+    const now = mine.find((t) => t.status === "in_progress") ?? mine[0];
+    const last = s.log.filter((l) => l.actor === role).sort((a, b) => b.ts.localeCompare(a.ts))[0];
+    return { role, open: mine.length, now, last };
+  });
+}
+
+/** Sales (net) and costs per month, oldest first, for the last `n` months (New York calendar). */
+export function moneyByMonth(s: Snapshot, n = 6) {
+  const months: string[] = [];
+  const d = new Date(`${today().slice(0, 7)}-15T12:00:00Z`);
+  for (let i = n - 1; i >= 0; i--) months.push(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - i, 15)).toISOString().slice(0, 7));
+  const sum = (xs: Row[], key: string, m: string) => xs.filter((x) => x.date?.startsWith(m)).reduce((a, x) => a + (Number(x[key]) || 0), 0);
+  return months.map((m) => ({ month: m, sales: sum(s.transactions, "net_usd", m), costs: sum(s.costs, "amount_usd", m) }));
+}
+
+export function costsByCategory(s: Snapshot) {
+  const by = new Map<string, number>();
+  for (const c of s.costs) by.set(c.category, (by.get(c.category) ?? 0) + (Number(c.amount_usd) || 0));
+  return [...by].sort((a, b) => b[1] - a[1]);
 }

@@ -1,12 +1,11 @@
-import { me } from "@/auth";
+import { viewerRole } from "@/lib/viewer";
 import { MessageBox } from "@/components/MessageBox";
 import { MessageItem } from "@/components/Messages";
 import { Card, Empty } from "@/components/ui";
 import { getSnapshot } from "@/lib/data";
 
 export default async function Messages() {
-  const [s, who] = await Promise.all([getSnapshot(), me()]);
-  const viewer = who?.role ?? null;
+  const [s, viewer] = await Promise.all([getSnapshot(), viewerRole()]);
   const all = [...s.requests].reverse();
   const forMe = all.filter((r) => viewer && r.to === viewer && !r.reply && !["done", "wont_do"].includes(r.status));
   const rest = all.filter((r) => !forMe.includes(r));

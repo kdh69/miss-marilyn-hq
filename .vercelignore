@@ -1,0 +1,10 @@
+# Never upload local secrets or the Python venv with `vercel deploy`.
+.env
+.env.*
+!.env.example
+.venv/
+*.pem
+service-account*.json
+*-key.json
+credentials*.json
+*.xlsx
