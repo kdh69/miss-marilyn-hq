@@ -13,6 +13,7 @@
     "typecheck": "tsc -p packages/core && tsc -p apps/backend && tsc -p scripts",
     "doctor": "npm run doctor -w @mm/backend",
     "dryrun": "npm run dryrun -w @mm/backend",
+    "qc": "npm run qc -w @mm/backend --",
     "google:authorize": "tsx --env-file-if-exists=.env scripts/google-authorize.ts",
     "test": "vitest run",
     "test:preflight": "node --env-file-if-exists=.env scripts/py.mjs -m unittest discover -s apps/backend/preflight/tests -v",

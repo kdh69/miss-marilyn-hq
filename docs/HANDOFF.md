@@ -1,40 +1,39 @@
-# Handoff — where things stand (2026-10-27)
+# Handoff — where things stand (2026-10-29)
 
 Read this first when picking the project back up. Setup steps in full: [`SETUP.md`](SETUP.md).
 Live checklist: [Launch Checklist](https://claude.ai/artifact/FzUU8wZjrWifR9sv6Ejrpy).
 
 ## State right now
 
-- **Code:** all checks pass (typecheck, 100 tests, 5 KDP preflight tests). Nothing is connected yet.
+- **Code:** all checks pass (typecheck, 100 tests, 5 KDP preflight tests).
 - **Panel:** live at **https://missmarilyn.vercel.app**, in **preview mode**: sample data, open to
   anyone with the link, nothing saves. The sidebar's *Preview as Clara / Kyle* switch flips views.
-- **MM Core Sheet:** not built yet (`npm run sheet:setup` needs the Google keys).
+- **MM Core Sheet:** built (18 tabs, protections), shared with the service account and the bot
+  Gmail. `npm run doctor` is green except uploads (needs `GOOGLE_OWNER_REFRESH_TOKEN`).
+  `npm run dryrun` passes locally.
+- **Google Cloud:** project `miss-marilyn-513120` (plain Gmail, no organization: an org blocked
+  service account keys on the first try). Service account and OAuth client are in `.env`.
+- **Grok:** connected with the bot Gmail; the row test passed (T-9999, now `cancelled`).
+  No bot API fallback needed.
+- **QC is manual:** no `ANTHROPIC_API_KEY`. Kyle reviews in Claude Code with `npm run qc`
+  (SETUP.md § Manual QC). Adding a key later turns automatic QC back on.
 - **Backend on GitHub Actions:** skips every run until the secrets are set.
-- **Grok bots:** not tested against the Sheet yet. The Grok row test is the biggest unknown.
 
 ## Kyle — outstanding, in order
 
-1. **Bot Gmail**: create it, turn on 2-step. In Grok → Connect apps, disconnect personal Gmail and
-   connect Gmail + Drive with the bot account. Then put it in the Sheet's `config` → `bot_account_email`.
-2. **Google Cloud** (project *Miss Marilyn HQ*, Clara's business Gmail as owner):
-   enable the Sheets and Drive APIs; create service account `mm-backend` + JSON key; OAuth consent
-   screen (External, Clara and Kyle as test users); OAuth client ID (Web) with redirect URIs
-   `https://missmarilyn.vercel.app/api/auth/callback/google` and `http://localhost:5179/oauth2callback`.
-3. **Share Drive**: *Miss Marilyn Business* + MM Core → service account (Editor);
-   MM Core + MM Work → bot Gmail (Editor); MM Brand → bot Gmail (Viewer).
-4. **Local `.env`** (already created from `.env.example`): fill `GOOGLE_SERVICE_ACCOUNT_JSON`,
-   `ANTHROPIC_API_KEY` (set a $20/month limit in the Anthropic console), `KYLE_EMAIL`.
-   Then `npm run sheet:setup` and `npm run doctor` until green.
-5. **Grok row test**: paste the prompt from SETUP.md §4 into the Orchestrator. If columns shift or
-   rows can't be appended, stop and build the bot API fallback.
-6. **GitHub secrets**: `GOOGLE_SERVICE_ACCOUNT_JSON`, `MM_CORE_SHEET_ID`, `ANTHROPIC_API_KEY`,
-   `KYLE_EMAIL` (optional ones in SETUP.md §5). Then Actions → *MM backend tick* → `doctor`, then `dryrun`.
-7. **Vercel env**: add sign-in **first or together with** the Sheet keys — `AUTH_GOOGLE_ID`,
+1. **Uploads**: OAuth consent screen → Publish app, then `npm run google:authorize` as
+   kdhuntzinger@gmail.com and put `GOOGLE_OWNER_REFRESH_TOKEN` in `.env`.
+2. **`.env`**: fill `KYLE_EMAIL`.
+3. Delete the service account key file from Downloads; its only copy should be `.env` (and later
+   the GitHub and Vercel secrets).
+4. **GitHub secrets**: `GOOGLE_SERVICE_ACCOUNT_JSON`, `MM_CORE_SHEET_ID`, `KYLE_EMAIL`
+   (optional ones in SETUP.md §5). Then Actions → *MM backend tick* → `doctor`, then `dryrun`.
+5. **Vercel env**: add sign-in **first or together with** the Sheet keys — `AUTH_GOOGLE_ID`,
    `AUTH_GOOGLE_SECRET`, `PANEL_USERS`, then `GOOGLE_SERVICE_ACCOUNT_JSON`, `MM_CORE_SHEET_ID`.
    (Sheet keys without sign-in would put real data on a public page.) Sign in as yourself and as Clara.
-8. **Connect Vercel to GitHub** (project → Settings → Git) so pushes to `main` deploy automatically.
+6. **Connect Vercel to GitHub** (project → Settings → Git) so pushes to `main` deploy automatically.
    Today's deploy was made from a local folder with `vercel deploy --prod`.
-9. **Later**: Resend + verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); paste the 7 prompts
+7. **Later**: Resend + verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); paste the 7 prompts
    from [`bot-prompts.md`](bot-prompts.md) into Grok; check whether Grok can schedule the Orchestrator.
 
 ## Clara — outstanding
@@ -57,7 +56,6 @@ Live checklist: [Launch Checklist](https://claude.ai/artifact/FzUU8wZjrWifR9sv6E
   - The *Ask the team to make this* button on Trends writes an `idea` request to the Orchestrator;
     the Orchestrator prompt needs to handle it.
   - Nobody has reviewed the redesigned pages on a phone yet.
-- **Bot API fallback**, only if the Grok row test fails.
 - **Etsy publish**, once API access is approved (stub in `apps/backend/src/jobs/etsyPublish.ts`).
 - **Money tab imports:** KDP royalty report + Etsy sales CSV → `transactions`.
 - **Photos dropped straight into Drive** (not via the panel) → register them as `assets`.

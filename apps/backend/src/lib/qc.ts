@@ -11,17 +11,16 @@ export type QcResult = { result: "pass" | "fail"; notes: string; summaryForMom: 
 
 const RUBRIC_DIR = new URL("../../rubrics/", import.meta.url);
 const MAX_PDF_BYTES = 25_000_000; // API request limit is 32 MB
-const anthropic = new Anthropic();
+// Thinking counts toward max_tokens, so leave room for it before the JSON verdict.
+const MAX_TOKENS = 8000;
+let anthropic: Anthropic | undefined;
+
+/** Claude QC runs only with ANTHROPIC_API_KEY; without it QC is manual (npm run qc). */
+export const autoQcEnabled = () => !!process.env.ANTHROPIC_API_KEY?.trim();
 
 export async function runQc(core: Core, task: Row, assets: Row[], rubric: string): Promise<QcResult> {
-  const rubricText = await readFile(new URL(`${rubric || "default"}.md`, RUBRIC_DIR), "utf8").catch(() =>
-    readFile(new URL("default.md", RUBRIC_DIR), "utf8"),
-  );
-  const lessons = core
-    .rows("lessons")
-    .filter((l) => l.status === "active" && ["all", task.task_type, task.owner].includes(l.applies_to))
-    .map((l) => `- ${l.rule}`)
-    .join("\n");
+  const rubricText = await readFile(rubricPath(rubric), "utf8").catch(() => readFile(rubricPath(""), "utf8"));
+  const lessons = activeLessons(core, task).map((rule) => `- ${rule}`).join("\n");
 
   const system = [
     rubricText,
@@ -42,8 +41,11 @@ export async function runQc(core: Core, task: Row, assets: Row[], rubric: string
   }
 
   const model = core.config("qc_model") || "claude-sonnet-5-5";
+  anthropic ??= new Anthropic();
   for (let attempt = 0; attempt < 2; attempt++) {
-    const res = await anthropic.messages.create({ model, max_tokens: 1500, system, messages: [{ role: "user", content }] });
+    const res = await anthropic.messages.create({
+      model, max_tokens: MAX_TOKENS, output_config: { effort: "medium" }, system, messages: [{ role: "user", content }],
+    });
     await logCost(core, task, res.usage, model);
     const text = res.content.map((b) => (b.type === "text" ? b.text : "")).join("");
     try {
@@ -60,6 +62,14 @@ export async function runQc(core: Core, task: Row, assets: Row[], rubric: string
   }
   return { result: "fail", notes: "QC returned invalid JSON twice — escalate", summaryForMom: "" };
 }
+
+export const rubricPath = (rubric: string) => new URL(`${rubric || "default"}.md`, RUBRIC_DIR);
+
+export const activeLessons = (core: Core, task: Row) =>
+  core
+    .rows("lessons")
+    .filter((l) => l.status === "active" && ["all", task.task_type, task.owner].includes(l.applies_to))
+    .map((l) => l.rule);
 
 async function attachment(fileUrl: string): Promise<Anthropic.ContentBlockParam | null> {
   const id = fileUrl.match(/[-\w]{25,}/)?.[0];
@@ -88,8 +98,8 @@ async function attachment(fileUrl: string): Promise<Anthropic.ContentBlockParam 
 }
 
 async function logCost(core: Core, task: Row, usage: Anthropic.Usage, model: string) {
-  const inRate = Number(core.config("qc_price_in_per_mtok") || 3);
-  const outRate = Number(core.config("qc_price_out_per_mtok") || 15);
+  const inRate = Number(core.config("qc_price_in_per_mtok") || 2);
+  const outRate = Number(core.config("qc_price_out_per_mtok") || 10);
   const usd = (usage.input_tokens * inRate + usage.output_tokens * outRate) / 1_000_000;
   const now = nowIso();
   await core.append("costs", [{
