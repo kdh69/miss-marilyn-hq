@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { me } from "@/auth";
+import { viewer } from "@/auth";
 import { BookWorkspace } from "@/components/BookWorkspace";
 import { MessageBox } from "@/components/MessageBox";
 import { MessageItem } from "@/components/Messages";
@@ -9,7 +9,7 @@ import { bookPages, bookProgress, getSnapshot } from "@/lib/data";
 
 export default async function Book({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [s, who] = await Promise.all([getSnapshot(), me()]);
+  const [s, v] = await Promise.all([getSnapshot(), viewer()]);
   const book = s.products.find((p) => p.product_id === id);
   if (!book) notFound();
   const b = bookProgress(s, id);
@@ -31,7 +31,7 @@ export default async function Book({ params }: { params: Promise<{ id: string }>
       </Card>
 
       <Card title="Pages">
-        <BookWorkspace productId={id} pages={bookPages(s, id)} requests={requests} viewer={who?.role ?? null} />
+        <BookWorkspace productId={id} pages={bookPages(s, id)} requests={requests} viewer={v.view} canEdit={!!v.real} />
       </Card>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -41,7 +41,7 @@ export default async function Book({ params }: { params: Promise<{ id: string }>
         <Card title="Conversation about this book">
           <div className="flex flex-col gap-3">
             {requests.filter((r) => !r.page_number).length
-              ? requests.filter((r) => !r.page_number).map((r) => <MessageItem key={r.request_id} r={r} viewer={who?.role ?? null} />)
+              ? requests.filter((r) => !r.page_number).map((r) => <MessageItem key={r.request_id} r={r} viewer={v.view} />)
               : <p className="text-sm text-[var(--quiet)]">No messages yet.</p>}
           </div>
         </Card>

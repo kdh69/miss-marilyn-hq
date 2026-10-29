@@ -5,9 +5,9 @@
  * messages; the backend and the Orchestrator act on them.
  */
 import { revalidateTag } from "next/cache";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { Core, nowIso, startResumableUpload } from "@mm/core";
-import { me, type PanelRole } from "@/auth";
+import { me, VIEW_COOKIE, type PanelRole } from "@/auth";
 
 type Result = { ok: boolean; error?: string };
 const NOT_SIGNED_IN: Result = { ok: false, error: "Sign-in isn't set up yet, so changes can't be saved." };
@@ -117,6 +117,14 @@ export async function registerPhoto(fileId: string, name: string, mimeType: stri
 }
 
 // ---------- Kyle-only controls ----------
+
+/** Flip the panel between Clara's view and Kyle's. Only changes what is shown; writes still use the signed-in identity. */
+export async function setView(view: PanelRole): Promise<Result> {
+  const who = await me();
+  if (who?.role === "mom") return { ok: false, error: "Clara always sees her own view." };
+  (await cookies()).set(VIEW_COOKIE, view === "kyle" ? "kyle" : "mom", { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+  return { ok: true };
+}
 
 export async function setSystemStatus(value: "RUN" | "HALT"): Promise<Result> {
   const who = await me();

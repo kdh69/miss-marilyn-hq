@@ -1,19 +1,30 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
-import { authConfigured, me, signOut } from "@/auth";
+import { authConfigured, me, signOut, viewer } from "@/auth";
+import { ViewToggle } from "@/components/ViewToggle";
 import { SystemBanner } from "@/components/SystemBanner";
 import { getSnapshot } from "@/lib/data";
 
-async function UserChip() {
-  if (!authConfigured()) return <p className="mt-6 hidden text-xs text-[var(--quiet)] md:block">Preview mode — sign-in not set up, editing off.</p>;
+async function UserChip({ view, canSwitch }: { view: "mom" | "kyle"; canSwitch: boolean }) {
+  if (!authConfigured()) {
+    return (
+      <div className="mt-4">
+        <p className="text-xs text-[var(--quiet)]">Preview mode — sign-in not set up, editing off.</p>
+        {canSwitch && <ViewToggle view={view} />}
+      </div>
+    );
+  }
   const who = await me();
   if (!who) return null;
   return (
-    <form className="mt-6 hidden md:block" action={async () => { "use server"; await signOut({ redirectTo: "/signin" }); }}>
-      <p className="text-xs text-[var(--quiet)]">Signed in as {who.role === "mom" ? "Clara" : "Kyle"}</p>
-      <button className="text-xs text-[var(--quiet)] underline">Sign out</button>
-    </form>
+    <div className="mt-4">
+      <form action={async () => { "use server"; await signOut({ redirectTo: "/signin" }); }}>
+        <p className="text-xs text-[var(--quiet)]">Signed in as {who.role === "mom" ? "Clara" : "Kyle"}</p>
+        <button className="text-xs text-[var(--quiet)] underline">Sign out</button>
+      </form>
+      {canSwitch && <ViewToggle view={view} />}
+    </div>
   );
 }
 
@@ -21,7 +32,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Miss Marilyn HQ", description: "Clara's control panel" };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [s, who] = await Promise.all([getSnapshot().catch(() => null), me()]);
+  const [s, v] = await Promise.all([getSnapshot().catch(() => null), viewer()]);
   const halted = s?.config.find((c) => c.key === "system_status")?.value === "HALT";
   return (
     <html lang="en">
@@ -37,10 +48,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <p className="text-[15px] font-semibold">Miss Marilyn</p>
             <p className="mb-4 text-xs text-[var(--quiet)]">Control panel</p>
             <Nav />
-            <UserChip />
+            <UserChip view={v.view} canSwitch={v.canSwitch} />
           </aside>
           <main className="min-w-0 flex-1">
-            <SystemBanner halted={halted} viewer={who?.role ?? null} />
+            <SystemBanner halted={halted} viewer={v.view} />
             {children}
           </main>
         </div>

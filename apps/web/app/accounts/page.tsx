@@ -1,4 +1,4 @@
-import { me } from "@/auth";
+import { viewer } from "@/auth";
 import { AccountRow } from "@/components/AccountRow";
 import { Bar, Card, Empty } from "@/components/ui";
 import { getSnapshot } from "@/lib/data";
@@ -6,7 +6,7 @@ import { getSnapshot } from "@/lib/data";
 const PHASES: [string, string][] = [["now", "Set up now"], ["phase_0", "Business basics"], ["phase_1", "Selling and social"], ["phase_2", "Automation"], ["phase_3", "Merch and storefront"]];
 
 export default async function Accounts() {
-  const [s, who] = await Promise.all([getSnapshot(), me()]);
+  const [s, v] = await Promise.all([getSnapshot(), viewer()]);
   const all = s.accounts.filter((a) => a.status !== "not_needed");
   const done = all.filter((a) => a.status === "done").length;
   return (
@@ -22,7 +22,7 @@ export default async function Accounts() {
         return (
           <Card key={phase} title={title}>
             <div className="flex flex-col divide-y divide-black/5">
-              {rows.map((a) => <AccountRow key={a.account_id} a={a} canEdit={who?.role === "kyle"} />)}
+              {rows.map((a) => <AccountRow key={a.account_id} a={a} canEdit={v.view === "kyle" && v.real === "kyle"} />)}
             </div>
           </Card>
         );

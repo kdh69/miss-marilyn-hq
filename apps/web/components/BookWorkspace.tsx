@@ -9,7 +9,7 @@ const isHers = (p: Page) => !!p.text_final;
 type Req = Record<string, string>;
 
 /** Page grid + one open page: art, the draft, Clara's own words, notes. */
-export function BookWorkspace({ productId, pages, requests, viewer }: { productId: string; pages: Page[]; requests: Req[]; viewer: "mom" | "kyle" | null }) {
+export function BookWorkspace({ productId, pages, requests, viewer, canEdit }: { productId: string; pages: Page[]; requests: Req[]; viewer: "mom" | "kyle" | null; canEdit: boolean }) {
   const [open, setOpen] = useState(pages[0]?.page_number ?? "");
   const page = pages.find((p) => p.page_number === open);
   const yours = pages.filter(isHers).length;
@@ -42,7 +42,7 @@ export function BookWorkspace({ productId, pages, requests, viewer }: { productI
         <aside className="glass flex flex-col gap-3 self-start rounded-3xl p-4 lg:sticky lg:top-6">
           <p className="text-sm font-semibold">Page {page.page_number}</p>
           <Art id={page.art_id} brief={page.art_brief} large />
-          <PageText key={page.page_id} page={page} canEdit={!!viewer} />
+          <PageText key={page.page_id} page={page} canEdit={canEdit} />
           <div>
             <p className="mb-1.5 text-xs font-semibold text-[var(--quiet)]">Note on this page</p>
             <MessageBox productId={productId} pageNumber={page.page_number} defaultKind="change" placeholder="e.g. Papa should look happier here" />

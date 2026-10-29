@@ -4,11 +4,10 @@ import { MessageBox } from "@/components/MessageBox";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { MessageItem } from "@/components/Messages";
 import { bookProgress, getSnapshot, spendToday } from "@/lib/data";
-import { me } from "@/auth";
+import { viewer as whoIsLooking } from "@/auth";
 
 export default async function Today() {
-  const [s, who] = await Promise.all([getSnapshot(), me()]);
-  const viewer = who?.role ?? (s._sample ? "mom" : null); // sample data previews Clara's view
+  const [s, { view: viewer }] = await Promise.all([getSnapshot(), whoIsLooking()]);
   const questions = s.requests.filter((r) => r.to === viewer && !r.reply && !["done", "wont_do"].includes(r.status));
   const waiting = s.mom_queue.filter((m) => !m.answer && !m.processed_at);
   const spend = spendToday(s);
