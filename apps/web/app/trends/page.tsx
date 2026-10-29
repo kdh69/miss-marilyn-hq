@@ -3,12 +3,13 @@ import { Icon } from "@/components/Icon";
 import { TrendAction } from "@/components/TrendAction";
 import { getSnapshot } from "@/lib/data";
 import { ago } from "@/lib/labels";
+import { viewerRole } from "@/lib/viewer";
 
 const TYPE: Record<string, string> = { keyword: "Keyword", competitor: "Competitor", trend: "Trend", pricing: "Pricing", idea: "Idea" };
 const CONF: Record<string, { label: string; tone: "green" | "orange" | "gray" }> = { high: { label: "Sure", tone: "green" }, med: { label: "Fairly sure", tone: "orange" }, low: { label: "A hunch", tone: "gray" } };
 
 export default async function Trends() {
-  const s = await getSnapshot();
+  const [s, viewer] = await Promise.all([getSnapshot(), viewerRole()]);
   const rows = [...s.research].sort((a, b) => b.date.localeCompare(a.date));
   const fresh = rows.filter((r) => r.status === "new");
   const older = rows.filter((r) => r.status !== "new");
@@ -31,7 +32,7 @@ export default async function Trends() {
             {r.suggested_action && (
               <p className="mt-3 rounded-xl bg-orange-500/10 p-2.5 text-sm"><span className="font-semibold">Idea:</span> {r.suggested_action}</p>
             )}
-            <div className="mt-auto pt-4"><TrendAction researchId={r.research_id} topic={r.topic} idea={r.suggested_action} /></div>
+            {viewer !== "family" && <div className="mt-auto pt-4"><TrendAction researchId={r.research_id} topic={r.topic} idea={r.suggested_action} /></div>}
           </Card>
         ))}
       </div>

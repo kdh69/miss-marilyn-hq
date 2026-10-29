@@ -14,12 +14,12 @@ export const TABS = [
   { href: "/accounts", label: "Accounts", icon: "accounts" },
 ];
 
-/** badges: count shown beside a tab, e.g. { "/": 4 } */
-export function Nav({ badges = {} }: { badges?: Record<string, number> }) {
+/** badges: count shown beside a tab, e.g. { "/": 4 }. hidden: tabs this viewer can't open. */
+export function Nav({ badges = {}, hidden = [] }: { badges?: Record<string, number>; hidden?: string[] }) {
   const path = usePathname();
   return (
     <nav className="-mx-1 flex gap-1 overflow-x-auto px-1 md:mx-0 md:flex-col md:px-0">
-      {TABS.map((t) => {
+      {TABS.filter((t) => !hidden.includes(t.href)).map((t) => {
         const active = t.href === "/" ? path === "/" : path.startsWith(t.href);
         const n = badges[t.href] ?? 0;
         return (

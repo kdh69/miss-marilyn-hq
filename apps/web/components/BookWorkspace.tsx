@@ -9,7 +9,8 @@ const isHers = (p: Page) => !!p.text_final;
 type Req = Record<string, string>;
 
 /** Page grid + one open page: art, the draft, Clara's own words, notes. */
-export function BookWorkspace({ productId, pages, requests, viewer }: { productId: string; pages: Page[]; requests: Req[]; viewer: "mom" | "kyle" | null }) {
+export function BookWorkspace({ productId, pages, requests, viewer }: { productId: string; pages: Page[]; requests: Req[]; viewer: "mom" | "kyle" | "family" | null }) {
+  const canEdit = viewer === "mom" || viewer === "kyle";
   const [open, setOpen] = useState(pages[0]?.page_number ?? "");
   const page = pages.find((p) => p.page_number === open);
   const yours = pages.filter(isHers).length;
@@ -42,12 +43,14 @@ export function BookWorkspace({ productId, pages, requests, viewer }: { productI
         <aside className="glass flex flex-col gap-3 self-start rounded-3xl p-4 lg:sticky lg:top-6">
           <p className="text-sm font-semibold">Page {page.page_number}</p>
           <Art id={page.art_id} brief={page.art_brief} large />
-          <PageText key={page.page_id} page={page} canEdit={!!viewer} />
-          <div>
-            <p className="mb-1.5 text-xs font-semibold text-[var(--quiet)]">Note on this page</p>
-            <MessageBox productId={productId} pageNumber={page.page_number} defaultKind="change" placeholder="e.g. Papa should look happier here" />
-          </div>
-          {requests.filter((r) => r.page_number === page.page_number).map((r) => <MessageItem key={r.request_id} r={r} viewer={viewer} />)}
+          <PageText key={page.page_id} page={page} canEdit={canEdit} />
+          {canEdit && <>
+            <div>
+              <p className="mb-1.5 text-xs font-semibold text-[var(--quiet)]">Note on this page</p>
+              <MessageBox productId={productId} pageNumber={page.page_number} defaultKind="change" placeholder="e.g. Papa should look happier here" />
+            </div>
+            {requests.filter((r) => r.page_number === page.page_number).map((r) => <MessageItem key={r.request_id} r={r} viewer={viewer} />)}
+          </>}
         </aside>
       )}
     </div>
@@ -84,7 +87,7 @@ function PageText({ page, canEdit }: { page: Page; canEdit: boolean }) {
         <details className="mt-1 text-xs text-[var(--quiet)]"><summary className="cursor-pointer">Original draft</summary><p className="mt-1">{page.text_draft}</p></details>
       )}
       <div className="mt-1 flex items-center justify-between text-xs text-[var(--quiet)]">
-        <span>{msg || (canEdit ? "Saved words replace the draft in the book" : "Sign in to edit")}</span>
+        <span>{msg || (canEdit ? "Saved words replace the draft in the book" : "View only")}</span>
         <button disabled={!canEdit || pending || !dirty || !text.trim()}
           onClick={() => start(async () => { const r = await savePageText(page.page_id, text); setMsg(r.ok ? "Saved ✓" : r.error ?? "Didn't save"); })}
           className="rounded-full bg-orange-500 px-3 py-1.5 font-semibold text-white disabled:opacity-40">Save words</button>

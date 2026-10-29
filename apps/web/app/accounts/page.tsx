@@ -1,4 +1,5 @@
-import { viewerRole } from "@/lib/viewer";
+import { notFound } from "next/navigation";
+import { canSee, viewerRole } from "@/lib/viewer";
 import { AccountRow } from "@/components/AccountRow";
 import { Bar, Card, Empty } from "@/components/ui";
 import { getSnapshot } from "@/lib/data";
@@ -7,6 +8,7 @@ const PHASES: [string, string][] = [["now", "Set up now"], ["phase_0", "Business
 
 export default async function Accounts() {
   const [s, viewer] = await Promise.all([getSnapshot(), viewerRole()]);
+  if (!canSee(viewer, "/accounts")) notFound();
   const all = s.accounts.filter((a) => a.status !== "not_needed");
   const done = all.filter((a) => a.status === "done").length;
   return (

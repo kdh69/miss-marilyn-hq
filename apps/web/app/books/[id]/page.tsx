@@ -36,7 +36,7 @@ export default async function Book({ params }: { params: Promise<{ id: string }>
         <BookWorkspace productId={id} pages={bookPages(s, id)} requests={requests} viewer={viewer} />
       </Card>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {viewer !== "family" && <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card title="Tell the team about this book">
           <MessageBox productId={id} placeholder="Ideas, changes, anything about this book…" />
         </Card>
@@ -47,7 +47,7 @@ export default async function Book({ params }: { params: Promise<{ id: string }>
               : <p className="text-sm text-[var(--quiet)]">No messages yet.</p>}
           </div>
         </Card>
-      </div>
+      </div>}
     </div>
   );
 }

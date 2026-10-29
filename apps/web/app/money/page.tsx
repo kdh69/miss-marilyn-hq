@@ -1,12 +1,15 @@
 import { Bar, Card, PageHeader, Stat } from "@/components/ui";
 import { MoneyChart } from "@/components/MoneyChart";
 import { Table } from "@/components/Table";
+import { notFound } from "next/navigation";
 import { costsByCategory, getSnapshot, moneyByMonth, spendToday } from "@/lib/data";
+import { canSee, viewerRole } from "@/lib/viewer";
 
 const usd = (n: number) => `$${n.toFixed(2)}`;
 const CATEGORY: Record<string, string> = { ai_credits: "Bots (Grok)", qc_api: "Quality checks (Claude)", print_proof: "Print proofs", software: "Software", listing_fees: "Listing fees", ads: "Ads", legal: "Legal", contractor: "Contractors", other: "Other" };
 
 export default async function Money() {
+  if (!canSee(await viewerRole(), "/money")) notFound();
   const s = await getSnapshot();
   const net = s.transactions.reduce((a, t) => a + (Number(t.net_usd) || 0), 0);
   const costs = s.costs.reduce((a, c) => a + (Number(c.amount_usd) || 0), 0);

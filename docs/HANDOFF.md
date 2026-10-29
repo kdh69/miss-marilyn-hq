@@ -1,79 +1,115 @@
-# Handoff — where things stand (2026-10-29)
+# Handoff — where things stand (2026-10-29, evening)
 
 Read this first when picking the project back up. Setup steps in full: [`SETUP.md`](SETUP.md).
-Live checklist: [Launch Checklist](https://claude.ai/artifact/FzUU8wZjrWifR9sv6Ejrpy).
+Working away from the laptop: [`REMOTE.md`](REMOTE.md). Bot descriptions: [`bot-prompts.md`](bot-prompts.md).
+
+## How it fits together
+
+```
+Grok bots ──write──▶ MM Core Sheet ◀──read/write── Backend (GitHub Actions, every 30 min; not on yet)
+                          │
+                          ▼ re-read every 60 s
+            missmarilyn.vercel.app  (Kyle, Mom, family)
+                          │
+      Mom's approvals, page wording, messages ──▶ back into the Sheet
+```
+
+Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing.
 
 ## State right now
 
-- **Code:** all checks pass (typecheck, 100 tests, 5 KDP preflight tests).
-- **Panel:** live at **https://missmarilyn.vercel.app**, in **preview mode**: sample data, open to
-  anyone with the link, nothing saves. The sidebar's *Preview as Clara / Kyle* switch flips views.
-- **MM Core Sheet:** built (18 tabs, protections), shared with the service account and the bot
-  Gmail. `npm run doctor` is green except uploads (needs `GOOGLE_OWNER_REFRESH_TOKEN`).
-  `npm run dryrun` passes locally.
-- **Google Cloud:** project `miss-marilyn-513120` (plain Gmail, no organization: an org blocked
-  service account keys on the first try). Service account and OAuth client are in `.env`.
-- **Grok:** connected with the bot Gmail; the row test passed (T-9999, now `cancelled`).
-  No bot API fallback needed.
-- **QC is manual:** no `ANTHROPIC_API_KEY`. Kyle reviews in Claude Code with `npm run qc`
-  (SETUP.md § Manual QC). Adding a key later turns automatic QC back on.
-- **Backend on GitHub Actions:** skips every run until the secrets are set.
+- **Panel:** live at **https://missmarilyn.vercel.app** on real Sheet data, behind sign-in.
+  - Kyle and Mom: *Continue with Google* (emails in `PANEL_USERS`). Mom never sees costs or the Money tab.
+  - Family: shared password (`FAMILY_PASSWORD` in `.env` and Vercel) opens a read-only view: no
+    Money, Accounts or Messages, no saving. Changing the password signs every family browser out.
+  - Deployed from the laptop with `vercel deploy --prod`. Vercel is **not** connected to GitHub yet.
+- **MM Core Sheet:** built and shared with the service account (Editor on *Miss Marilyn Business*) and the
+  bot Gmail (Editor on MM Core + MM Work, Viewer on MM Brand). `npm run doctor` is green except uploads.
+- **Google Cloud:** project `miss-marilyn-513120` under a plain Gmail (an organization blocked service
+  account keys on the first try). Service account key and OAuth client are in `.env` and Vercel.
+- **Grok:** connected with the bot Gmail; the row test passed. The bots synced both books into the Sheet.
+  Grok names map to Sheet roles: Producer=`story_producer`, Lister=`publisher`, Marketer=`growth`.
+- **QC is manual** (no `ANTHROPIC_API_KEY`): the backend leaves work at `ready_for_qc` and Kyle reviews
+  with Claude. Adding a key later turns automatic QC back on.
+- **Backend on GitHub Actions:** not running. Secrets aren't set, and the schedule runs from `main`,
+  which doesn't have today's work yet (see step 1 below).
+
+### The board after today's QC
+
+- **Passed, waiting on Mom:** T-0003 Ollie front cover (on her Today list to approve).
+- **Failed, back to the bots** (notes in each task's `qc_notes`):
+  - T-0013 Miss M cover: yarn ball instead of red string, no nose beauty mark, propeller plane, Mama too orange.
+  - T-0001 Ollie story: no `art_brief`/`characters` on any page, brave pebble/pocket continuity, p31 notes missing.
+  - T-0006 / T-0016 KDP packets: missing AI-content answers, ISBN, trim, bleed, paper, file links.
+  - T-0007 / T-0017 Etsy listings: bundle files not made yet, no page count; T-0017 title is 165 chars.
+- **Blocked:** the Ollie interior art and print files (T-0002, T-0004, T-0005). The art was lost in an
+  Oct 28 reset; only low-res Oct 24 PDFs survive, in Kyle's Orchestrator chat. Probably a redraw.
+- **In progress:** Miss M character sheets and redraw (T-0012), Miss M story (T-0011), interior (T-0014).
 
 ## Kyle — outstanding, in order
 
-1. **Uploads**: OAuth consent screen → Publish app, then `npm run google:authorize` as
-   kdhuntzinger@gmail.com and put `GOOGLE_OWNER_REFRESH_TOKEN` in `.env`.
-2. **`.env`**: fill `KYLE_EMAIL`.
-3. Delete the service account key file from Downloads; its only copy should be `.env` (and later
-   the GitHub and Vercel secrets).
-4. **GitHub secrets**: `GOOGLE_SERVICE_ACCOUNT_JSON`, `MM_CORE_SHEET_ID`, `KYLE_EMAIL`
-   (optional ones in SETUP.md §5). Then Actions → *MM backend tick* → `doctor`, then `dryrun`.
-5. **Vercel env**: add sign-in **first or together with** the Sheet keys — `AUTH_GOOGLE_ID`,
-   `AUTH_GOOGLE_SECRET`, `PANEL_USERS`, then `GOOGLE_SERVICE_ACCOUNT_JSON`, `MM_CORE_SHEET_ID`.
-   (Sheet keys without sign-in would put real data on a public page.) Sign in as yourself and as Clara.
-6. **Connect Vercel to GitHub** (project → Settings → Git) so pushes to `main` deploy automatically.
-   Today's deploy was made from a local folder with `vercel deploy --prod`.
-7. **Later**: Resend + verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); paste the 7 prompts
-   from [`bot-prompts.md`](bot-prompts.md) into Grok; check whether Grok can schedule the Orchestrator.
+1. **Merge `panel-preview` into `main`** (open a PR on GitHub). Scheduled workflows only run from `main`,
+   and `main` lacks manual QC: without it, the backend would move tasks to `in_qc` and fail on them.
+2. **GitHub secrets** (repo → Settings → Secrets and variables → Actions): `GOOGLE_SERVICE_ACCOUNT_JSON`,
+   `MM_CORE_SHEET_ID`, `KYLE_EMAIL`; optional `CLARA_EMAIL`, `PANEL_URL`. Copy values from `.env`.
+   Then Actions → *MM backend tick* → Run workflow → `doctor`, then `dryrun`. Until this is on,
+   Mom's Approve clicks are saved but nothing acts on them.
+3. **Connect Vercel to GitHub** (Vercel → project `missmarilyn` → Settings → Git, production branch
+   `main`, root directory `apps/web`). After that, merging to `main` deploys; no laptop needed.
+4. **Uploads:** Google Cloud → OAuth consent screen → **Publish app**, then `npm run google:authorize`
+   (laptop) and sign in as the owner of *Miss Marilyn Business*. Save `GOOGLE_OWNER_REFRESH_TOKEN` to
+   `.env`, GitHub secrets and Vercel, then redeploy. Until then the panel's photo upload shows a
+   friendly "not switched on yet" message; drop photos in Drive under MM Brand → photos instead.
+5. **Grok:** paste each bot's new description from [`bot-prompts.md`](bot-prompts.md) (house rules + role),
+   and rename the room from "Coloring Books For Kids" to "Miss Marilyn HQ". Send Scout the
+   story-plus-coloring research topic.
+6. **Ollie art:** attach the Oct 24 Ollie PDFs in the Orchestrator chat, then decide recover vs. redraw.
+7. Delete the service account key file from Downloads (its copies live in `.env` and the secrets).
+8. **Later:** Resend + a verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); a password manager
+   (Bitwarden's free plan covers two people); whether Grok can schedule the Orchestrator's sweeps.
 
-## Clara — outstanding
+## Mom — outstanding
 
-- **First, because it blocks the most:** pick the pen name. The KDP packet and the Etsy shop name both wait on it.
-- **Accounts:** business Gmail with 2-step; a password manager shared with Kyle.
-- **Photos:** 15–20 photos and 2–3 videos of Miss M, uploaded through the panel once sign-in works.
-- **Business setup:** LLC + EIN, a business bank account and card, the brand domain.
-- **Selling accounts:** Amazon KDP, Etsy shop, the Etsy developer app, Meta Business Suite, Pinterest,
-  an email list tool.
-- **Brand docs:** approve [`brand/series-bible.md`](brand/series-bible.md) and
-  [`brand/style-guide.md`](brand/style-guide.md), which then go into MM Brand.
+- **Pick the author name** (pen name or real name). It blocks the Ollie upload and both KDP packets.
+- **Rewrite each page in her own words** on the panel's Books page. Builder prints only her words
+  (`text_final`); both books have none yet.
+- **Approve the Ollie cover** on her Today list.
+- **Miss M material:** 15–20 photos and 2–3 videos; Zoey's photos and description; the rescue story and
+  dedication for the "Meet the Real Miss Marilyn" page.
+- **Business setup:** LLC + EIN, business bank account and card, brand domain; then KDP, Etsy,
+  Meta Business Suite, Pinterest and an email list tool.
+
+## Decisions made on 2026-10-29
+
+- QC stays manual for now, through Kyle's Claude subscription (no API key).
+- Bot costs are Kyle's only. Family gets a read-only view behind a shared password.
+- Coloring versions: **not a product yet.** When they happen, each book gets a free coloring PDF
+  ("Color & Tell Your Own Story") through a QR code / link page at the back of the book that collects
+  the parent's email. No coloring SKUs and no new format. Illustrator saves ink line layers now so it's ready.
+- Bots work on both series, upload every source file to Drive (the Oct 28 reset lost files kept only
+  locally), and label everything they make `rights_source=AI`.
+- Miss Marilyn art: watercolor and ink, beauty mark on every page, no humans, red string (never a yarn
+  ball), Mama cream/ginger, Papa gray tabby. These belong in the `lessons` tab; check the Orchestrator wrote them.
 
 ## Code — next up
 
-- **Panel → real data.** The UI is built against the real schema. Once the Sheet and sign-in are
-  connected, check each page against real rows. Known spots:
-  - Book progress counts tasks per product, so a book with only a few tasks can look further along
-    than it is.
-  - The *Ask the team to make this* button on Trends writes an `idea` request to the Orchestrator;
-    the Orchestrator prompt needs to handle it.
-  - Nobody has reviewed the redesigned pages on a phone yet.
-- **Etsy publish**, once API access is approved (stub in `apps/backend/src/jobs/etsyPublish.ts`).
+- Verify the panel on a phone with real data, signed in as each role.
+- Book progress counts tasks per product, so a book with few tasks can look further along than it is.
+- **Etsy publish** once API access is approved (stub in `apps/backend/src/jobs/etsyPublish.ts`).
 - **Money tab imports:** KDP royalty report + Etsy sales CSV → `transactions`.
 - **Photos dropped straight into Drive** (not via the panel) → register them as `assets`.
 
 ## Things to know
 
-- **Public repo:** keeps GitHub Actions free, but:
-  - GitHub pauses scheduled workflows after 60 days with no commits.
-  - The MM Core Sheet ID is visible in `.env.example`, so keep the Sheet's General access on **Restricted**.
-- **Sample data** lives in `apps/web/lib/sample.ts`. The panel uses it whenever the Sheet keys are
-  missing.
-- **Preview mode** is on while `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` or `AUTH_SECRET` is missing.
-  The preview switch only sets a cookie; every save is refused without a real sign-in.
-- **Vercel project** `missmarilyn` (team *kdh69s-projects*) builds from `apps/web`. `AUTH_SECRET` is
-  already set for production. Vercel installs only the panel's own packages, so anything the panel
-  build needs must be listed in `apps/web/package.json`, not just the root.
-- **Windows:** Python runs as `python`, not `python3`. Scripts pick the right one, and `PYTHON` in
-  `.env` overrides it. KDP preflight uses the project `.venv` because the main Python needs admin
-  rights to install packages.
-- **Kyle's laptop** has about 6 GB of RAM. `next build` and `next dev` can run out of memory with
-  other apps open; close Chrome tabs first, or let Vercel do the build.
+- **Public repo:** keeps GitHub Actions free, but GitHub pauses scheduled workflows after 60 days with
+  no commits, and the Sheet ID is visible in `.env.example`, so keep the Sheet's General access on
+  **Restricted**. Never commit `.env`, emails other than commit metadata, or the family password.
+- **`.vercelignore`** keeps `.env` and key files out of `vercel deploy` uploads.
+- **Panel roles** come from `PANEL_USERS` (`email:mom`, `email:kyle`, `email:family:Name`) plus the
+  family password. Every write in `apps/web/app/actions.ts` goes through `editor()`, which refuses family.
+- **Sample data** in `apps/web/lib/sample.ts` is used only when the Sheet keys are missing.
+- **Vercel project** `missmarilyn` (team *kdh69s-projects*) builds from `apps/web` and installs only the
+  panel's own packages, so anything the panel build needs must be in `apps/web/package.json`.
+- **Windows:** Python runs as `python`; KDP preflight uses the project `.venv`.
+- **Kyle's laptop** has about 6 GB of RAM. Let Vercel do `next build`; typecheck locally with
+  `npx tsc --noEmit -p apps/web`.

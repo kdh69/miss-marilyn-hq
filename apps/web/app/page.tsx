@@ -7,11 +7,12 @@ import { PhotoUpload } from "@/components/PhotoUpload";
 import { MessageItem } from "@/components/Messages";
 import { bookProgress, bookStages, getSnapshot, spendToday, teamNow } from "@/lib/data";
 import { BOTS, ROLE, STAGE_LABEL, STATUS, ago } from "@/lib/labels";
-import { viewerRole } from "@/lib/viewer";
+import { viewerName, viewerRole } from "@/lib/viewer";
 
 export default async function Today() {
-  const [s, viewer] = await Promise.all([getSnapshot(), viewerRole()]);
+  const [s, viewer, name] = await Promise.all([getSnapshot(), viewerRole(), viewerName()]);
   const isKyle = viewer === "kyle";
+  const isFamily = viewer === "family";
   const questions = s.requests.filter((r) => r.to === viewer && !r.reply && !["done", "wont_do"].includes(r.status));
   const waiting = s.mom_queue.filter((m) => !m.answer && !m.processed_at);
   const stuck = s.tasks.filter((t) => ["blocked", "escalated"].includes(t.status));
@@ -21,26 +22,33 @@ export default async function Today() {
   const trend = s.research.find((r) => r.status === "new");
   const hour = Number(new Date().toLocaleString("en-US", { timeZone: "America/New_York", hour: "numeric", hour12: false }));
   const greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-  const need = isKyle ? stuck.length + questions.length : waiting.length + questions.length;
+  const need = isFamily ? 0 : isKyle ? stuck.length + questions.length : waiting.length + questions.length;
+  const pagesWritten = s.pages.filter((p) => p.text_final || p.text_draft).length;
 
   return (
     <div className="flex flex-col gap-4">
       <header className="px-1 pt-2">
-        <h1 className="text-2xl font-semibold">{greet}, {isKyle ? "Kyle" : "Clara"}</h1>
+        <h1 className="text-2xl font-semibold">{greet}{name ? `, ${name}` : ""}</h1>
         <p className="text-sm text-[var(--quiet)]">
-          {need ? `${need} thing${need > 1 ? "s" : ""} need you today.` : "Nothing needs you right now."} Everything else is moving.
+          {isFamily
+            ? "Here's how the books are coming along."
+            : `${need ? `${need} thing${need > 1 ? "s" : ""} need you today.` : "Nothing needs you right now."} Everything else is moving.`}
         </p>
       </header>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Waiting on you" value={String(need)} tone="accent" />
+        {isFamily
+          ? <Stat label="Pages written" value={String(pagesWritten)} tone="accent" />
+          : <Stat label="Waiting on you" value={String(need)} tone="accent" />}
         <Stat label="Books in progress" value={String(books.length)} />
         <Stat label="Bots working now" value={String(team.filter((t) => t.now?.status === "in_progress").length)} sub={`of ${BOTS.length}`} />
-        <Stat label="Bot spend today" value={`$${spend.bots.toFixed(2)}`} sub={`of $${spend.cap}`} tone="accent-2" />
+        {isKyle
+          ? <Stat label="Bot spend today" value={`$${spend.bots.toFixed(2)}`} sub={`of $${spend.cap}`} tone="accent-2" />
+          : <Stat label="Tasks finished" value={String(s.tasks.filter((t) => t.status === "done").length)} tone="accent-2" />}
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
-        <div className="flex flex-col gap-4 lg:col-span-3">
+        {!isFamily && <div className="flex flex-col gap-4 lg:col-span-3">
           {isKyle ? (
             <Card title="Stuck or escalated">
               <div className="flex flex-col gap-3">
@@ -73,14 +81,12 @@ export default async function Today() {
           <Card title="Tell the team">
             <MessageBox to={isKyle ? "orchestrator" : undefined} />
           </Card>
-          {!isKyle && (
-            <Card title="Photos of Miss M">
-              <PhotoUpload />
-            </Card>
-          )}
-        </div>
+          <Card title="Photos of Miss M">
+            <PhotoUpload />
+          </Card>
+        </div>}
 
-        <div className="flex flex-col gap-4 lg:col-span-2">
+        <div className={`flex flex-col gap-4 ${isFamily ? "lg:col-span-5" : "lg:col-span-2"}`}>
           <Card title="Books">
             <div className="flex flex-col gap-5">
               {books.map((p, i) => {

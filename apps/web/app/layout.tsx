@@ -2,18 +2,20 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
 import { PreviewSwitch } from "@/components/PreviewSwitch";
-import { authConfigured, me, signOut } from "@/auth";
+import { authConfigured, me, signOut, type PanelRole } from "@/auth";
 import { SystemBanner } from "@/components/SystemBanner";
 import { getSnapshot } from "@/lib/data";
-import { viewerRole } from "@/lib/viewer";
+import { hiddenTabs, viewerRole } from "@/lib/viewer";
+import { familySignOut } from "@/app/actions";
 
-async function UserChip({ viewer }: { viewer: "mom" | "kyle" | null }) {
+async function UserChip({ viewer }: { viewer: PanelRole | null }) {
   if (!authConfigured()) return <PreviewSwitch as={viewer === "kyle" ? "kyle" : "mom"} />;
   const who = await me();
   if (!who) return null;
+  const out = who.role === "family" && !who.email ? familySignOut : async () => { "use server"; await signOut({ redirectTo: "/signin" }); };
   return (
-    <form className="mt-6 hidden md:block" action={async () => { "use server"; await signOut({ redirectTo: "/signin" }); }}>
-      <p className="text-xs text-[var(--quiet)]">Signed in as {who.role === "mom" ? "Clara" : "Kyle"}</p>
+    <form className="mt-6 hidden md:block" action={out}>
+      <p className="text-xs text-[var(--quiet)]">Signed in as {who.name || who.email}{who.role === "family" ? " (view only)" : ""}</p>
       <button className="text-xs text-[var(--quiet)] underline">Sign out</button>
     </form>
   );
@@ -47,7 +49,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <p className="text-xs text-[var(--quiet)]">Control panel</p>
               </div>
             </div>
-            <Nav badges={badges} />
+            <Nav badges={badges} hidden={hiddenTabs(viewer)} />
             <UserChip viewer={viewer} />
           </aside>
           <main className="min-w-0 flex-1">

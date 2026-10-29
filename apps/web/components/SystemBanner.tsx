@@ -2,7 +2,7 @@
 import { useTransition } from "react";
 import { setSystemStatus } from "@/app/actions";
 
-export function SystemBanner({ halted, viewer }: { halted: boolean; viewer: "mom" | "kyle" | null }) {
+export function SystemBanner({ halted, viewer }: { halted: boolean; viewer: "mom" | "kyle" | "family" | null }) {
   const [pending, start] = useTransition();
   if (!halted) return null;
   return (

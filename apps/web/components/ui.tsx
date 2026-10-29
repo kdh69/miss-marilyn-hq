@@ -88,7 +88,7 @@ export function StageTrack({ stages }: { stages: { type: string; label: string; 
             </span>
             <span className={`h-0.5 flex-1 ${i === stages.length - 1 ? "opacity-0" : stages[i + 1].state === "upcoming" ? "bg-black/10" : "bg-orange-400"}`} />
           </div>
-          <span className={`mt-1.5 truncate px-0.5 text-[11px] ${st.state === "active" ? "font-semibold text-[var(--ink)]" : "text-[var(--quiet)]"}`}>{st.label}</span>
+          <span className={`mt-1.5 w-full break-words px-0.5 text-[10px] leading-tight sm:text-[11px] ${st.state === "active" ? "font-semibold text-[var(--ink)]" : "text-[var(--quiet)]"}`}>{st.label}</span>
         </li>
       ))}
     </ol>
