@@ -32,7 +32,7 @@ export async function weeklyDigest(core: Core) {
   const progress = books.map((b) => {
     const tasks = core.rows("tasks").filter((t) => t.product_id === b.product_id && t.status !== "cancelled");
     const done = tasks.filter((t) => t.status === "done").length;
-    return `• ${b.title}: ${tasks.length ? Math.round((done / tasks.length) * 100) : 0}% done`;
+    return `• ${b.title}: ${b.status === "paused" ? "on pause" : `${tasks.length ? Math.round((done / tasks.length) * 100) : 0}% done`}`;
   });
   const to = process.env.CLARA_EMAIL;
   if (to) {

@@ -32,4 +32,4 @@ they live in the shared password manager. *Business Gmail* = Clara's; the *bot G
 | A24 | Shopify | Clara | own storefront | phase 3 | yes | — |
 | A25 | Amazon Merch on Demand | Clara | merch on Amazon | phase 3 | yes | — |
 
-**ISBN:** KDP's free ISBN lists Amazon as publisher; Bowker (~$125 for one, ~$295 for ten) puts the LLC on record. Decide before Ollie's KDP packet.
+**ISBN:** KDP's free ISBN lists Amazon as publisher; Bowker (~$125 for one, ~$295 for ten) puts the LLC on record. Decide before Book 1's KDP packet.

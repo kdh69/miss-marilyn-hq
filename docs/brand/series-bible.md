@@ -31,10 +31,11 @@ kids learn that the cat in the story is a real cat who lives with a real family.
 
 ## 3. Book format
 
-- 8.5 x 8.5 in, 32 pages, premium colour, paperback first.
+- 8.5 x 8.5 in, 24 pages (KDP's minimum), premium colour, paperback first. Shorter on purpose
+  (decided 2026-10-30): 10 story spreads, story text on 11–15 pages, about 250–400 words in all.
 - One adventure, one lesson per book. No sub-plots.
-- Under 60 words per spread (two facing pages). Most spreads should be 20–45 words. Hard cap:
-  a spread over 60 words fails QC.
+- Under 50 words per spread (two facing pages). Most spreads should be 20–40 words. Hard cap:
+  a spread over 50 words fails QC.
 - Words a three-year-old knows, or can understand from the picture. One "big word" per book is
   fine if the picture explains it (for example "runway").
 - Short sentences. Present or simple past tense; pick one per book and keep it.
@@ -46,21 +47,21 @@ kids learn that the cat in the story is a real cat who lives with a real family.
 | 1 | Title page (title, series line, author) |
 | 2 | Copyright page (and dedication if Clara wants one) |
 | 3 | Opening single page: Miss M at home, cozy, one line of text |
-| 4–5 to 28–29 | 13 story spreads (see beat map below) |
-| 30–31 | Last story spread: home again, the lesson said simply, last sneeze or refrain |
-| 32 | Meet the Real Miss Marilyn (photo page, section 9) |
+| 4–5 to 20–21 | Story spreads 1–9 (see beat map below) |
+| 22–23 | Story spread 10, the last: home again, the lesson said simply, last sneeze or refrain |
+| 24 | Meet the Real Miss Marilyn (photo page, section 9) |
 
-### Beat map for the 13 story spreads
+### Beat map for the 10 story spreads
 
-1. **Spreads 1–2 — The news.** Someone tells Miss M about the adventure. She is excited and
+1. **Spread 1 — The news.** Someone tells Miss M about the adventure. She is excited and
    a little unsure. Introduce the refrain.
-2. **Spreads 3–4 — Getting ready.** Packing, practising, asking questions. First "Achoo!" usually
+2. **Spread 2 — Getting ready.** Packing, practising, asking questions. First "Achoo!" usually
    lands here (small, funny).
-3. **Spreads 5–9 — The adventure.** Two or three small moments, each a little bigger than the
+3. **Spreads 3–6 — The adventure.** Two or three small moments, each a little bigger than the
    last. One moment of gentle worry (never danger). Zoey or a family member helps.
-4. **Spreads 10–11 — The turn.** Miss M tries the thing she was unsure about. The lesson happens
+4. **Spreads 7–8 — The turn.** Miss M tries the thing she was unsure about. The lesson happens
    here through what she does, not through a speech.
-5. **Spreads 12–13 — Back home / wind down.** Calm, warm, bedtime-friendly. The lesson in one
+5. **Spreads 9–10 — Back home / wind down.** Calm, warm, bedtime-friendly. The lesson in one
    short line a parent can repeat later. Final refrain or final sneeze.
 
 ## 4. The running gag: "Achoo!"
@@ -224,7 +225,7 @@ out fine. The lesson is shown, not preached.
   Miss M's or a family member's voice and is under 12 words.
 - No gendered or cultural stereotypes, no food shaming, no screen-time moralising.
 
-## 9. "Meet the Real Miss Marilyn" page (page 32, every book)
+## 9. "Meet the Real Miss Marilyn" page (page 24, every book)
 
 The Builder lays this out; the Story Producer writes a draft in the page plan; Clara rewrites it
 in her own words (pages.text_final) and supplies the photo.
@@ -257,11 +258,16 @@ placeholder; QC will block it and Clara fills it in.
 
 One adventure, one lesson. Clara picks the order. The first three are her own ideas.
 
+**Book order (2026-10-30):** Book 1 is *Miss Marilyn Makes a Friend* (MM-B02), Clara's playground
+story; it takes row 3's lesson. Book 2 is *Miss Marilyn Flies to See Her Grandparents* (MM-B01),
+on pause until Book 1 is out. Product IDs stay as they are; `series_no` in the products tab is the
+book number.
+
 | # | Adventure | Lesson | Sneeze idea |
 |---|---|---|---|
 | 1 | Flying on a plane | Being brave means trying even when you feel a little scared | A fluffy pillow on the plane; the sneeze makes a shy seatmate giggle |
 | 2 | Visiting Nonna and Poppy | Saying goodbye is hard, but love stays with you until next time | Flour in Nonna's kitchen |
-| 3 | First day of school | Making a friend starts with saying hello | Chalk dust; a new friend sneezes too (echo) |
+| 3 | A day at the playground (Book 1, Clara's story) | Making a friend starts with saying hello | A new friend sneezes too (echo) |
 | 4 | Planting a garden with Poppy | Good things take time (patience) | Pollen from Poppy's flowers |
 | 5 | A thunderstorm night | Big feelings get smaller when you share them | False alarm during the storm, real sneeze when it's over |
 | 6 | Beach day | Taking turns makes it more fun for everyone | Sand-and-breeze sneeze knocks over a sandcastle; they build a better one together |
@@ -270,23 +276,12 @@ One adventure, one lesson. Clara picks the order. The first three are her own id
 | 9 | Snow day | Helping others feels good | Snowflake on the nose; the sneeze shakes snow off a branch onto Papa |
 | 10 | Bedtime at Nonna and Poppy's (first sleepover) | New places can feel like home when you bring a little bit of home with you | Dusty old teddy from Mama's childhood |
 
-Avoid repeating a lesson. Hold the new-sibling topic for later; the Ollie practice book covers it.
+Avoid repeating a lesson. Hold the new-sibling topic for later.
 
-## 11. Ollie and the New Baby (standalone practice book)
+## 11. Ollie and the New Baby (archived)
 
-- **What it is:** a single standalone picture book about an otter called Ollie welcoming a new
-  baby sibling. It is **not** part of the Miss Marilyn series and shares no characters or world.
-- **Why it exists:** it's the practice run for the whole pipeline (story, art, build, KDP packet,
-  Etsy printables, social) before Book 1, so mistakes are cheap.
-- **Same as the series:** 8.5 x 8.5 in, 32 pages, under 60 words per spread, read-aloud rules,
-  tone rules and all the "Don't" rules in section 8, page-plan format, style guide file rules.
-- **Different from the series:** no "Achoo!" gag, no "Meet the Real Miss Marilyn" page (page 32
-  can be a simple ending illustration or a "Welcome, little one" page), no Miss M cast.
-- **Lesson:** there is enough love for everyone; being a big sibling is a special job.
-- **Ollie's looks and family:** defined by the Illustrator's character sheet and approved by
-  Clara. [TO FILL: Ollie's age feel, family members, baby's name]
-- **Watch for:** lots of existing new-sibling books exist; keep the plot simple and ours, and
-  avoid any otter or sibling characters from existing books and shows.
+Retired on 2026-10-30. The practice book (OL-B01) is archived: its rows and Drive files are kept,
+but no bot works on it. Nothing from it carries into the Miss Marilyn series.
 
 ---
 

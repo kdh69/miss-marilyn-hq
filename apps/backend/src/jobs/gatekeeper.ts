@@ -4,7 +4,7 @@
  */
 import { Core, isLegalTransition, nowIso, type Row } from "@mm/core";
 import { notifyKyle } from "../lib/notify";
-import { autoQcEnabled, runQc, type QcResult } from "../lib/qc";
+import { autoQcEnabled, parkedBooks, runQc, type QcResult } from "../lib/qc";
 import { pushToMom } from "./momSync";
 import { needsPreflight, preflight } from "../lib/preflight";
 
@@ -80,10 +80,11 @@ export async function qcGate(core: Core, qcBudgetLeft: boolean, onlyTaskId?: str
   const types = new Map(core.rows("task_types").map((t) => [t.task_type, t]));
   const assets = new Map(core.rows("assets").map((a) => [a.asset_id, a]));
   const maxAttempts = Number(core.config("qc_max_attempts") || 2);
+  const parked = parkedBooks(core);
 
   const queue = core
     .rows("tasks")
-    .filter((t) => t.status === "ready_for_qc" && (!onlyTaskId || t.task_id === onlyTaskId))
+    .filter((t) => t.status === "ready_for_qc" && (onlyTaskId ? t.task_id === onlyTaskId : !parked.has(t.product_id)))
     .sort((a, b) => (a.priority || "P9").localeCompare(b.priority || "P9") || a.updated_at.localeCompare(b.updated_at))
     .slice(0, QC_PER_RUN);
 

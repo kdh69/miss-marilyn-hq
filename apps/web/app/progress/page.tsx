@@ -2,13 +2,13 @@ import Link from "next/link";
 import { canSee, viewer } from "@/lib/viewer";
 import { Card, Empty, PageHeader, StageTrack } from "@/components/ui";
 import { Table } from "@/components/Table";
-import { bookStage, getSnapshot } from "@/lib/data";
+import { activeBooks, bookStage, getSnapshot } from "@/lib/data";
 import { TASK_STATUS, WHO, when } from "@/lib/labels";
 
 /** One card per book on the Story → Art → Layout → Publish → On sale track. Kyle also gets the tables. */
 export default async function Progress() {
   const [s, v] = await Promise.all([getSnapshot(), viewer()]);
-  const books = s.products.filter((p) => p.status !== "retired");
+  const books = activeBooks(s);
   const technical = v.view === "kyle";
   const open = s.tasks.filter((t) => !["done", "cancelled"].includes(t.status)).map((t) => ({ ...t, status: technical ? t.status : TASK_STATUS[t.status] ?? t.status, owner: WHO[t.owner] ?? t.owner }));
   const recent = [...s.log].reverse().slice(0, 25).map((l) => ({ ...l, ts: when(l.ts), actor: WHO[l.actor] ?? l.actor }));

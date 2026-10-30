@@ -112,8 +112,7 @@ export function todoList(s: Snapshot, view: string | null): TodoItem[] {
 
 /** The next page in each book that's still in the draft's words, for "Keep writing". */
 export function nextToWrite(s: Snapshot) {
-  return s.products
-    .filter((p) => p.status !== "retired")
+  return workingBooks(s)
     .map((p) => {
       const pages = s.pages.filter((x) => x.product_id === p.product_id).sort((a, b) => Number(a.page_number) - Number(b.page_number));
       const left = pages.filter((x) => !x.text_final);
@@ -158,8 +157,14 @@ export function bookPages(s: Snapshot, productId: string) {
     });
 }
 
-/** Books that aren't retired. */
-export const activeBooks = (s: Snapshot) => s.products.filter((p) => p.status !== "retired");
+/** Books that aren't retired, in series order, paused ones last. */
+export const activeBooks = (s: Snapshot) =>
+  s.products
+    .filter((p) => p.status !== "retired")
+    .sort((a, b) => Number(a.status === "paused") - Number(b.status === "paused") || (Number(a.series_no) || 99) - (Number(b.series_no) || 99));
+
+/** Books the team is working on: active and not paused. */
+export const workingBooks = (s: Snapshot) => activeBooks(s).filter((p) => p.status !== "paused");
 
 /** The task of a step for a book: the open one if any, else the latest. */
 export function stepTask(s: Snapshot, productId: string, key: string) {
@@ -185,7 +190,7 @@ export function latestAsset(s: Snapshot, productId: string, types: string[]) {
  * following the steps: approve what's waiting, else keep making the script hers, else see what's new.
  */
 export function upNext(s: Snapshot) {
-  return activeBooks(s).map((p) => {
+  return workingBooks(s).map((p) => {
     const id = p.product_id;
     const st = bookStage(s, id);
     const pages = s.pages.filter((x) => x.product_id === id).sort((a, b) => Number(a.page_number) - Number(b.page_number));

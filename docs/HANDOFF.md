@@ -1,4 +1,4 @@
-# Handoff — where things stand (2026-10-30, early morning)
+# Handoff — where things stand (2026-10-30, evening)
 
 Read this first when picking the project back up. Setup steps in full: [`SETUP.md`](SETUP.md).
 Working away from the laptop: [`REMOTE.md`](REMOTE.md). Bot descriptions: [`bot-prompts.md`](bot-prompts.md).
@@ -49,21 +49,20 @@ Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing
   `doctor` and `dryrun` both pass on Actions. Uploads are the only red item, so the weekly backup step
   fails (and GitHub emails Kyle) until the owner token is set.
 
-### The board (after the first QC round and the hand-back)
+### The board (after the book reorder, 2026-10-30)
 
-- **Waiting on Mom:** T-0003 Ollie front cover passed QC; it's on her Today list to approve.
-- **Being fixed after QC fails** (notes in each task's `qc_notes`):
-  - T-0001 Ollie story (Producer, in progress): add `art_brief`/`characters` to all pages, brave pebble/pocket continuity, p31 notes.
-  - T-0013 Miss M cover (Illustrator, todo): red string not yarn ball, nose beauty mark, airliner, softer Mama.
-  - T-0006 / T-0016 KDP packets (Lister, todo): add AI-content answers, ISBN, trim, bleed, paper, file links.
-- **Ollie art: redraw** (decided 2026-10-30). T-0002 has the redraw brief anchored on the QC-passed cover
-  (A-T0003-01), character sheets first; it moves to todo when T-0001 is done. T-0004/T-0005 (print files)
-  wait for that art to pass QC.
-- **Miss M:** character sheets and redraw (T-0012), story (T-0011) and interior (T-0014) in progress.
-- **Etsy bundles, low priority (P3):** T-0021 (Ollie) and T-0022 (Miss M) printable_set tasks wait on
-  QC-passed art; the listings T-0007 / T-0017 wait on them. There's no Etsy shop yet anyway.
-- **Marketing** (T-0008–T-0010, T-0018–T-0020) stays blocked behind the art.
-- The Orchestrator wrote the Miss Marilyn lessons (7 rows) and set MM-B01-PB to $10.99.
+- **Book 1 = MM-B02 "Miss Marilyn Makes a Friend"**, Clara's playground story, `in_production`, P1.
+  Kyle's brief for the Orchestrator (her story plus the corrections) is the `kyle → orchestrator` idea
+  in `requests`; the Orchestrator turns it into book_plan → story_draft → character sheets → art.
+  Open question for Clara: what animal Gussie is.
+- **Book 2 = MM-B01 "Flies to See Her Grandparents"**, `paused`, `series_no` 2. Every open task is
+  `blocked` with "Book paused"; QC skips paused books. Its 32-page draft gets cut to 24 when it resumes.
+  The Miss M / Mama / Papa character sheets in T-0012 carry over into Book 1.
+- **Ollie (OL-B01) is archived:** product and SKUs `retired`, all its tasks `cancelled`, its requests
+  closed. Rows and Drive files are kept; the panel and the bots ignore it.
+- **Every book is 24 pages now** (KDP's minimum): 10 story spreads, story text on 11–15 pages, under
+  50 words a spread. Series bible §3, the story rubric and the Producer prompt say so.
+- **Marketing and Etsy** for Book 2 stay blocked with it.
 
 ## Kyle — outstanding, in order
 
@@ -78,7 +77,9 @@ and `dryrun` on Actions, connected Vercel to GitHub, passed the QC results back 
    `.env`, GitHub secrets and Vercel, then redeploy. Until then the panel's photo upload shows a
    friendly "not switched on yet" message; drop photos in Drive under MM Brand → photos instead.
 4. **Grok:** paste each bot's new description from [`bot-prompts.md`](bot-prompts.md) (house rules + role;
-   Builder's printables rule changed 2026-10-30), and rename the room from "Coloring Books For Kids" to
+   changed 2026-10-30: one series, book order by `series_no`, no work on paused/retired books, 24 pages),
+   and upload `docs/brand/series-bible.md` and `style-guide.md` to **MM Brand** (it has only `photos/`,
+   and the bots are told to read them there). Rename the room from "Coloring Books For Kids" to
    "Miss Marilyn HQ". Send Scout the story-plus-coloring research topic.
 5. Delete the service account key file from Downloads (its copies live in `.env` and the secrets).
 6. **Later:** Resend + a verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); a password manager
@@ -86,10 +87,10 @@ and `dryrun` on Actions, connected Vercel to GitHub, passed the QC results back 
 
 ## Mom — outstanding
 
-- **Pick the author name** (pen name or real name). It blocks the Ollie upload and both KDP packets.
+- **Pick the author name** (pen name or real name). It blocks Book 1's KDP packet.
 - **Rewrite each page in her own words** in the panel's **Script** step (the whole script, page by page), then approve it. Builder prints only her words
-  (`text_final`); both books have none yet.
-- **Approve the Ollie cover** in the Illustrations step.
+  (`text_final`). Book 1's pages come once the Producer drafts them.
+- **Tell us what Gussie is** (what animal, real pet or not) before his art.
 - **Miss M material:** 15–20 photos and 2–3 videos; Zoey's photos and description; the rescue story and
   dedication for the "Meet the Real Miss Marilyn" page.
 - **Business setup:** LLC + EIN, business bank account and card, brand domain; then KDP, Etsy,
@@ -102,11 +103,12 @@ and `dryrun` on Actions, connected Vercel to GitHub, passed the QC results back 
 - Coloring versions: **not a product yet.** When they happen, each book gets a free coloring PDF
   ("Color & Tell Your Own Story") through a QR code / link page at the back of the book that collects
   the parent's email. No coloring SKUs and no new format. Illustrator saves ink line layers now so it's ready.
-- Bots work on both series, upload every source file to Drive (the Oct 28 reset lost files kept only
+- Bots upload every source file to Drive (the Oct 28 reset lost files kept only
   locally), and label everything they make `rights_source=AI`.
 - Miss Marilyn art: watercolor and ink, beauty mark on every page, no humans, red string (never a yarn
   ball), Mama cream/ginger, Papa gray tabby. These are in the `lessons` tab.
-- Ollie interior art is redrawn, not recovered from the low-res Oct 24 PDFs; the QC-passed cover is the style anchor.
+- 2026-10-30: Ollie archived; Clara's playground story is Book 1 (MM-B02); the flying book is Book 2 (MM-B01), paused.
+  Product IDs don't change; `series_no` is the book number. Every book is 24 pages.
 - Mom's `text_final` rule covers book interiors and cover wraps only. Printables take their wording from
   the brief and need only QC-passed art.
 

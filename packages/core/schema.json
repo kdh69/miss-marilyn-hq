@@ -1210,6 +1210,7 @@
     "product_status": [
       "concept",
       "in_production",
+      "paused",
       "live",
       "retired"
     ],

@@ -5,7 +5,7 @@ import { NeedsYou } from "@/components/NeedsYou";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { Card, Empty, PageHeader, StageTrack, StatRow, btn } from "@/components/ui";
 import { Table } from "@/components/Table";
-import { bookStage, getSnapshot, greeting, lastTick, needsYou, spendToday, todoList, upNext } from "@/lib/data";
+import { activeBooks, bookStage, getSnapshot, greeting, lastTick, needsYou, spendToday, todoList, upNext } from "@/lib/data";
 import { WHO, when } from "@/lib/labels";
 
 const usd = (n: number) => `${n < 0 ? "-" : ""}$${Math.abs(n).toFixed(2)}`;
@@ -17,7 +17,7 @@ export default async function Overview() {
   const family = v.view === "family";
   const items = needsYou(s, v.view);
   const titles = Object.fromEntries(s.products.map((p) => [p.product_id, p.title]));
-  const books = s.products.filter((p) => p.status !== "retired");
+  const books = activeBooks(s);
   const inWorks = books.filter((p) => p.status === "in_production").length;
   const next = upNext(s).sort((a, b) => Number(b.mine) - Number(a.mine));
   const pagesTotal = s.pages.filter((p) => books.some((b) => b.product_id === p.product_id));

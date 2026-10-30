@@ -22,7 +22,7 @@ export const TASK_TYPE: Record<string, string> = {
   social_batch: "Social posts", email: "Email", lead_magnet: "Freebie", photo_request: "Photos of Miss M", dryrun: "Test run",
 };
 
-export const PRODUCT_STATUS: Record<string, string> = { concept: "Idea", in_production: "In the works", live: "On sale", retired: "Retired" };
+export const PRODUCT_STATUS: Record<string, string> = { concept: "Idea", in_production: "In the works", paused: "On pause", live: "On sale", retired: "Retired" };
 
 export const MOM_ITEM: Record<string, string> = { approve: "Approve", photos: "Send photos", rewrite: "Make the words yours", kdp_publish: "OK to publish" };
 

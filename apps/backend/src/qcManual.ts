@@ -10,12 +10,15 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { Core } from "@mm/core";
 import { qcGate } from "./jobs/gatekeeper";
-import { activeLessons, rubricPath } from "./lib/qc";
+import { activeLessons, parkedBooks, rubricPath } from "./lib/qc";
 
 async function list(core: Core) {
   const types = new Map(core.rows("task_types").map((t) => [t.task_type, t]));
   const assets = new Map(core.rows("assets").map((a) => [a.asset_id, a]));
-  const queue = core.rows("tasks").filter((t) => t.status === "ready_for_qc");
+  const parked = parkedBooks(core);
+  const waiting = core.rows("tasks").filter((t) => t.status === "ready_for_qc");
+  const queue = waiting.filter((t) => !parked.has(t.product_id));
+  if (waiting.length > queue.length) console.log(`Skipping ${waiting.length - queue.length} on paused or retired books.`);
   if (!queue.length) return console.log("Nothing waiting for QC.");
   for (const t of queue) {
     const type = types.get(t.task_type);

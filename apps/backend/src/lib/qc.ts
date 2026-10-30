@@ -71,6 +71,10 @@ export const activeLessons = (core: Core, task: Row) =>
     .filter((l) => l.status === "active" && ["all", task.task_type, task.owner].includes(l.applies_to))
     .map((l) => l.rule);
 
+/** Books on pause or retired: their work waits at ready_for_qc instead of being reviewed. */
+export const parkedBooks = (core: Core) =>
+  new Set(core.rows("products").filter((p) => ["paused", "retired"].includes(p.status)).map((p) => p.product_id));
+
 async function attachment(fileUrl: string): Promise<Anthropic.ContentBlockParam | null> {
   const id = fileUrl.match(/[-\w]{25,}/)?.[0];
   if (!id) return null;
