@@ -55,7 +55,9 @@ Details: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md).
   AI draft for the KDP/copyright record); approving it starts the illustrations.
 - **Illustrations:** the art as it comes in; approve the cover.
 - **Building:** words and pictures together, the print files; approve the layout.
-- **Full book review:** read it start to finish, then the final OK. Nothing publishes without it.
+- **Full book review:** a checklist from every step (each gap links back to its step), the book to
+  read from the cover, then the final OK. Nothing publishes without it.
+- Every step page ends with *Back* and *Next step* for the same book.
 - Money for Clara shows sales only; costs are Kyle's. If the bots are paused, a banner says so.
 
 ## What runs every 30 minutes

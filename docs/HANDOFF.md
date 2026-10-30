@@ -95,7 +95,8 @@ Done 2026-10-30: merged `panel-preview` into `main` (#9), set the GitHub secrets
 
 ## Code — next up
 
-- Verify the panel on a phone with real data, signed in as each role.
+- Verify the panel on a phone with real data, signed in as each role. First real saves to try: a
+  page's words (Script), a picture approval (Illustrations), a page approval (Building).
 - Book progress counts tasks per product, so a book with few tasks can look further along than it is.
 - **Etsy publish** once API access is approved (stub in `apps/backend/src/jobs/etsyPublish.ts`).
 - **Money tab imports:** KDP royalty report + Etsy sales CSV → `transactions`.

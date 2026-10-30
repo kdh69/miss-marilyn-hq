@@ -235,6 +235,25 @@ Clara's panel now follows how a book actually gets made. Her tabs are the steps:
 - A book's step is the earliest step with open work; tasks outside the steps (a photo request)
   don't move it. Steps and their task types live in `STAGE_TRACK` in `apps/web/lib/labels.ts`.
 
+## 15. Full book review, and the steps tied together
+
+- **Full book review, same treatment:** book number and cover, then a checklist built from every
+  earlier step — pages in her words (Script), pictures approved (Illustrations), finished pages
+  approved and layout approved (Building). Each unfinished line links back to its step. The final
+  OK sits under it; if steps are unfinished it says so, but the call is hers. Two tabs: *Read it*
+  (the book from the cover, one printed page at a time: arrows, swipe, ← →; a "Something to
+  change on this page?" note that goes to the team) and *Whole book* (every page at once; tap one
+  to read from there).
+- **Back / Next step** at the bottom of every step page, for the same book (Script → Illustrations
+  → Building → Full book review → the whole book).
+- **Up next** on the Overview sees the per-page work too: "Approve 7 pictures", "Look over 11
+  finished pages", "Read the whole book, start to finish".
+
+The flow end to end: an idea (Ideas) → the team plans it → Script (her words, approve) →
+Illustrations (approve pictures and the cover) → Building (approve each finished page and the
+layout) → Full book review (read it, final OK) → published. Every approval is hers; nothing
+publishes without the final OK.
+
 ## Rules kept
 
 - The panel still writes only `mom_queue` answers, `requests`, `pages.text_final*`, photos, and

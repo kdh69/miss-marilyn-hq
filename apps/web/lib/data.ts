@@ -110,18 +110,6 @@ export function todoList(s: Snapshot, view: string | null): TodoItem[] {
   return items.sort((a, b) => (a.when || "9999").localeCompare(b.when || "9999"));
 }
 
-/** The next page in each book that's still in the draft's words, for "Keep writing". */
-export function nextToWrite(s: Snapshot) {
-  return s.products
-    .filter((p) => p.status !== "retired")
-    .map((p) => {
-      const pages = s.pages.filter((x) => x.product_id === p.product_id).sort((a, b) => Number(a.page_number) - Number(b.page_number));
-      const left = pages.filter((x) => !x.text_final);
-      return left.length ? { productId: p.product_id, title: p.title, page: left[0].page_number, left: left.length, total: pages.length } : null;
-    })
-    .filter((x): x is NonNullable<typeof x> => !!x);
-}
-
 export function greeting() {
   const hour = Number(new Date().toLocaleString("en-US", { timeZone: "America/New_York", hour: "numeric", hour12: false }));
   return hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
@@ -185,6 +173,11 @@ export function latestAsset(s: Snapshot, productId: string, types: string[]) {
  * following the steps: approve what's waiting, else keep making the script hers, else see what's new.
  */
 export function upNext(s: Snapshot) {
+  // Pages that are ready to look at (they have a picture) but Clara hasn't approved yet.
+  const unapproved = (id: string, what: "picture" | "layout") => {
+    const ok = pageApprovals(s, id, what);
+    return bookPages(s, id).filter((p) => p.art_id && !ok[p.page_number]).length;
+  };
   return activeBooks(s).map((p) => {
     const id = p.product_id;
     const st = bookStage(s, id);
@@ -198,6 +191,9 @@ export function upNext(s: Snapshot) {
     else if (ask("art")) line = { step: "Art", text: "Approve the cover", href: at("art"), mine: true };
     else if (ask("script")) line = { step: "Script", text: "Read the script and approve it", href: at("script"), mine: true };
     else if (st.key === "script" && draftOnly) line = { step: "Script", text: `Make the script yours — page ${draftOnly.page_number} is next`, href: at("script"), mine: true };
+    else if (st.key === "art" && unapproved(id, "picture")) line = { step: "Art", text: `Approve ${unapproved(id, "picture")} picture${unapproved(id, "picture") > 1 ? "s" : ""}`, href: at("art"), mine: true };
+    else if (st.key === "build" && unapproved(id, "layout")) line = { step: "Build", text: `Look over ${unapproved(id, "layout")} finished page${unapproved(id, "layout") > 1 ? "s" : ""}`, href: at("build"), mine: true };
+    else if (st.key === "review") line = { step: "Review", text: "Read the whole book, start to finish", href: at("review"), mine: true };
     else if (st.key === "idea") line = { step: "Idea", text: "The team is planning it", href: "/ideas", mine: false };
     else if (st.key === "done") line = { step: "Done", text: "On sale", href: `/books/${id}`, mine: false };
     else line = { step: st.label, text: st.now.replace(/\.$/, ""), href: at(st.key), mine: false };

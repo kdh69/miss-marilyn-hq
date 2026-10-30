@@ -41,6 +41,35 @@ export function StepShell({ step, s, view, selected, children }: { step: string;
       </div>
       {!here.length && <p className="px-1 text-sm text-[var(--quiet)]">No book is on this step right now. Tap any book above to look at it here anyway.</p>}
       {children}
+      {selected && <StepNav step={i} book={selected} />}
     </div>
+  );
+}
+
+/** Bottom of every step page: back to the step before and on to the next one, for the same book. */
+function StepNav({ step, book }: { step: number; book: string }) {
+  const prev = STAGE_TRACK[step - 1];
+  const next = STAGE_TRACK[step + 1];
+  const href = (st: (typeof STAGE_TRACK)[number]) => (st.key === "idea" ? st.href : `${st.href}?book=${book}`);
+  return (
+    <nav className="mt-2 flex items-stretch justify-between gap-3" aria-label="Steps">
+      {prev ? (
+        <Link href={href(prev)} className="glass flex min-h-14 flex-1 flex-col justify-center rounded-2xl px-4 text-left">
+          <span className="text-[11px] text-[var(--quiet)]">← Back</span>
+          <span className="text-[15px] font-semibold">{prev.label}</span>
+        </Link>
+      ) : <span className="flex-1" />}
+      {next ? (
+        <Link href={href(next)} className="flex min-h-14 flex-1 flex-col justify-center rounded-2xl bg-orange-500 px-4 text-right text-white shadow-sm">
+          <span className="text-[11px] opacity-90">Next step →</span>
+          <span className="text-[15px] font-semibold">{next.label}</span>
+        </Link>
+      ) : (
+        <Link href={`/books/${book}`} className="glass flex min-h-14 flex-1 flex-col justify-center rounded-2xl px-4 text-right">
+          <span className="text-[11px] text-[var(--quiet)]">That's the last step</span>
+          <span className="text-[15px] font-semibold">The whole book →</span>
+        </Link>
+      )}
+    </nav>
   );
 }
