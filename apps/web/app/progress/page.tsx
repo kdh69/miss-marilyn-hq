@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { viewer } from "@/auth";
+import { canSee, viewer } from "@/lib/viewer";
 import { Card, Empty, PageHeader, StageTrack } from "@/components/ui";
 import { Table } from "@/components/Table";
 import { bookStage, getSnapshot } from "@/lib/data";

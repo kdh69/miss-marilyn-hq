@@ -9,6 +9,7 @@ import { join } from "node:path";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { Core, driveReader, type Row } from "@mm/core";
+import { python } from "./python";
 
 const run = promisify(execFile);
 const SCRIPT = fileURLToPath(new URL("../../preflight/preflight.py", import.meta.url));
@@ -39,7 +40,7 @@ export async function preflight(core: Core, task: Row, assets: Row[]): Promise<s
       const bin = await driveReader().files.get({ fileId: id, alt: "media" }, { responseType: "arraybuffer" });
       await writeFile(file, Buffer.from(bin.data as ArrayBuffer));
       const args = ["-I", SCRIPT, kind, file, ...(kind === "cover" ? ["--pages", pages] : [])];
-      const { stdout } = await run("python3", args, { maxBuffer: 4_000_000 }).catch((e) => ({ stdout: e.stdout as string }));
+      const { stdout } = await run(python, args, { maxBuffer: 4_000_000 }).catch((e) => ({ stdout: e.stdout as string }));
       const result = JSON.parse(stdout || '{"ok":false,"failures":["preflight crashed"]}');
       failures.push(...(result.failures as string[]).map((f) => `${a.asset_id}: ${f}`));
     }

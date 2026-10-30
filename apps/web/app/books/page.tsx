@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { viewer } from "@/auth";
+import { canSee, viewer } from "@/lib/viewer";
 import { NewBook } from "@/components/NewBook";
 import { Empty, PageHeader, Pill, StageTrack } from "@/components/ui";
 import { bookPages, bookStage, getSnapshot, needsYou } from "@/lib/data";
@@ -16,7 +16,7 @@ export default async function Books() {
       <PageHeader
         title="Books"
         sub={items.length ? <>Tap a book to write. <Link href="/" className="text-orange-700 underline">{items.length} thing{items.length > 1 ? "s" : ""} need{items.length > 1 ? "" : "s"} you</Link>.</> : "Tap a book to read and write its pages."}
-        action={<NewBook canWrite={!!v.real} />}
+        action={v.view !== "family" ? <NewBook canWrite={v.canWrite} /> : undefined}
       />
       {s._sample && <p className="px-1 text-xs text-[var(--quiet)]">Sample data — the Sheet isn't connected yet.</p>}
 

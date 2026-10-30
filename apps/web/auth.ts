@@ -1,17 +1,25 @@
 import NextAuth from "next-auth";
-import { cookies } from "next/headers";
 import Google from "next-auth/providers/google";
+import { cookies } from "next/headers";
+import { FAMILY_COOKIE, isFamilyCookie } from "@/lib/family";
 
-export type PanelRole = "mom" | "kyle";
+/** kyle: everything. mom: approves, edits pages, messages; no costs. family: read-only, no money or accounts. */
+export type PanelRole = "mom" | "kyle" | "family";
+const ROLES: PanelRole[] = ["mom", "kyle", "family"];
+type PanelUser = { role: PanelRole; name: string };
 
-/** PANEL_USERS="clara@gmail.com:mom,kyle@gmail.com:kyle" — the only people who can sign in. */
-export function panelUsers(): Map<string, PanelRole> {
-  return new Map(
-    (process.env.PANEL_USERS ?? "")
-      .split(",")
-      .map((s) => s.trim().toLowerCase().split(":") as [string, PanelRole])
-      .filter(([e, r]) => e && (r === "mom" || r === "kyle")),
-  );
+/**
+ * PANEL_USERS="clara@gmail.com:mom,kyle@gmail.com:kyle,sis@gmail.com:family:Jess" — the only
+ * people who can sign in. The name is optional (greeting only); mom and kyle default to Clara and Kyle.
+ */
+export function panelUsers(): Map<string, PanelUser> {
+  const users = new Map<string, PanelUser>();
+  for (const entry of (process.env.PANEL_USERS ?? "").split(",")) {
+    const [email, role, name] = entry.trim().split(":").map((s) => s.trim());
+    if (!email || !ROLES.includes(role as PanelRole)) continue;
+    users.set(email.toLowerCase(), { role: role as PanelRole, name: name || (role === "mom" ? "Clara" : role === "kyle" ? "Kyle" : "") });
+  }
+  return users;
 }
 
 export const authConfigured = () => !!(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET && process.env.AUTH_SECRET);
@@ -22,40 +30,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     signIn: ({ profile }) => !!profile?.email && panelUsers().has(profile.email.toLowerCase()),
     session: ({ session }) => {
-      const role = panelUsers().get(session.user?.email?.toLowerCase() ?? "");
+      const role = panelUsers().get(session.user?.email?.toLowerCase() ?? "")?.role;
       return { ...session, role };
     },
-    authorized: ({ auth: s, request }) => {
+    authorized: async ({ auth: s, request }) => {
       if (!authConfigured()) return true; // preview mode: read-only sample, writes refused in actions
       if (request.nextUrl.pathname.startsWith("/signin")) return true;
-      return !!s?.user;
+      return !!s?.user || (await isFamilyCookie(request.cookies.get(FAMILY_COOKIE)?.value));
     },
   },
 });
 
-/** Who is acting, or null. Server actions refuse to write without this. */
-export async function me(): Promise<{ email: string; role: PanelRole } | null> {
+/** Who is signed in, or null. Google sign-in wins; otherwise the family password cookie. */
+export async function me(): Promise<{ email: string; role: PanelRole; name: string } | null> {
   if (!authConfigured()) return null;
   const s = await auth();
   const email = s?.user?.email?.toLowerCase();
-  const role = email ? panelUsers().get(email) : undefined;
-  return email && role ? { email, role } : null;
+  const user = email ? panelUsers().get(email) : undefined;
+  if (email && user) return { email, ...user };
+  if (await isFamilyCookie((await cookies()).get(FAMILY_COOKIE)?.value)) return { email: "", role: "family", name: "Family" };
+  return null;
 }
 
-// ---------- Which view is on screen ----------
-
-export const VIEW_COOKIE = "mm_view";
-
-/**
- * The view being rendered, as distinct from who is signed in. Kyle can flip to Clara's
- * view to see exactly what she sees; preview mode (no sign-in) also shows Clara's view
- * by default. Clara always gets her own view. Writes never use this: server actions use me().
- */
-export async function viewer(): Promise<{ real: PanelRole | null; view: PanelRole; canSwitch: boolean }> {
+/** Who may write, or null. Server actions refuse without this; family is read-only. */
+export async function editor(): Promise<{ email: string; role: "mom" | "kyle"; name: string } | null> {
   const who = await me();
-  const real = who?.role ?? null;
-  if (real === "mom") return { real, view: "mom", canSwitch: false };
-  const pick = (await cookies()).get(VIEW_COOKIE)?.value;
-  const view: PanelRole = pick === "kyle" || pick === "mom" ? pick : real === "kyle" ? "kyle" : "mom";
-  return { real, view, canSwitch: true };
+  return who && who.role !== "family" ? { ...who, role: who.role } : null;
 }

@@ -7,6 +7,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { Readable } from "node:stream";
 import { Core, driveReader, driveWriter, headersOf, schema, sheetId, sheetsClient, writerIdentity } from "@mm/core";
+import { python } from "./lib/python";
 
 const run = promisify(execFile);
 let red = 0;
@@ -20,8 +21,8 @@ const has = (k: string) => !!process.env[k]?.trim();
 async function main() {
   section("Keys");
   const required = ["GOOGLE_SERVICE_ACCOUNT_JSON", "MM_CORE_SHEET_ID"];
-  const backend = ["ANTHROPIC_API_KEY", "KYLE_EMAIL"];
-  const optional = ["CLARA_EMAIL", "RESEND_API_KEY", "NOTIFY_FROM", "PANEL_URL", "GOOGLE_OWNER_REFRESH_TOKEN"];
+  const backend = ["KYLE_EMAIL"];
+  const optional = ["ANTHROPIC_API_KEY", "CLARA_EMAIL", "RESEND_API_KEY", "NOTIFY_FROM", "PANEL_URL", "GOOGLE_OWNER_REFRESH_TOKEN"];
   const panel = ["AUTH_GOOGLE_ID", "AUTH_GOOGLE_SECRET", "AUTH_SECRET", "PANEL_USERS"];
   for (const k of required) (has(k) ? ok(k) : bad(`${k} missing`, "add it to .env / GitHub secrets (see docs/SETUP.md)"));
   for (const k of backend) (has(k) ? ok(k) : warn(`${k} missing`, "needed by the backend in GitHub secrets"));
@@ -115,7 +116,7 @@ async function main() {
   }
 
   section("Claude QC");
-  if (!has("ANTHROPIC_API_KEY")) warn("skipped — no ANTHROPIC_API_KEY", "add it to run QC");
+  if (!has("ANTHROPIC_API_KEY")) console.log("  · manual QC (no ANTHROPIC_API_KEY): tasks wait at ready_for_qc for npm run qc");
   else {
     const model = core.config("qc_model") || "claude-sonnet-5-5";
     try {
@@ -128,8 +129,8 @@ async function main() {
 
   section("KDP preflight");
   try {
-    await run("python3", ["-I", "-c", "import pymupdf"]);
-    ok("python3 + PyMuPDF available");
+    await run(python, ["-I", "-c", "import pymupdf"]);
+    ok(`${python} + PyMuPDF available`);
   } catch {
     warn("PyMuPDF not installed here", "pip install -r apps/backend/preflight/requirements.txt (GitHub Actions installs it automatically)");
   }

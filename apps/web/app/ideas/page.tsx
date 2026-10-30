@@ -1,4 +1,5 @@
-import { viewer } from "@/auth";
+import { redirect } from "next/navigation";
+import { canSee, viewer } from "@/lib/viewer";
 import { MessageBox } from "@/components/MessageBox";
 import { MessageItem } from "@/components/Messages";
 import { ScoutCard } from "@/components/ScoutCard";
@@ -8,6 +9,7 @@ import { bookTitle, getSnapshot } from "@/lib/data";
 /** The idea pad: jot it, see where it went. House rules and Scout's finds live here too. */
 export default async function Ideas() {
   const [s, v] = await Promise.all([getSnapshot(), viewer()]);
+  if (!canSee(v.view, "/ideas")) redirect("/");
   const all = [...s.requests].reverse();
   const ideas = all.filter((r) => r.kind === "idea" || (r.kind === "note" && r.from === v.view));
   const rules = all.filter((r) => r.kind === "rule");
@@ -20,7 +22,7 @@ export default async function Ideas() {
       <MessageBox defaultKind="idea" kinds={["idea", "note", "rule"]} placeholder="A book, a character, a printable, anything…" rows={3} big />
       {scout.length > 0 && (
         <Card title="Ideas from the team">
-          <div className="flex flex-col gap-3">{scout.map((r) => <ScoutCard key={r.research_id} r={r} canWrite={!!v.real} />)}</div>
+          <div className="flex flex-col gap-3">{scout.map((r) => <ScoutCard key={r.research_id} r={r} canWrite={v.canWrite} />)}</div>
         </Card>
       )}
       <Card title="Your ideas">

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { viewer } from "@/auth";
+import { canSee, viewer } from "@/lib/viewer";
 import { MessageBox } from "@/components/MessageBox";
 import { MessageItem } from "@/components/Messages";
 import { Card, Empty, PageHeader, Stat } from "@/components/ui";
@@ -10,7 +10,7 @@ import { MOM_ITEM } from "@/lib/labels";
 /** Kyle's home: route Clara's notes, see what's stuck, what she still has waiting, spend. */
 export default async function Inbox() {
   const [s, v] = await Promise.all([getSnapshot(), viewer()]);
-  if (v.view !== "kyle") redirect("/ideas");
+  if (v.view !== "kyle") redirect("/");
   const all = [...s.requests].reverse();
   const forMe = all.filter((r) => r.to === "kyle" && !r.reply && !["done", "wont_do"].includes(r.status));
   const rest = all.filter((r) => !forMe.includes(r));

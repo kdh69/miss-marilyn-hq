@@ -176,6 +176,15 @@ phone). It replaces "Books is home" from section 1.
 - The Books shelf drops its "Needs you" strip (it lives on Overview and inside each book) and
   links back to Overview when something is waiting.
 
+## 13. Merged with main (family view, costs rule)
+
+Main gained a family role and a costs rule while this was being built. Both hold in this design:
+
+- **Family** (Google `:family` or the family password) sees Overview, Books and Progress, read-only:
+  no message boxes, no page editing, no ideas, to-do, inbox, system or money.
+- **Costs are Kyle's.** Clara's Money tab shows sales only; costs, profit and bot spend are on Kyle's.
+- Every write still goes through `editor()`; `viewer()` only decides what is shown.
+
 ## Rules kept
 
 - The panel still writes only `mom_queue` answers, `requests`, `pages.text_final*`, photos, and

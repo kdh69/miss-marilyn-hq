@@ -7,15 +7,18 @@
 import { revalidateTag } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { Core, nowIso, startResumableUpload } from "@mm/core";
-import { me, VIEW_COOKIE, type PanelRole } from "@/auth";
+import { authConfigured, editor, me, type PanelRole } from "@/auth";
+import { redirect } from "next/navigation";
+import { PREVIEW_COOKIE } from "@/lib/viewer";
+import { FAMILY_COOKIE, FAMILY_MAX_AGE, checkFamilyPassword, familyToken } from "@/lib/family";
 
 type Result = { ok: boolean; error?: string };
-const NOT_SIGNED_IN: Result = { ok: false, error: "Sign-in isn't set up yet, so changes can't be saved." };
+const NOT_SIGNED_IN: Result = { ok: false, error: "This view is read-only, so changes can't be saved." };
 const refresh = () => revalidateTag("mm-core-snapshot");
 const stamp = () => nowIso().replace(/\D/g, "").slice(0, 14);
 
 export async function answerItem(itemId: string, answer: "Approve" | "Changes" | "Reject" | "Done", note = ""): Promise<Result> {
-  const who = await me();
+  const who = await editor();
   if (!who) return NOT_SIGNED_IN;
   if (answer === "Changes" && !note.trim()) return { ok: false, error: "Add a note saying what to change." };
   const core = await Core.load(["mom_queue"]);
@@ -25,8 +28,8 @@ export async function answerItem(itemId: string, answer: "Approve" | "Changes" |
 }
 
 /** A note, change, idea, rule or question — from Clara or Kyle, about the business, a book or a page. */
-export async function sendMessage(input: { kind: string; body: string; productId?: string; pageNumber?: string; to?: PanelRole | "orchestrator" }): Promise<Result> {
-  const who = await me();
+export async function sendMessage(input: { kind: string; body: string; productId?: string; pageNumber?: string; to?: "mom" | "kyle" | "orchestrator" }): Promise<Result> {
+  const who = await editor();
   if (!who) return NOT_SIGNED_IN;
   const body = input.body.trim();
   if (!body) return { ok: false, error: "Type a message first." };
@@ -43,7 +46,7 @@ export async function sendMessage(input: { kind: string; body: string; productId
 }
 
 export async function replyRequest(requestId: string, reply: string): Promise<Result> {
-  const who = await me();
+  const who = await editor();
   if (!who) return NOT_SIGNED_IN;
   if (!reply.trim()) return { ok: false, error: "Type a reply first." };
   const core = await Core.load(["requests"]);
@@ -65,7 +68,7 @@ export async function triageRequest(requestId: string, action: "forward" | "seen
 
 /** Clara's own words for a page. Stored apart from the AI draft, so the human rewrite is on record. */
 export async function savePageText(pageId: string, text: string): Promise<Result> {
-  const who = await me();
+  const who = await editor();
   if (!who) return NOT_SIGNED_IN;
   if (!text.trim()) return { ok: false, error: "Type some words first." };
   try {
@@ -85,7 +88,7 @@ const MAX_UPLOAD = 500 * 1024 * 1024;
 
 /** Step 1: get a one-time Drive upload URL; the browser sends the file straight to Google. */
 export async function startPhotoUpload(name: string, mimeType: string, size: number): Promise<Result & { uploadUrl?: string }> {
-  const who = await me();
+  const who = await editor();
   if (!who) return NOT_SIGNED_IN;
   if (!PHOTO_TYPES.test(mimeType)) return { ok: false, error: `${name}: only photos (JPG, PNG, HEIC) and videos (MP4, MOV)` };
   if (size > MAX_UPLOAD) return { ok: false, error: `${name} is over 500 MB` };
@@ -99,13 +102,17 @@ export async function startPhotoUpload(name: string, mimeType: string, size: num
     const uploadUrl = await startResumableUpload({ folderId, name: `${stamp()}_${who.role}_${safe}`, mimeType, size, origin });
     return { ok: true, uploadUrl };
   } catch (e) {
-    return { ok: false, error: `Upload couldn't start: ${String((e as Error).message).slice(0, 120)}` };
+    const m = String((e as Error).message);
+    if (/do not have storage/i.test(m)) {
+      return { ok: false, error: "Photo uploads aren't switched on yet (Kyle is finishing the Google Drive setup). For now, add photos in Drive: MM Brand → photos." };
+    }
+    return { ok: false, error: `Upload couldn't start: ${m.slice(0, 120)}` };
   }
 }
 
 /** Step 2: record the uploaded file as a photo/video asset (rights_source=photo). */
 export async function registerPhoto(fileId: string, name: string, mimeType: string, taskId = ""): Promise<Result> {
-  const who = await me();
+  const who = await editor();
   if (!who) return NOT_SIGNED_IN;
   const core = await Core.load(["assets"]);
   const n = core.rows("assets").filter((a) => a.asset_id.startsWith(`P-${stamp().slice(0, 8)}`)).length + 1;
@@ -121,15 +128,36 @@ export async function registerPhoto(fileId: string, name: string, mimeType: stri
   return { ok: true };
 }
 
-// ---------- Kyle-only controls ----------
+// ---------- Family view (shared password, read-only) ----------
 
-/** Flip the panel between Clara's view and Kyle's. Only changes what is shown; writes still use the signed-in identity. */
-export async function setView(view: PanelRole): Promise<Result> {
-  const who = await me();
-  if (who?.role === "mom") return { ok: false, error: "Clara always sees her own view." };
-  (await cookies()).set(VIEW_COOKIE, view === "kyle" ? "kyle" : "mom", { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+export async function familySignIn(form: FormData): Promise<void> {
+  const ok = await checkFamilyPassword(String(form.get("password") ?? ""));
+  if (!ok) {
+    await new Promise((r) => setTimeout(r, 800)); // slows guessing
+    redirect("/signin?family=wrong");
+  }
+  (await cookies()).set(FAMILY_COOKIE, await familyToken(), { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: FAMILY_MAX_AGE });
+  redirect("/");
+}
+
+export async function familySignOut(): Promise<void> {
+  (await cookies()).delete(FAMILY_COOKIE);
+  redirect("/signin");
+}
+
+// ---------- "Viewing as" (Kyle, and preview mode) ----------
+
+/**
+ * Flips whose view is shown: Clara's or Kyle's. Sets a cookie only; never touches the Sheet.
+ * Allowed in preview mode and for Kyle; writes still act as whoever is really signed in.
+ */
+export async function previewAs(role: PanelRole): Promise<Result> {
+  if (authConfigured() && (await me())?.role !== "kyle") return { ok: false, error: "Only Kyle can switch views." };
+  (await cookies()).set(PREVIEW_COOKIE, role === "kyle" ? "kyle" : "mom", { path: "/", sameSite: "lax", maxAge: 60 * 60 * 24 * 365 });
   return { ok: true };
 }
+
+// ---------- Kyle-only controls ----------
 
 export async function setSystemStatus(value: "RUN" | "HALT"): Promise<Result> {
   const who = await me();
@@ -141,9 +169,9 @@ export async function setSystemStatus(value: "RUN" | "HALT"): Promise<Result> {
   return { ok };
 }
 
-/** Kyle can update any account; Clara can update the ones she owns (status only). */
+/** Kyle can update any account; Clara can mark the ones she owns (status only). */
 export async function setAccountStatus(accountId: string, status: string, loginEmail?: string): Promise<Result> {
-  const who = await me();
+  const who = await editor();
   if (!who) return NOT_SIGNED_IN;
   const core = await Core.load(["accounts"]);
   const row = core.rows("accounts").find((a) => a.account_id === accountId);

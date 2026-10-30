@@ -7,7 +7,7 @@ import { btn } from "./ui";
 type Req = Record<string, string>;
 
 /** One message, with a reply box if it's to the person looking and Kyle's routing buttons. */
-export function MessageItem({ r, viewer, bookTitle, compact = false }: { r: Req; viewer: "mom" | "kyle" | null; bookTitle?: string; compact?: boolean }) {
+export function MessageItem({ r, viewer, bookTitle, compact = false }: { r: Req; viewer: "mom" | "kyle" | "family" | null; bookTitle?: string; compact?: boolean }) {
   const [reply, setReply] = useState("");
   const [msg, setMsg] = useState("");
   const [pending, start] = useTransition();

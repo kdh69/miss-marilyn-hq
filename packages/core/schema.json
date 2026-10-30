@@ -871,12 +871,12 @@
         ],
         [
           "qc_price_in_per_mtok",
-          3,
+          2,
           "USD per million input tokens for qc_model; verify against current pricing"
         ],
         [
           "qc_price_out_per_mtok",
-          15,
+          10,
           "USD per million output tokens for qc_model; verify against current pricing"
         ],
         [

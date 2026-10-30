@@ -6,7 +6,8 @@
   "scripts": {
     "run": "tsx --env-file-if-exists=../../.env src/run.ts",
     "doctor": "tsx --env-file-if-exists=../../.env src/doctor.ts",
-    "dryrun": "tsx --env-file-if-exists=../../.env src/dryrun.ts"
+    "dryrun": "tsx --env-file-if-exists=../../.env src/dryrun.ts",
+    "qc": "tsx --env-file-if-exists=../../.env src/qcManual.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

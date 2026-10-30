@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { viewer } from "@/auth";
+import { viewer } from "@/lib/viewer";
 import { BookWorkspace } from "@/components/BookWorkspace";
 import { MessageBox } from "@/components/MessageBox";
 import { MessageItem } from "@/components/Messages";
@@ -33,10 +33,10 @@ export default async function Book({ params, searchParams }: { params: Promise<{
       <NeedsYou items={items} viewer={v.view} showBook={false} />
 
       <Card title="Pages">
-        <BookWorkspace productId={id} startPage={startPage} pages={bookPages(s, id)} requests={requests} viewer={v.view} canEdit={!!v.real} technical={technical} />
+        <BookWorkspace productId={id} startPage={startPage} pages={bookPages(s, id)} requests={requests} viewer={v.view} canEdit={v.canWrite} technical={technical} />
       </Card>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {v.view !== "family" && <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <details className="glass group self-start rounded-3xl p-4 md:p-5">
             <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-[15px] font-semibold">
               <span>Talk to the team about this book{thread.length ? ` · ${thread.length}` : ""}</span>
@@ -57,7 +57,7 @@ export default async function Book({ params, searchParams }: { params: Promise<{
               <Table rows={s.listings.filter((l) => l.sku.startsWith(id)).map((l) => ({ ...l, channel: CHANNEL[l.channel] ?? l.channel }))} cols={[["channel", "Where"], ["status", "Status"], ["price", "Price"]]} empty="" />
             </Card>
           )}
-      </div>
+      </div>}
     </div>
   );
 }

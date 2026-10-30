@@ -14,7 +14,7 @@ const isHers = (p: Page) => !!p.text_final;
  * in big type, a save button that stays on screen. The AI draft sits under "Show the draft".
  */
 export function BookWorkspace({ productId, pages, requests, viewer, canEdit, technical = false, startPage }: {
-  productId: string; pages: Page[]; requests: Req[]; viewer: "mom" | "kyle" | null; canEdit: boolean; technical?: boolean; startPage?: string;
+  productId: string; pages: Page[]; requests: Req[]; viewer: "mom" | "kyle" | "family" | null; canEdit: boolean; technical?: boolean; startPage?: string;
 }) {
   const [i, setI] = useState(() => Math.max(0, pages.findIndex((p) => p.page_number === startPage)));
   const page = pages[i];
@@ -81,13 +81,13 @@ export function BookWorkspace({ productId, pages, requests, viewer, canEdit, tec
         <PageText key={page.page_id} page={page} canEdit={canEdit} />
       </div>
 
-      <details className="rounded-2xl bg-white/50 p-3">
+      {canEdit && <details className="rounded-2xl bg-white/50 p-3">
         <summary className="cursor-pointer text-sm font-semibold">Note on this page{requests.filter((r) => r.page_number === page.page_number).length ? ` · ${requests.filter((r) => r.page_number === page.page_number).length}` : ""}</summary>
         <div className="mt-3 flex flex-col gap-3">
           <MessageBox productId={productId} pageNumber={page.page_number} defaultKind="change" kinds={["change", "note", "question"]} placeholder="e.g. Papa should look happier here" />
           {requests.filter((r) => r.page_number === page.page_number).map((r) => <MessageItem key={r.request_id} r={r} viewer={viewer} compact />)}
         </div>
-      </details>
+      </details>}
     </div>
   );
 }
@@ -165,7 +165,7 @@ function PageText({ page, canEdit }: { page: Page; canEdit: boolean }) {
         rows={6} spellCheck
         className="w-full rounded-2xl border border-black/10 bg-white p-4 text-[17px] leading-relaxed outline-none focus:border-orange-400 disabled:opacity-70" />
       <div className="flex items-center justify-between gap-3">
-        <span className={`text-sm ${state === "error" ? "text-red-600" : "text-[var(--quiet)]"}`}>{canEdit ? status : "Preview only — sign in to write"}</span>
+        <span className={`text-sm ${state === "error" ? "text-red-600" : "text-[var(--quiet)]"}`}>{canEdit ? status : "View only"}</span>
         <span className="hidden md:block"><button disabled={!canEdit || !dirty || !text.trim() || state === "saving"} onClick={() => save(text)} className={btn.primary}>Save</button></span>
       </div>
       {page.text_draft && (

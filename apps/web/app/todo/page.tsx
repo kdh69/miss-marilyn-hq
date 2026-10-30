@@ -1,4 +1,5 @@
-import { viewer } from "@/auth";
+import { redirect } from "next/navigation";
+import { canSee, viewer } from "@/lib/viewer";
 import { AccountRow } from "@/components/AccountRow";
 import { TodoList } from "@/components/TodoList";
 import { Bar, Card, Empty, PageHeader } from "@/components/ui";
@@ -8,12 +9,13 @@ import { CHANNEL, SET_UP_NOW, when } from "@/lib/labels";
 /** Clara's list: what's waiting on her, this week's posts, and her accounts. */
 export default async function Todo() {
   const [s, v] = await Promise.all([getSnapshot(), viewer()]);
+  if (!canSee(v.view, "/todo")) redirect("/");
   const items = todoList(s, v.view);
   const weekEnd = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
   const posts = s.content.filter((c) => ["approved", "scheduled"].includes(c.status) && c.scheduled_for && c.scheduled_for.slice(0, 10) <= weekEnd).sort((a, b) => a.scheduled_for.localeCompare(b.scheduled_for));
   const accounts = s.accounts.filter((a) => a.status !== "not_needed");
   const done = accounts.filter((a) => a.status === "done").length;
-  const canEditMine = v.real === "mom" || v.real === "kyle";
+  const canEditMine = v.canWrite;
   const groups = [
     { label: "Set up now", rows: accounts.filter((a) => SET_UP_NOW.includes(a.phase)) },
     { label: "Later", rows: accounts.filter((a) => !SET_UP_NOW.includes(a.phase)) },
@@ -23,7 +25,7 @@ export default async function Todo() {
     <div className="flex flex-col gap-4">
       <PageHeader title="To-do" sub={items.length ? `${items.length} on your list.` : "Your list is clear."} />
       <Card title="On your list">
-        <TodoList items={items} canWrite={!!v.real} />
+        <TodoList items={items} canWrite={v.canWrite} />
       </Card>
       <Card title="This week's posts">
         {posts.length ? (

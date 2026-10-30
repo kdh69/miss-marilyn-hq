@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { viewer } from "@/auth";
+import { canSee, viewer } from "@/lib/viewer";
 import { AccountRow } from "@/components/AccountRow";
 import { PauseButton } from "@/components/PauseButton";
 import { Card, Empty, PageHeader } from "@/components/ui";
@@ -11,7 +11,7 @@ const PHASES: [string, string][] = [["now", "Set up now"], ["phase_0", "Business
 /** Kyle only: pause/resume, backend health, config, accounts. */
 export default async function System() {
   const [s, v] = await Promise.all([getSnapshot(), viewer()]);
-  if (v.view !== "kyle") redirect("/todo");
+  if (v.view !== "kyle") redirect("/");
   const halted = s.config.find((c) => c.key === "system_status")?.value === "HALT";
   const tick = lastTick(s);
   const spend = spendToday(s);

@@ -16,7 +16,7 @@ export type NeedsYouItem =
  * The "Needs you" strip: one row per thing waiting on the person looking, one button each.
  * Shown on the shelf (everything) and inside a book (just that book's).
  */
-export function NeedsYou({ items, viewer, titles = {}, showBook = true }: { items: NeedsYouItem[]; viewer: "mom" | "kyle"; titles?: Record<string, string>; showBook?: boolean }) {
+export function NeedsYou({ items, viewer, titles = {}, showBook = true }: { items: NeedsYouItem[]; viewer: "mom" | "kyle" | "family"; titles?: Record<string, string>; showBook?: boolean }) {
   if (!items.length) return null;
   return (
     <section className="rounded-3xl border border-orange-200 bg-orange-50/70 p-4 md:p-5">

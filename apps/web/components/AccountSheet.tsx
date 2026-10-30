@@ -4,23 +4,24 @@ import { createPortal } from "react-dom";
 import { ViewToggle } from "./ViewToggle";
 
 /** Phone header button: who's signed in, the Clara/Kyle switch (Kyle only), sign out. */
-export function AccountSheet({ name, view, canSwitch, preview, signOut }: {
-  name: string; view: "mom" | "kyle"; canSwitch: boolean; preview: boolean; signOut?: () => Promise<void>;
+export function AccountSheet({ name, view, canSwitch, preview, family = false, signOut }: {
+  name: string; view: "mom" | "kyle"; canSwitch: boolean; preview: boolean; family?: boolean; signOut?: () => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  useEffect(() => setOpen(false), [view]); // switching views closes the sheet
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} aria-label="Account"
         className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-sm font-semibold text-white">
-        {name.slice(0, 1)}
+        {(name || "?").slice(0, 1).toUpperCase()}
       </button>
       {/* Portal to <body> so the sheet sits above the tab bar, not inside the header's layer. */}
       {open && mounted && createPortal(
         <div className="fixed inset-0 z-[60] flex items-end bg-black/40 md:hidden" onClick={() => setOpen(false)}>
           <div role="dialog" aria-label="Account" className="w-full rounded-t-3xl bg-white p-5 pb-[max(2rem,env(safe-area-inset-bottom))] shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <p className="font-semibold">{preview ? `Preview of ${name}'s view` : `Signed in as ${name}`}</p>
+            <p className="font-semibold">{preview ? `Preview of ${name}'s view` : `Signed in as ${name}${family ? " (view only)" : ""}`}</p>
             {preview && <p className="text-sm text-[var(--quiet)]">Sign-in isn't set up yet, so nothing saves.</p>}
             {canSwitch && <ViewToggle view={view} />}
             {signOut && !preview && (

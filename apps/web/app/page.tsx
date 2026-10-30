@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { viewer } from "@/auth";
+import { viewer, viewerName } from "@/lib/viewer";
 import { MessageBox } from "@/components/MessageBox";
 import { NeedsYou } from "@/components/NeedsYou";
 import { PhotoUpload } from "@/components/PhotoUpload";
@@ -12,8 +12,9 @@ const usd = (n: number) => `${n < 0 ? "-" : ""}$${Math.abs(n).toFixed(2)}`;
 
 /** Overview: the first screen. What needs you, where everything is, one tap to keep going. */
 export default async function Overview() {
-  const [s, v] = await Promise.all([getSnapshot(), viewer()]);
+  const [s, v, name] = await Promise.all([getSnapshot(), viewer(), viewerName()]);
   const kyle = v.view === "kyle";
+  const family = v.view === "family";
   const items = needsYou(s, v.view);
   const titles = Object.fromEntries(s.products.map((p) => [p.product_id, p.title]));
   const books = s.products.filter((p) => p.status !== "retired");
@@ -35,8 +36,8 @@ export default async function Overview() {
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
-        title={`${greeting()}, ${kyle ? "Kyle" : "Clara"}`}
-        sub={kyle
+        title={`${greeting()}${name ? `, ${name}` : ""}`}
+        sub={family ? "Here's how the books are coming along." : kyle
           ? `${toRoute.length} to route · ${stuck.length} stuck · ${onClara} waiting on Clara · bots ${halted ? "paused" : "running"}`
           : count ? `${count} thing${count > 1 ? "s" : ""} need${count > 1 ? "" : "s"} you. Everything else is moving.` : "Nothing needs you right now. The team is working."}
       />
@@ -48,16 +49,20 @@ export default async function Overview() {
         { label: "Waiting on Clara", short: "On Clara", value: String(onClara) },
         { label: "Bots today", short: "Bots today", value: usd(spend.bots) },
       ] : [
-        { label: "Waiting on you", short: "Need you", value: String(items.length), tone: "accent" },
+        family
+          ? { label: "Pages written", short: "Pages", value: String(pagesTotal.filter((p) => p.text_final || p.text_draft).length), tone: "accent" }
+          : { label: "Waiting on you", short: "Need you", value: String(items.length), tone: "accent" },
         { label: "Books in the works", short: "Books going", value: String(inWorks) },
         { label: "Pages in your words", short: "Your pages", value: `${pagesYours}/${pagesTotal.length}`, tone: "accent-2" },
-        { label: "Sales so far", short: "Sales", value: usd(sales) },
+        family
+          ? { label: "Tasks finished", short: "Tasks done", value: String(s.tasks.filter((t) => t.status === "done").length) }
+          : { label: "Sales so far", short: "Sales", value: usd(sales) },
       ]} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
         {/* Left: what to do */}
-        <div className="flex flex-col gap-4 lg:col-span-3">
-          {!kyle && write[0] && (
+        {!family && <div className="flex flex-col gap-4 lg:col-span-3">
+          {v.view === "mom" && write[0] && (
             <Link href={`/books/${write[0].productId}?page=${write[0].page}`} className="glass flex items-center gap-4 rounded-3xl p-4 transition hover:bg-white/70 md:p-5">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-500 text-xl text-white" aria-hidden>✎</span>
               <span className="min-w-0 flex-1">
@@ -82,10 +87,10 @@ export default async function Overview() {
               <PhotoUpload />
             </Card>
           )}
-        </div>
+        </div>}
 
         {/* Right: where things are */}
-        <div className="flex flex-col gap-4 lg:col-span-2">
+        <div className={`flex flex-col gap-4 ${family ? "lg:col-span-5" : "lg:col-span-2"}`}>
           <Card title="Books" action={<Link href="/progress" className="text-sm text-orange-700 underline">Progress</Link>}>
             <div className="flex flex-col gap-4">
               {books.map((p) => {
@@ -94,7 +99,7 @@ export default async function Overview() {
                   <Link key={p.product_id} href={`/books/${p.product_id}`} className="block">
                     <p className="font-semibold">{p.title}</p>
                     <div className="my-2"><StageTrack index={st.index} /></div>
-                    <p className="text-sm text-[var(--quiet)]">{st.now}{st.waiting ? <span className="text-orange-700"> · On you: {st.waiting}</span> : ""}</p>
+                    <p className="text-sm text-[var(--quiet)]">{st.now}{st.waiting && !family ? <span className="text-orange-700"> · {kyle ? "On Clara" : "On you"}: {st.waiting}</span> : ""}</p>
                   </Link>
                 );
               })}
@@ -102,7 +107,7 @@ export default async function Overview() {
             </div>
           </Card>
 
-          <Card title="Coming up" action={<Link href={kyle ? "/inbox" : "/todo"} className="text-sm text-orange-700 underline">{kyle ? "Inbox" : "To-do"}</Link>}>
+          {!family && <Card title="Coming up" action={<Link href={kyle ? "/inbox" : "/todo"} className="text-sm text-orange-700 underline">{kyle ? "Inbox" : "To-do"}</Link>}>
             {comingUp.length ? (
               <ul className="flex flex-col divide-y divide-black/5">
                 {comingUp.map((t) => (
@@ -110,7 +115,7 @@ export default async function Overview() {
                 ))}
               </ul>
             ) : <Empty>Nothing else on the list.</Empty>}
-          </Card>
+          </Card>}
 
           {kyle ? (
             <Card title="Latest activity">

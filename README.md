@@ -5,6 +5,7 @@ Grok bots and Claude QC write into it; a backend runs every 30 minutes on GitHub
 works from her own panel (Next.js on Vercel).
 
 - Design: [Phase 1 Build Spec](https://claude.ai/artifact/SK5iZFL8TkRLKDzAwv5ihP) · panel redesign: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md)
+- **Picking this up? Start with [`docs/HANDOFF.md`](docs/HANDOFF.md)** — what is done and what is outstanding.
 - Setup, in order: [`docs/SETUP.md`](docs/SETUP.md) · live checklist: [Launch Checklist](https://claude.ai/artifact/FzUU8wZjrWifR9sv6Ejrpy)
 - Accounts: [`docs/ACCOUNTS.md`](docs/ACCOUNTS.md) · bot prompts: [`docs/bot-prompts.md`](docs/bot-prompts.md)
 - Brand drafts for MM Brand: [`docs/brand/`](docs/brand/)
@@ -41,8 +42,9 @@ Folder IDs live in the Sheet's `config` tab.
 
 ## How Clara works in the panel
 
-Six tabs on the phone's bottom bar and the desktop sidebar. Kyle sees his own six, and can flip
-to Clara's view with the *Viewing as* switch (it only changes what is shown; writes stay his).
+Tabs on the phone's bottom bar and the desktop sidebar: five for Clara, six for Kyle, three for
+family (read-only). Kyle can flip to Clara's view with the *Viewing as* switch (it only changes
+what is shown; writes stay his).
 Plan and rationale: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md).
 
 - **Overview** (home): greeting, headline numbers, *Keep writing* (straight to her next page
@@ -58,7 +60,7 @@ Plan and rationale: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md).
   a *Let's make this* button.
 - **To-do:** everything waiting on her in date order, this week's posts, and her accounts and
   socials (she can mark her own accounts done).
-- **Money:** sales, costs, profit, by book.
+- **Money:** sales by book. Costs and profit are Kyle's only.
 - **Kyle — Overview:** what to route, what's stuck, what's on Clara, bot spend, books, latest
   activity. **Inbox:** Clara's notes to route (*Send to bots*, *I handled it*, *Not doing*), stuck
   tasks, what's waiting on Clara, bot spend. **System:** pause/resume, last tick, config, accounts.

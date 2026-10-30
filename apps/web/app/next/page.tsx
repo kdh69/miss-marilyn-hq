@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import { viewer } from "@/auth";
+import { viewer } from "@/lib/viewer";
 
 /** Moved: this lives under the new tabs now. */
 export default async function Moved() {
   const v = await viewer();
-  redirect(v.view === "kyle" ? "/progress" : "/todo");
+  redirect(v.view === "family" ? "/" : v.view === "kyle" ? "/progress" : "/todo");
 }

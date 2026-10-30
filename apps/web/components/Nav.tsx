@@ -4,8 +4,9 @@ import { usePathname } from "next/navigation";
 
 type Tab = { href: string; label: string; icon: keyof typeof ICON };
 
-/** Six tabs each: Overview first, then in the order each person needs them. */
-export const TABS: Record<"mom" | "kyle", Tab[]> = {
+/** Each view's tabs: Overview first, then in the order that person needs them. */
+export type View = "mom" | "kyle" | "family";
+export const TABS: Record<View, Tab[]> = {
   mom: [
     { href: "/", label: "Overview", icon: "home" },
     { href: "/books", label: "Books", icon: "book" },
@@ -21,6 +22,11 @@ export const TABS: Record<"mom" | "kyle", Tab[]> = {
     { href: "/inbox", label: "Inbox", icon: "inbox" },
     { href: "/system", label: "System", icon: "gear" },
     { href: "/money", label: "Money", icon: "coin" },
+  ],
+  family: [
+    { href: "/", label: "Overview", icon: "home" },
+    { href: "/books", label: "Books", icon: "book" },
+    { href: "/progress", label: "Progress", icon: "track" },
   ],
 };
 
@@ -46,7 +52,7 @@ function Icon({ name, className = "" }: { name: keyof typeof ICON; className?: s
 const useActive = () => { const path = usePathname(); return (href: string) => href === "/" ? path === "/" : path === href || path.startsWith(href + "/"); };
 
 /** Desktop sidebar links. */
-export function SideNav({ view }: { view: "mom" | "kyle" }) {
+export function SideNav({ view }: { view: View }) {
   const isActive = useActive();
   const tabs = TABS[view];
   return (
@@ -63,7 +69,7 @@ export function SideNav({ view }: { view: "mom" | "kyle" }) {
 }
 
 /** Phone bottom tab bar. Rendered outside the sidebar so it's never hidden with it. */
-export function TabBar({ view }: { view: "mom" | "kyle" }) {
+export function TabBar({ view }: { view: View }) {
   const isActive = useActive();
   const tabs = TABS[view];
   return (
