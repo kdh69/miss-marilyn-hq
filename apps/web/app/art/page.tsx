@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { Art } from "@/components/BookWorkspace";
 import { Approval } from "@/components/NeedsYou";
-import { ArtTabs } from "@/components/ArtTabs";
+import { PageTabs } from "@/components/PageTabs";
 import { StepShell, pickBook } from "@/components/StepShell";
 import { Bar, Card, Empty, Pill } from "@/components/ui";
-import { bookPages, driveId, getSnapshot, latestAsset, pictureApprovals, stepAsk, stepTask } from "@/lib/data";
+import { bookPages, driveId, getSnapshot, latestAsset, pageApprovals, stepAsk, stepTask } from "@/lib/data";
 import { bookNumber } from "@/lib/labels";
 import { canSee, viewer } from "@/lib/viewer";
 
@@ -43,7 +43,7 @@ export default async function Illustrations({ searchParams }: { searchParams: Pr
         {ask && <div className="mt-3"><Approval item={ask} labels={{ yes: "Approve the cover", changes: "Ask for changes" }} /></div>}
       </Card>
 
-      {pages.length ? <ArtTabs productId={id} pages={pages} approved={pictureApprovals(s, id)} notes={notes} canWrite={v.canWrite} /> : <Card><Empty>No pages yet.</Empty></Card>}
+      {pages.length ? <PageTabs mode="art" productId={id} pages={pages} approved={pageApprovals(s, id, "picture")} notes={notes} canWrite={v.canWrite} /> : <Card><Empty>No pages yet.</Empty></Card>}
     </StepShell>
   );
 }

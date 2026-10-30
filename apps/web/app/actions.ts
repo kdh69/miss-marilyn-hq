@@ -67,10 +67,11 @@ export async function triageRequest(requestId: string, action: "forward" | "seen
 }
 
 /**
- * Clara OKs the picture on a page. Recorded as a done note in `requests` (nothing for the team to
- * do), so the panel can show it as approved; a newer picture on that page clears it.
+ * Clara OKs a page's picture (Illustrations) or its finished layout (Building). Recorded as a done
+ * note in `requests` (nothing for the team to do), so the panel can show it as approved; a newer
+ * picture, newer words or a newer layout file on that page clears it.
  */
-export async function approvePicture(productId: string, pageNumber: string): Promise<Result> {
+export async function approvePage(productId: string, pageNumber: string, what: "picture" | "layout"): Promise<Result> {
   const who = await editor();
   if (!who) return NOT_SIGNED_IN;
   try {
@@ -79,7 +80,7 @@ export async function approvePicture(productId: string, pageNumber: string): Pro
     await core.append("requests", [{
       request_id: `Q-${stamp()}-${Math.floor(Math.random() * 90 + 10)}`,
       created_at: now, from: who.role, to: "orchestrator", product_id: productId, page_number: pageNumber,
-      kind: "note", body: `Picture approved for page ${pageNumber}.`, status: "done", updated_at: now, updated_by: who.role,
+      kind: "note", body: `${what === "layout" ? "Layout" : "Picture"} approved for page ${pageNumber}.`, status: "done", updated_at: now, updated_by: who.role,
     }]);
     refresh();
     return { ok: true };

@@ -205,21 +205,24 @@ export function upNext(s: Snapshot) {
   });
 }
 
-export const PICTURE_OK = "Picture approved for page";
+const APPROVED: Record<"picture" | "layout", string> = { picture: "Picture approved for page", layout: "Layout approved for page" };
 
 /**
- * Pages whose current picture Clara approved. An approval is a done note in `requests`
- * ("Picture approved for page 3."); a newer picture on that page clears it, so she always signs
- * off on the art that's there now.
+ * Pages Clara approved, per kind: the picture (Illustrations) or the finished page (Building).
+ * An approval is a done note in `requests` ("Layout approved for page 3."). It only counts if it's
+ * newer than what it approved: the picture for a picture; the picture, her words and the latest
+ * interior PDF for a layout — so she always signs off on what's there now.
  */
-export function pictureApprovals(s: Snapshot, productId: string): Record<string, string> {
+export function pageApprovals(s: Snapshot, productId: string, what: "picture" | "layout"): Record<string, string> {
   const pages = new Map(bookPages(s, productId).map((p) => [p.page_number, p]));
+  const layoutAt = what === "layout" ? latestAsset(s, productId, ["interior_pdf"])?.created_at ?? "" : "";
   const out: Record<string, string> = {};
   for (const r of s.requests) {
-    if (r.product_id !== productId || !r.page_number || !r.body.startsWith(PICTURE_OK)) continue;
+    if (r.product_id !== productId || !r.page_number || !r.body.startsWith(APPROVED[what])) continue;
     const p = pages.get(r.page_number);
     if (!p?.art_id) continue;
-    if (p.art_at && r.created_at < p.art_at) continue; // approved an older picture
+    const since = [p.art_at, what === "layout" ? p.text_final_at : "", layoutAt].filter(Boolean).sort().pop() ?? "";
+    if (since && r.created_at < since) continue;
     if (!out[r.page_number] || r.created_at > out[r.page_number]) out[r.page_number] = r.created_at;
   }
   return out;

@@ -216,6 +216,12 @@ Clara's panel now follows how a book actually gets made. Her tabs are the steps:
   approval is a done note in `requests` ("Picture approved for page 3."), so it needs no new column
   and gives the team no work; a newer picture on that page clears it. A change request goes to the
   team as "Picture change for page 3: …". Sample mode shows placeholder pictures for Ollie pages 1–8.
+- **Building, same treatment:** book number and cover at the top, the layout approval, then *Page
+  by page* (each page as it will print: the picture with her words set beneath it, draft-only words
+  flagged because they won't print; *Approve page* or *Ask for a layout change*; approved pages fold
+  to a thin "✓ Approved" line) and *Whole book* (every finished page at once). A page's layout
+  approval ("Layout approved for page 3.") clears if its picture, her words or the interior PDF
+  change after it. Illustrations and Building share one component (`PageTabs`, picture or layout mode).
 - **Illustrations:** pages drawn so far, the cover, and the cover approval. Tap a page to look
   closer or ask for a change.
 - **Building** and **Full book review** use the book page view (picture + her words, page by

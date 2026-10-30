@@ -118,6 +118,7 @@ export function sample(): Snapshot {
       { request_id: "Q-04", created_at: ago(50), from: "mom", to: "orchestrator", kind: "rule", body: "Miss M's collar is always red, in every book.", status: "done", reply: "Got it — added to the series bible.", reply_by: "orchestrator" },
       { request_id: "Q-05", created_at: ago(70), from: "orchestrator", to: "mom", product_id: "OL-B01", kind: "question", body: "Should Grandpa Otter wear glasses?", status: "done", reply: "Yes! Little round ones.", reply_by: "mom" },
       { request_id: "Q-06", created_at: ago(10), from: "mom", to: "orchestrator", product_id: "OL-B01", page_number: "1", kind: "note", body: "Picture approved for page 1.", status: "done", reply: "" },
+      { request_id: "Q-07", created_at: ago(4), from: "mom", to: "orchestrator", product_id: "OL-B01", page_number: "1", kind: "note", body: "Layout approved for page 1.", status: "done", reply: "" },
     ]),
     research: rows([
       { research_id: "R-01", date: day(), topic: "Sibling printables", research_type: "trend", finding: "Searches for new-sibling activity pages are rising this month.", numbers: "+38% in 30 days", confidence: "med", suggested_action: "A Big Sibling activity pack to sell next to the Ollie book", status: "new" },
