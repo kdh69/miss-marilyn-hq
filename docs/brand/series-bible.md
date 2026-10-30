@@ -187,6 +187,17 @@ friendly, and any animal **except** a cat or a dog (so the family stays visually
 Give each one a plain name a child can say (Pip, Lulu, Benny). No side character returns unless
 the Orchestrator's brief says so.
 
+**Exception — Gussie (Book 1, MM-B02), a dog at Clara's request.** Based on a real dog; reference
+photos are in MM Brand → photos → inbox (`gussie-*`).
+- **Looks:** a young, lean black-and-tan dog. Short, shiny black coat; tan eyebrow dots, tan
+  cheeks and muzzle, tan chest and lower legs (the legs a little brindled). Long slim muzzle,
+  dark nose, warm brown eyes, soft ears that fold over and flop forward. In the book, drawn as a
+  pup (Miss M's size).
+- **Personality:** shy and a little sad at first, sitting off to the side; warms up fast once
+  someone says hello, and laughs easily after that.
+- **Keep him distinct from Zoey** (the family's dog): different colours, shape and collar, so a
+  child never mixes them up. If Zoey's reference photos are close, ask Clara before drawing either.
+
 ## 7. World and setting
 
 - **Home:** a cozy house with a big sunny window seat (Miss M's favourite spot, *draft*), a

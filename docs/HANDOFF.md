@@ -54,7 +54,7 @@ Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing
 - **Book 1 = MM-B02 "Miss Marilyn Makes a Friend"**, Clara's playground story, `in_production`, P1.
   Kyle's brief for the Orchestrator (her story plus the corrections) is the `kyle → orchestrator` idea
   in `requests`; the Orchestrator turns it into book_plan → story_draft → character sheets → art.
-  Open question for Clara: what animal Gussie is.
+  Gussie is a dog (black-and-tan, photos in MM Brand → photos → inbox); the bible has his entry.
 - **Book 2 = MM-B01 "Flies to See Her Grandparents"**, `paused`, `series_no` 2. Every open task is
   `blocked` with "Book paused"; QC skips paused books. Its 32-page draft gets cut to 24 when it resumes.
   The Miss M / Mama / Papa character sheets in T-0012 carry over into Book 1.
@@ -90,7 +90,6 @@ and `dryrun` on Actions, connected Vercel to GitHub, passed the QC results back 
 - **Pick the author name** (pen name or real name). It blocks Book 1's KDP packet.
 - **Rewrite each page in her own words** in the panel's **Script** step (the whole script, page by page), then approve it. Builder prints only her words
   (`text_final`). Book 1's pages come once the Producer drafts them.
-- **Tell us what Gussie is** (what animal, real pet or not) before his art.
 - **Miss M material:** 15–20 photos and 2–3 videos; Zoey's photos and description; the rescue story and
   dedication for the "Meet the Real Miss Marilyn" page.
 - **Business setup:** LLC + EIN, business bank account and card, brand domain; then KDP, Etsy,
