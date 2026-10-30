@@ -27,6 +27,9 @@ export default async function System() {
           <dt className="text-[var(--quiet)]">Status</dt><dd>{halted ? "HALT" : "RUN"}</dd>
         </dl>
       </Card>
+      <Card title="Backend notes">
+        <Table rows={[...s.log].reverse().filter((l) => l.actor === "backend").slice(0, 10)} cols={[["ts", "When"], ["message", "Note"], ["task_id", "Task"], ["to_status", "Now"]]} empty="No backend notes yet." />
+      </Card>
       <Card title="Config">
         <Table rows={s.config} cols={[["key", "Key"], ["value", "Value"], ["note", "Note"]]} empty="No config rows." />
       </Card>

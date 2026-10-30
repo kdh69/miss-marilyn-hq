@@ -19,15 +19,23 @@ export function Card({ title, children, className = "", action, id }: { title?: 
 /** Page title row: back link, title, one line under it, one primary action on the right. */
 export function PageHeader({ title, sub, back, action, eyebrow }: { title: string; sub?: ReactNode; back?: { href: string; label: string }; action?: ReactNode; eyebrow?: string }) {
   return (
+    <>
+    {back && (
+      <div className="topbar sticky top-[var(--topbar-h)] z-30 -mx-4 -mt-4 mb-1 flex min-h-11 items-center gap-3 border-b border-black/5 px-4 backdrop-blur md:hidden">
+        <Link href={back.href} className="flex min-h-11 items-center text-[15px] text-orange-700">← {back.label}</Link>
+        <span className="min-w-0 truncate text-sm font-semibold">{title}</span>
+      </div>
+    )}
     <header className="flex flex-col gap-3 px-1 pb-1 pt-1 sm:flex-row sm:items-end sm:justify-between md:pt-0">
       <div className="min-w-0">
-        {back && <Link href={back.href} className="text-sm text-[var(--quiet)]">← {back.label}</Link>}
+        {back && <Link href={back.href} className="hidden text-sm text-[var(--quiet)] md:inline">← {back.label}</Link>}
         {eyebrow && <p className="text-xs text-[var(--quiet)]">{eyebrow}</p>}
         <h1 className="text-2xl font-semibold">{title}</h1>
         {sub && <p className="mt-0.5 text-[15px] text-[var(--quiet)]">{sub}</p>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </header>
+    </>
   );
 }
 

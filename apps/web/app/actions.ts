@@ -67,10 +67,15 @@ export async function triageRequest(requestId: string, action: "forward" | "seen
 export async function savePageText(pageId: string, text: string): Promise<Result> {
   const who = await me();
   if (!who) return NOT_SIGNED_IN;
-  const core = await Core.load(["pages"]);
-  const ok = await core.update("pages", pageId, { text_final: text.trim(), text_final_by: who.role, text_final_at: nowIso() }, who.role);
-  refresh();
-  return ok ? { ok } : { ok, error: "A bot just updated this page — refresh to see it, then save again." };
+  if (!text.trim()) return { ok: false, error: "Type some words first." };
+  try {
+    const core = await Core.load(["pages"]);
+    const ok = await core.update("pages", pageId, { text_final: text.trim(), text_final_by: who.role, text_final_at: nowIso() }, who.role);
+    refresh();
+    return ok ? { ok } : { ok, error: "A bot just updated this page — refresh to see it, then save again." };
+  } catch {
+    return { ok: false, error: "Couldn't reach the Sheet. Your words are still here — tap Save again in a minute." };
+  }
 }
 
 // ---------- Photos & videos (Clara → MM Brand/photos/inbox) ----------

@@ -37,12 +37,16 @@ export default async function Book({ params }: { params: Promise<{ id: string }>
       </Card>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <Card title="About this book">
-            <div className="flex flex-col gap-3">
+          <details className="glass group self-start rounded-3xl p-4 md:p-5">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-[15px] font-semibold">
+              <span>Talk to the team about this book{thread.length ? ` · ${thread.length}` : ""}</span>
+              <span className="text-[var(--quiet)] transition group-open:rotate-90">›</span>
+            </summary>
+            <div className="mt-3 flex flex-col gap-3">
               <MessageBox productId={id} placeholder="Ideas, changes, anything about this book…" />
               {thread.length ? thread.map((r) => <MessageItem key={r.request_id} r={r} viewer={v.view} compact />) : <p className="text-sm text-[var(--quiet)]">No messages yet.</p>}
             </div>
-          </Card>
+          </details>
           {technical && (
             <Card title="Tasks">
               <Table rows={s.tasks.filter((t) => t.product_id === id)} cols={[["task_id", "ID"], ["task_type", "Type"], ["owner", "Owner"], ["status", "Status"], ["due_date", "Due"]]} empty="No tasks." />

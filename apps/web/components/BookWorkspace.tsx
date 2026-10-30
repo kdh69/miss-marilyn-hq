@@ -20,6 +20,8 @@ export function BookWorkspace({ productId, pages, requests, viewer, canEdit, tec
   const page = pages[i];
   const yours = pages.filter(isHers).length;
   const stripRef = useRef<HTMLDivElement>(null);
+  const touch = useRef<{ x: number; y: number } | null>(null);
+  const go = (d: number) => setI((x) => Math.min(pages.length - 1, Math.max(0, x + d)));
 
   // Keep the chosen thumbnail in view; arrow keys move between pages when not typing.
   useEffect(() => {
@@ -42,11 +44,11 @@ export function BookWorkspace({ productId, pages, requests, viewer, canEdit, tec
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-[var(--quiet)]">{yours} of {pages.length} pages in your words</p>
+        <p className="text-sm text-[var(--quiet)]">{yours} of {pages.length} pages in your words<span className="hidden md:inline"> · ← → to turn pages</span></p>
         <div className="flex items-center gap-1">
-          <button onClick={() => setI((x) => Math.max(0, x - 1))} disabled={i === 0} aria-label="Previous page" className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-lg disabled:opacity-30">‹</button>
+          <button onClick={() => go(-1)} disabled={i === 0} aria-label="Previous page" className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-lg disabled:opacity-30">‹</button>
           <span className="min-w-[88px] text-center text-sm font-semibold">Page {page.page_number} of {pages.length}</span>
-          <button onClick={() => setI((x) => Math.min(pages.length - 1, x + 1))} disabled={i === pages.length - 1} aria-label="Next page" className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-lg disabled:opacity-30">›</button>
+          <button onClick={() => go(1)} disabled={i === pages.length - 1} aria-label="Next page" className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-lg disabled:opacity-30">›</button>
         </div>
       </div>
 
@@ -64,7 +66,15 @@ export function BookWorkspace({ productId, pages, requests, viewer, canEdit, tec
 
       {/* The page */}
       <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,340px)_1fr]">
-        <div>
+        {/* Swipe the art left/right to change page on a phone. */}
+        <div
+          onTouchStart={(e) => { touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
+          onTouchEnd={(e) => {
+            const t = touch.current; touch.current = null;
+            if (!t) return;
+            const dx = e.changedTouches[0].clientX - t.x, dy = e.changedTouches[0].clientY - t.y;
+            if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
+          }}>
           <Art id={page.art_id} brief={page.art_brief} large />
           {technical && <p className="mt-2 text-xs text-[var(--quiet)]">{page.page_id} · art {page.art_asset_id || "—"} · {page.characters}</p>}
         </div>
@@ -102,18 +112,41 @@ function PageText({ page, canEdit }: { page: Page; canEdit: boolean }) {
   const [err, setErr] = useState("");
   const [, start] = useTransition();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const dirty = text.trim() !== savedText.trim();
+  // Only her own edits count. The AI draft sitting in the box is never saved as her words on its own.
+  const [touched, setTouched] = useState(false);
+  const dirty = touched && text.trim() !== savedText.trim();
   const hers = !!savedText;
+  // Latest values for the unmount flush (switching pages must never drop her words).
+  const latest = useRef({ text, savedText, sending: "", touched });
+  latest.current.text = text;
+  latest.current.touched = touched;
+  latest.current.savedText = savedText;
 
   const save = useCallback((value: string) => {
-    if (!canEdit || !value.trim() || value.trim() === savedText.trim()) return;
+    if (!canEdit || !latest.current.touched || !value.trim() || value.trim() === savedText.trim() || value === latest.current.sending) return;
+    latest.current.sending = value;
     setState("saving");
     start(async () => {
-      const r = await savePageText(page.page_id, value);
+      const r = await savePageText(page.page_id, value).catch(() => ({ ok: false, error: "Couldn't reach the panel. Your words are still here — tap Save again in a minute." } as { ok: boolean; error?: string }));
+      latest.current.sending = "";
       if (r.ok) { setSavedText(value); setState("saved"); }
       else { setErr(r.error ?? "Didn't save"); setState("error"); }
     });
   }, [canEdit, page.page_id, savedText]);
+
+  // Leaving this page (another page, another tab): save what's typed.
+  useEffect(() => () => {
+    const { text: t, savedText: saved, sending, touched: edited } = latest.current;
+    if (canEdit && edited && t.trim() && t.trim() !== saved.trim() && t !== sending) void savePageText(page.page_id, t);
+  }, [canEdit, page.page_id]);
+
+  // Closing the browser tab with unsaved words: ask first.
+  useEffect(() => {
+    if (!dirty || !canEdit) return;
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty, canEdit]);
 
   // Autosave after a pause in typing.
   useEffect(() => {
@@ -123,12 +156,12 @@ function PageText({ page, canEdit }: { page: Page; canEdit: boolean }) {
     return () => { if (timer.current) clearTimeout(timer.current); };
   }, [text, dirty, canEdit, save]);
 
-  const status = state === "saving" ? "Saving…" : state === "error" ? err : dirty ? "Not saved yet" : hers ? "Saved · these are your words" : "";
+  const status = state === "saving" ? "Saving…" : state === "error" ? err : dirty ? "Not saved yet" : hers ? "Saved · these are your words" : "Change anything and it saves as your words";
 
   return (
     <div className="flex flex-col gap-2">
       <p className="text-sm font-semibold">{hers ? "Your words" : "The draft — make it yours"}</p>
-      <textarea value={text} onChange={(e) => setText(e.target.value)} onBlur={() => dirty && save(text)} disabled={!canEdit}
+      <textarea value={text} onChange={(e) => { setText(e.target.value); setTouched(true); }} onBlur={() => dirty && save(text)} disabled={!canEdit}
         rows={6} spellCheck
         className="w-full rounded-2xl border border-black/10 bg-white p-4 text-[17px] leading-relaxed outline-none focus:border-orange-400 disabled:opacity-70" />
       <div className="flex items-center justify-between gap-3">
@@ -139,7 +172,7 @@ function PageText({ page, canEdit }: { page: Page; canEdit: boolean }) {
         <details className="text-sm text-[var(--quiet)]">
           <summary className="cursor-pointer">Show the AI draft</summary>
           <p className="mt-2 rounded-xl bg-black/5 p-3 text-[15px] text-[var(--ink)]">{page.text_draft}</p>
-          {canEdit && <button onClick={() => setText(page.text_draft)} className="mt-2 underline">Start from the draft again</button>}
+          {canEdit && <button onClick={() => { setText(page.text_draft); setTouched(true); }} className="mt-2 min-h-9 underline">Use the draft</button>}
         </details>
       )}
       {/* Phone: the Save button rides above the tab bar while there's something to save. */}

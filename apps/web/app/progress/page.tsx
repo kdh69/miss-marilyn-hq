@@ -37,7 +37,7 @@ export default async function Progress() {
       {technical && (
         <>
           <Card title="Open tasks">
-            <Table rows={open} cols={[["task_id", "ID"], ["title", "Task"], ["owner", "Who"], ["status", "Status"], ["due_date", "Due"]]} empty="Nothing in progress." />
+            <Table rows={open} cols={[["task_id", "ID"], ["title", "Task"], ["owner", "Who"], ["status", "Status"], ["qc_result", "QC"], ["qc_attempts", "Tries"], ["due_date", "Due"]]} empty="Nothing in progress." />
           </Card>
           <Card title="Latest activity">
             <Table rows={recent} cols={[["ts", "When"], ["actor", "Who"], ["task_id", "Task"], ["to_status", "Now"], ["message", "Note"]]} empty="No activity yet." />

@@ -9,13 +9,14 @@ export function NewBook({ canWrite }: { canWrite: boolean }) {
   const [title, setTitle] = useState("");
   const [about, setAbout] = useState("");
   const [lesson, setLesson] = useState("");
+  const [ages, setAges] = useState("");
   const [msg, setMsg] = useState("");
   const [pending, start] = useTransition();
 
   const send = () => start(async () => {
-    const body = `New book idea: "${title.trim()}".${about.trim() ? ` It's about ${about.trim()}.` : ""}${lesson.trim() ? ` The lesson: ${lesson.trim()}.` : ""}`;
+    const body = `New book idea: "${title.trim()}".${about.trim() ? ` It's about ${about.trim()}.` : ""}${lesson.trim() ? ` The lesson: ${lesson.trim()}.` : ""}${ages.trim() ? ` For ages ${ages.trim()}.` : ""}`;
     const r = await sendMessage({ kind: "idea", body });
-    if (r.ok) { setMsg("Sent to the team ✓ — it shows up on the shelf once the plan is ready."); setTitle(""); setAbout(""); setLesson(""); }
+    if (r.ok) { setMsg("Sent to the team ✓ — it shows up on the shelf once the plan is ready."); setTitle(""); setAbout(""); setLesson(""); setAges(""); }
     else setMsg(r.error ?? "Didn't send");
   });
 
@@ -27,6 +28,7 @@ export function NewBook({ canWrite }: { canWrite: boolean }) {
       <input className={field} placeholder="Working title" value={title} onChange={(e) => setTitle(e.target.value)} />
       <input className={field} placeholder="What happens (a line or two)" value={about} onChange={(e) => setAbout(e.target.value)} />
       <input className={field} placeholder="The lesson, if there is one" value={lesson} onChange={(e) => setLesson(e.target.value)} />
+      <input className={field} placeholder="Ages, e.g. 3–6" value={ages} onChange={(e) => setAges(e.target.value)} />
       <div className="flex flex-wrap items-center gap-2">
         <button disabled={pending || !title.trim() || !canWrite} onClick={send} className={btn.primary}>Send to the team</button>
         <button onClick={() => setOpen(false)} className={btn.quiet}>Cancel</button>

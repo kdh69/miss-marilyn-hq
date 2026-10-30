@@ -43,3 +43,25 @@ export const STAGE_TRACK: { key: string; label: string; types: string[] }[] = [
 ];
 
 export const when = (iso: string) => (iso ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "");
+
+/** Where to sign in for a service, matched on its name in the accounts tab. No passwords, just the door. */
+const ACCOUNT_URLS: [match: string, url: string][] = [
+  ["business gmail", "https://mail.google.com"],
+  ["github", "https://github.com"],
+  ["google cloud", "https://console.cloud.google.com"],
+  ["anthropic", "https://console.anthropic.com"],
+  ["grok", "https://grok.com"],
+  ["vercel", "https://vercel.com/dashboard"],
+  ["resend", "https://resend.com"],
+  ["amazon kdp", "https://kdp.amazon.com"],
+  ["etsy developer", "https://www.etsy.com/developers/your-apps"],
+  ["etsy shop", "https://www.etsy.com/your/shops/me/dashboard"],
+  ["meta business", "https://business.facebook.com"],
+  ["pinterest business", "https://www.pinterest.com/business/hub/"],
+  ["shopify", "https://admin.shopify.com"],
+  ["amazon merch", "https://merch.amazon.com"],
+];
+export const accountUrl = (service = "") => ACCOUNT_URLS.find(([m]) => service.toLowerCase().includes(m))?.[1] ?? "";
+
+/** Accounts phases, folded into the two groups Clara needs. */
+export const SET_UP_NOW = ["now", "phase_0"];

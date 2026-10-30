@@ -22,7 +22,7 @@ export function MessageItem({ r, viewer, bookTitle, compact = false }: { r: Req;
         <span className="font-semibold text-[var(--ink)]">{WHO[r.from] ?? r.from} → {WHO[r.to] ?? r.to}</span>
         <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-violet-700">{KIND[r.kind] ?? r.kind}</span>
         {where && <span>{where}{r.page_number ? ` · page ${r.page_number}` : ""}</span>}
-        <span className="ml-auto">{REQUEST_STATUS[r.status] ?? r.status}{r.created_at ? ` · ${when(r.created_at)}` : ""}</span>
+        <span className="ml-auto">{viewer !== "kyle" && r.to === "kyle" && r.status === "seen" ? "Kyle saw it" : viewer !== "kyle" && r.to === "orchestrator" && r.status === "new" ? "Sent to the team" : REQUEST_STATUS[r.status] ?? r.status}{r.created_at ? ` · ${when(r.created_at)}` : ""}</span>
       </div>
       <p className="mt-2 text-[15px]">{r.body}</p>
       {r.reply && <p className="mt-2 rounded-xl bg-orange-500/10 p-2.5 text-sm"><span className="font-semibold">{WHO[r.reply_by] ?? r.reply_by}:</span> {r.reply}</p>}

@@ -11,8 +11,9 @@ could act on, and the book editor sat below a grid of six page thumbnails. Clara
 in order, are: **write and edit books → see progress → jot ideas → accounts, socials and a
 to-do list → money**. The panel reads in that order on every screen size.
 
-Status: steps 1–8 below are built (branch `panel-view-toggle`). What's left is polish from
-real use: Clara's first session on her phone will tell us which words still read wrong.
+Status: everything below is built (branch `panel-view-toggle`), including the follow-up pass
+in section 11. What's left is polish from real use: Clara's first session on her phone will
+tell us which words still read wrong.
 
 The view toggle (done): Kyle's sidebar has a *Viewing as: Clara / Kyle* switch. It changes what
 is rendered, never who is writing; server actions always use the signed-in identity. Clara never
@@ -53,8 +54,8 @@ writes a `book_plan` request (kind `idea`, product_id blank) for the Orchestrato
 6. "Note on this page" and the page's conversation, collapsed by default.
 7. Book-wide: "Tell the team about this book" and the thread, collapsed.
 
-Web gets the same order in two columns: page strip + page on the left, notes and thread on the
-right. The data model does not change: `pages.text_final*` stays Clara's, `text_draft` the AI's.
+Web gets the same order, with the art and her words side by side and the page full width;
+the book thread sits below it. The data model does not change: `pages.text_final*` stays Clara's, `text_draft` the AI's.
 
 Smaller editor wins: bigger type (17px) in the textarea, no "Sign in to edit" copy in her view
 (preview mode says "Preview only"), save errors in words she can act on.
@@ -62,7 +63,8 @@ Smaller editor wins: bigger type (17px) in the textarea, no "Sign in to edit" co
 ## 3. Progress
 
 One list, grouped by book, each book a card with a stage track:
-**Story → Art → Layout → Cover → Ready to publish → Live**, the current stage lit. Under it,
+**Story → Art → Layout → Publish → On sale**, the current stage lit (cover art counts as Art,
+cover layout as Layout). Under it,
 at most three lines: what's happening now, what's waiting on her, what's next. Stage comes from
 `tasks.task_type` and status, mapped in `lib/data.ts` (`STAGES` already exists; label it).
 No task table, no log in Clara's view. Kyle's Progress keeps the open-task table and log, plus
@@ -74,7 +76,9 @@ A notepad: a big text box at the top ("Jot an idea"), then her ideas newest firs
 where it went ("Kyle saw it", "Team is on it", "Became: Book 2"). Backed by `requests` with
 kind `idea` (and `rule` for "always do this", shown as a second tab "House rules"). Scout's
 research shows here as "Ideas from the team" cards she can accept ("Make this a book" → an
-`idea` request citing the `research_id`) or dismiss. The Trends tab goes away in her view.
+`idea` request citing the `research_id`). Dismiss is left out: it would mean the panel writing
+the `research` tab, which the panel rules don't allow. Scout's own review marks it instead.
+The Trends tab goes away in her view.
 
 ## 5. To-do, accounts and socials
 
@@ -85,8 +89,9 @@ scheduled this week. A checkbox finishes what the panel is allowed to finish (`m
 Done, request reply, Clara's own accounts). This needs one new write: Clara may set status on
 accounts she owns (today only Kyle can).
 
-**Accounts & socials**: same page, lower half. Per service: logo, status pill, "Open" link
-(`live_url` where known), and the login email. Grouped "Set up now / Later" instead of phase
+**Accounts & socials**: same page, lower half. Per service: a two-letter tile (no brand
+logos), status, an "Open" link to the service's sign-in page (a small map in `lib/labels.ts`;
+the accounts tab has no URL column), and the login email. Grouped "Set up now / Later" instead of phase
 codes. Passwords stay out, as now.
 
 **Schedule**: the content calendar (`content` rows approved or scheduled) as a week strip at
@@ -137,6 +142,22 @@ Books and Progress reuse Clara's components with IDs and statuses turned on.
 | Header actions | stack under the title | sit to the right of the title |
 | Inputs | 16px so iOS doesn't zoom | inherit |
 | Sideways scroll | none (checked) | none (checked) |
+
+## 11. Follow-up pass
+
+- **Untouched drafts are never saved as her words.** A page with only the AI draft saves only
+  after she edits it or taps "Use the draft". Before this fix, the editor autosaved the draft
+  as `text_final` two seconds after opening the page.
+- **No lost words.** Switching pages (arrows, strip, swipe) saves what she typed; closing the
+  browser tab with unsaved words asks first; a failed save keeps her words and says so.
+- **Swipe** the art left or right to turn pages on a phone.
+- **Sticky back bar** on phones: "← All books" and the title stay under the top bar.
+- **To-do ticks** close Done-type asks (photos, rewrite) and her own accounts. Approvals and
+  publish asks have no tick: they open the book, so she sees what she is OK-ing.
+- **Accounts** grouped "Set up now / Later", with Open links.
+- **Her notes say where they went**: "Kyle saw it", "Sent to the team", "Team is on it".
+- **New book** asks for an age range. The book thread is collapsed under "Talk to the team".
+- **Kyle**: QC result and attempts in Progress; recent backend notes on System.
 
 ## Rules kept
 

@@ -15,7 +15,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const [s, v] = await Promise.all([getSnapshot().catch(() => null), viewer()]);
   const halted = s?.config.find((c) => c.key === "system_status")?.value === "HALT";
   const preview = !authConfigured();
-  const name = v.real === "kyle" ? "Kyle" : v.real === "mom" ? "Clara" : "Preview";
+  const name = v.real === "kyle" ? "Kyle" : v.real === "mom" ? "Clara" : v.view === "kyle" ? "Kyle" : "Clara";
   const doSignOut = async () => { "use server"; await signOut({ redirectTo: "/signin" }); };
 
   return (

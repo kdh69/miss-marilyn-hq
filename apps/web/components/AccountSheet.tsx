@@ -16,7 +16,7 @@ export function AccountSheet({ name, view, canSwitch, preview, signOut }: {
       {open && (
         <div className="fixed inset-0 z-50 flex items-end bg-black/30 md:hidden" onClick={() => setOpen(false)}>
           <div className="glass w-full rounded-t-3xl p-5 pb-8" onClick={(e) => e.stopPropagation()}>
-            <p className="font-semibold">{preview ? "Preview mode" : `Signed in as ${name}`}</p>
+            <p className="font-semibold">{preview ? `Preview of ${name}'s view` : `Signed in as ${name}`}</p>
             {preview && <p className="text-sm text-[var(--quiet)]">Sign-in isn't set up yet, so nothing saves.</p>}
             {canSwitch && <ViewToggle view={view} />}
             {signOut && !preview && (

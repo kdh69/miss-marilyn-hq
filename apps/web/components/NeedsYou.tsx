@@ -42,7 +42,7 @@ function Approval({ item, book }: { item: Row; book?: { id: string; title: strin
 
   const send = (a: "Approve" | "Changes" | "Reject" | "Done") =>
     start(async () => {
-      const r = await answerItem(item.item_id, a, note);
+      const r = await answerItem(item.item_id, a, note).catch(() => ({ ok: false, error: "Couldn't reach the panel — try again in a minute." }));
       setMsg(r.ok ? "Got it ✓" : r.error ?? "Didn't save — try again");
     });
 

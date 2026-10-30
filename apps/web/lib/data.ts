@@ -131,18 +131,21 @@ export function needsYou(s: Snapshot, view: "mom" | "kyle"): NeedsYouItem[] {
 
 export const bookTitle = (s: Snapshot, productId: string) => s.products.find((p) => p.product_id === productId)?.title ?? productId;
 
-export type TodoItem = { id: string; when: string; what: string; where: string; href: string; done?: boolean };
+/** `finish` is set only for things the panel may close with a tick: a Done-type ask, or an account the viewer owns. */
+export type TodoItem = { id: string; when: string; what: string; where: string; href: string; finish?: { kind: "item" | "account"; id: string } };
 
 /** Clara's to-do list: approvals, questions, her own accounts, this week's posts. Sorted by date, undated last. */
 export function todoList(s: Snapshot, view: "mom" | "kyle"): TodoItem[] {
   const items: TodoItem[] = [];
   for (const n of needsYou(s, view)) {
     const due = n.kind === "approve" ? s.tasks.find((t) => t.task_id === n.item.task_id)?.due_date ?? "" : n.request.created_at.slice(0, 10);
-    items.push({ id: n.id, when: due, what: n.title, where: n.productId ? bookTitle(s, n.productId) : "The business", href: n.productId ? `/books/${n.productId}` : view === "mom" ? "/ideas" : "/inbox" });
+    // Approvals and publish asks need the real button (they can spend or publish); only Done-type asks get a tick.
+    const finish = n.kind === "approve" && ["photos", "rewrite"].includes(n.item.item_type) ? { kind: "item" as const, id: n.id } : undefined;
+    items.push({ id: n.id, when: due, what: n.title, where: n.productId ? bookTitle(s, n.productId) : "The business", href: n.productId ? `/books/${n.productId}` : n.kind === "approve" ? "/books" : view === "mom" ? "/ideas" : "/inbox", finish });
   }
   const mine = view === "mom" ? "clara" : "kyle";
   for (const a of s.accounts.filter((a) => ["todo", "in_progress", "waiting"].includes(a.status) && a.owner.toLowerCase().includes(mine) && a.phase === "now")) {
-    items.push({ id: a.account_id, when: "", what: `Set up ${a.service}`, where: "Accounts", href: view === "mom" ? "/todo#accounts" : "/system#accounts" });
+    items.push({ id: a.account_id, when: "", what: `Set up ${a.service}`, where: "Accounts", href: view === "mom" ? "/todo#accounts" : "/system#accounts", finish: { kind: "account", id: a.account_id } });
   }
   const weekEnd = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
   for (const c of s.content.filter((c) => ["approved", "scheduled"].includes(c.status) && c.scheduled_for && c.scheduled_for.slice(0, 10) <= weekEnd)) {

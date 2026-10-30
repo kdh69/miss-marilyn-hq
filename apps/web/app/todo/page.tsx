@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { viewer } from "@/auth";
 import { AccountRow } from "@/components/AccountRow";
+import { TodoList } from "@/components/TodoList";
 import { Bar, Card, Empty, PageHeader } from "@/components/ui";
 import { getSnapshot, todoList } from "@/lib/data";
-import { CHANNEL, when } from "@/lib/labels";
+import { CHANNEL, SET_UP_NOW, when } from "@/lib/labels";
 
 /** Clara's list: what's waiting on her, this week's posts, and her accounts. */
 export default async function Todo() {
@@ -14,27 +14,16 @@ export default async function Todo() {
   const accounts = s.accounts.filter((a) => a.status !== "not_needed");
   const done = accounts.filter((a) => a.status === "done").length;
   const canEditMine = v.real === "mom" || v.real === "kyle";
+  const groups = [
+    { label: "Set up now", rows: accounts.filter((a) => SET_UP_NOW.includes(a.phase)) },
+    { label: "Later", rows: accounts.filter((a) => !SET_UP_NOW.includes(a.phase)) },
+  ];
 
   return (
     <div className="flex flex-col gap-4">
       <PageHeader title="To-do" sub={items.length ? `${items.length} on your list.` : "Your list is clear."} />
       <Card title="On your list">
-        {items.length ? (
-          <ul className="flex flex-col divide-y divide-black/5">
-            {items.map((t) => (
-              <li key={t.id}>
-                <Link href={t.href} className="flex items-center gap-3 py-3">
-                  <span className="h-5 w-5 shrink-0 rounded-md border-2 border-orange-300" aria-hidden />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[15px]">{t.what}</span>
-                    <span className="block text-xs text-[var(--quiet)]">{t.where}{t.when ? ` · ${when(t.when)}` : ""}</span>
-                  </span>
-                  <span className="text-[var(--quiet)]">›</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : <Empty>Nothing waiting on you.</Empty>}
+        <TodoList items={items} canWrite={!!v.real} />
       </Card>
       <Card title="This week's posts">
         {posts.length ? (
@@ -53,9 +42,14 @@ export default async function Todo() {
         <p className="text-sm font-semibold">{done} of {accounts.length} set up</p>
         <div className="my-2"><Bar pct={accounts.length ? Math.round((done / accounts.length) * 100) : 0} /></div>
         <p className="mb-2 text-xs text-[var(--quiet)]">Passwords never go here — they live in the shared password manager.</p>
-        <div className="flex flex-col divide-y divide-black/5">
-          {accounts.map((a) => <AccountRow key={a.account_id} a={a} canEdit={canEditMine && (v.real === "kyle" || a.owner.toLowerCase().includes("clara"))} />)}
-        </div>
+        {groups.map(({ label, rows }) => rows.length > 0 && (
+          <div key={label} className="mt-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--quiet)]">{label}</p>
+            <div className="flex flex-col divide-y divide-black/5">
+              {rows.map((a) => <AccountRow key={a.account_id} a={a} canEdit={canEditMine && (v.real === "kyle" || a.owner.toLowerCase().includes("clara"))} technical={v.view === "kyle"} />)}
+            </div>
+          </div>
+        ))}
         {!accounts.length && <Empty>No accounts listed yet.</Empty>}
       </Card>
     </div>
