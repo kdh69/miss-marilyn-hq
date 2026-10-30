@@ -29,9 +29,12 @@ Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing
 ## State right now
 
 - **Panel:** live at **https://missmarilyn.vercel.app** on real Sheet data, behind sign-in.
-  - Kyle and Mom: *Continue with Google* (emails in `PANEL_USERS`). Mom never sees costs or the Money tab.
+  - Kyle and Mom: *Continue with Google* (emails in `PANEL_USERS`). Mom never sees costs: her Money tab
+    shows sales only. Layout and tabs per person: [`PANEL-PLAN.md`](PANEL-PLAN.md).
   - Family: shared password (`FAMILY_PASSWORD` in `.env` and Vercel) opens a read-only view: no
-    Money, Accounts or Messages, no saving. Changing the password signs every family browser out.
+    Money, Accounts, Ideas, To-do or messages, no saving (tabs: Overview, Books, Progress). Changing the
+    password signs every family browser out.
+  - Kyle's sidebar (or the avatar on a phone) has *Viewing as: Clara / Kyle* to see exactly what Mom sees.
   - Vercel is connected to GitHub: merging to `main` deploys production; other branches get previews.
 - **MM Core Sheet:** built and shared with the service account (Editor on *Miss Marilyn Business*) and the
   bot Gmail (Editor on MM Core + MM Work, Viewer on MM Brand). `npm run doctor` is green except uploads.
@@ -84,9 +87,9 @@ and `dryrun` on Actions, connected Vercel to GitHub, passed the QC results back 
 ## Mom — outstanding
 
 - **Pick the author name** (pen name or real name). It blocks the Ollie upload and both KDP packets.
-- **Rewrite each page in her own words** on the panel's Books page. Builder prints only her words
+- **Rewrite each page in her own words** in the panel's **Script** step (the whole script, page by page), then approve it. Builder prints only her words
   (`text_final`); both books have none yet.
-- **Approve the Ollie cover** on her Today list.
+- **Approve the Ollie cover** in the Illustrations step.
 - **Miss M material:** 15–20 photos and 2–3 videos; Zoey's photos and description; the rescue story and
   dedication for the "Meet the Real Miss Marilyn" page.
 - **Business setup:** LLC + EIN, business bank account and card, brand domain; then KDP, Etsy,

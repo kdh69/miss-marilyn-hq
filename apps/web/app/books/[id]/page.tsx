@@ -1,52 +1,62 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { viewer } from "@/lib/viewer";
 import { BookWorkspace } from "@/components/BookWorkspace";
 import { MessageBox } from "@/components/MessageBox";
 import { MessageItem } from "@/components/Messages";
-import { Bar, Card, StageTrack } from "@/components/ui";
-import { bookPages, bookProgress, bookStages, getSnapshot } from "@/lib/data";
-import { STAGE_LABEL } from "@/lib/labels";
-import { viewerRole } from "@/lib/viewer";
+import { NeedsYou } from "@/components/NeedsYou";
+import { Card, PageHeader, StageTrack } from "@/components/ui";
+import { Table } from "@/components/Table";
+import { bookPages, bookStage, getSnapshot, needsYou } from "@/lib/data";
+import { CHANNEL, PRODUCT_STATUS } from "@/lib/labels";
 
-export default async function Book({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const [s, viewer] = await Promise.all([getSnapshot(), viewerRole()]);
+export default async function Book({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ page?: string }> }) {
+  const [{ id }, { page: startPage }] = await Promise.all([params, searchParams]);
+  const [s, v] = await Promise.all([getSnapshot(), viewer()]);
   const book = s.products.find((p) => p.product_id === id);
   if (!book) notFound();
-  const b = bookProgress(s, id);
+  const st = bookStage(s, id);
   const requests = s.requests.filter((r) => r.product_id === id).reverse();
-  const waiting = s.mom_queue.filter((m) => !m.answer && !m.processed_at && s.tasks.find((t) => t.task_id === m.task_id)?.product_id === id);
+  const thread = requests.filter((r) => !r.page_number);
+  const items = needsYou(s, v.view).filter((n) => n.productId === id);
+  const technical = v.view === "kyle";
 
   return (
     <div className="flex flex-col gap-4">
-      <Link href="/books" className="px-1 text-sm text-[var(--quiet)]">← All books</Link>
-      <Card>
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-xs text-[var(--quiet)]">{id} · {book.status.replace("_", " ")}{book.lesson_theme ? ` · lesson: ${book.lesson_theme}` : ""}</p>
-            <h1 className="mt-1 text-2xl font-semibold">{book.title}</h1>
-            <p className="mt-1 text-sm text-[var(--quiet)]">Now: {b.stage}{waiting.length ? ` · ${waiting.length} waiting on you` : ""}</p>
-          </div>
-          <div className="w-full md:w-64"><Bar pct={b.pct} /><p className="mt-1 text-right text-xs text-[var(--quiet)]">{b.pct}%</p></div>
-        </div>
-        <div className="mt-5"><StageTrack stages={bookStages(s, id).map((x) => ({ ...x, label: STAGE_LABEL[x.type] }))} /></div>
-      </Card>
+      <PageHeader
+        back={{ href: "/books", label: "All books" }}
+        title={book.title}
+        eyebrow={technical ? `${id} · ${book.status}${book.lesson_theme ? ` · ${book.lesson_theme}` : ""}` : `${PRODUCT_STATUS[book.status] ?? book.status}${book.lesson_theme ? ` · about ${book.lesson_theme}` : ""}`}
+        sub={st.now}
+      />
+      <div className="px-1"><StageTrack index={st.index} book={id} /></div>
+
+      <NeedsYou items={items} viewer={v.view} showBook={false} />
 
       <Card title="Pages">
-        <BookWorkspace productId={id} pages={bookPages(s, id)} requests={requests} viewer={viewer} />
+        <BookWorkspace productId={id} startPage={startPage} pages={bookPages(s, id)} requests={requests} viewer={v.view} canEdit={v.canWrite} technical={technical} />
       </Card>
 
-      {viewer !== "family" && <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card title="Tell the team about this book">
-          <MessageBox productId={id} placeholder="Ideas, changes, anything about this book…" />
-        </Card>
-        <Card title="Conversation about this book">
-          <div className="flex flex-col gap-3">
-            {requests.filter((r) => !r.page_number).length
-              ? requests.filter((r) => !r.page_number).map((r) => <MessageItem key={r.request_id} r={r} viewer={viewer} />)
-              : <p className="text-sm text-[var(--quiet)]">No messages yet.</p>}
-          </div>
-        </Card>
+      {v.view !== "family" && <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <details className="glass group self-start rounded-3xl p-4 md:p-5">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-[15px] font-semibold">
+              <span>Talk to the team about this book{thread.length ? ` · ${thread.length}` : ""}</span>
+              <span className="text-[var(--quiet)] transition group-open:rotate-90">›</span>
+            </summary>
+            <div className="mt-3 flex flex-col gap-3">
+              <MessageBox productId={id} placeholder="Ideas, changes, anything about this book…" />
+              {thread.length ? thread.map((r) => <MessageItem key={r.request_id} r={r} viewer={v.view} compact />) : <p className="text-sm text-[var(--quiet)]">No messages yet.</p>}
+            </div>
+          </details>
+          {technical && (
+            <Card title="Tasks">
+              <Table rows={s.tasks.filter((t) => t.product_id === id)} cols={[["task_id", "ID"], ["task_type", "Type"], ["owner", "Owner"], ["status", "Status"], ["due_date", "Due"]]} empty="No tasks." />
+            </Card>
+          )}
+          {s.listings.some((l) => l.sku.startsWith(id)) && (
+            <Card title="Where it's sold">
+              <Table rows={s.listings.filter((l) => l.sku.startsWith(id)).map((l) => ({ ...l, channel: CHANNEL[l.channel] ?? l.channel }))} cols={[["channel", "Where"], ["status", "Status"], ["price", "Price"]]} empty="" />
+            </Card>
+          )}
       </div>}
     </div>
   );

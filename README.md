@@ -4,7 +4,7 @@ Systems for Clara's publishing + merch business. **MM Core** (a Google Sheet) ho
 Grok bots and Claude QC write into it; a backend runs every 30 minutes on GitHub Actions; Clara
 works from her own panel (Next.js on Vercel).
 
-- Design: [Phase 1 Build Spec](https://claude.ai/artifact/SK5iZFL8TkRLKDzAwv5ihP)
+- Design: [Phase 1 Build Spec](https://claude.ai/artifact/SK5iZFL8TkRLKDzAwv5ihP) · panel redesign: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md)
 - **Picking this up? Start with [`docs/HANDOFF.md`](docs/HANDOFF.md)** — what is done and what is outstanding.
 - Setup, in order: [`docs/SETUP.md`](docs/SETUP.md) · live checklist: [Launch Checklist](https://claude.ai/artifact/FzUU8wZjrWifR9sv6Ejrpy)
 - Accounts: [`docs/ACCOUNTS.md`](docs/ACCOUNTS.md) · bot prompts: [`docs/bot-prompts.md`](docs/bot-prompts.md)
@@ -15,7 +15,7 @@ packages/core            schema.json (tabs, columns, dropdowns, status rules) + 
 apps/backend             the 30-min tick: gatekeeper, Clara sync, messages, Etsy, alerts, digest, backup
 apps/backend/preflight   KDP PDF checker (Python, PyMuPDF) + tests
 apps/backend/rubrics     Claude QC rubric per task type
-apps/web                 Clara's panel: Today, Progress, Books, Messages, What's next, Money, Trends, Accounts
+apps/web                 the panel: Overview, Books, Progress, Ideas, To-do, Money (Clara) · Overview, Books, Progress, Inbox, System, Money (Kyle)
 scripts                  sheet:setup, google:authorize
 tests                    schema integrity + status-rule tests
 ```
@@ -42,14 +42,20 @@ Folder IDs live in the Sheet's `config` tab.
 
 ## How Clara works in the panel
 
-- **Today:** approvals, questions from the team, "Tell the team" (type, hit Enter), photo upload.
-- **Books → a book:** every page with art and text. She rewrites the draft in her own words
-  (`pages.text_final`, kept apart from the AI draft for the KDP/copyright record), leaves page notes,
-  or messages about the whole book.
-- **Messages:** both directions. Her notes go to Kyle first (`config.requests_default_to = kyle`):
-  *Send to bots*, *I handled it* or *Not doing*. "Always do this" notes become standing rules.
-- **Accounts:** which accounts exist and which are still to do. **Money**, **Trends**, **Progress**, **What's next**.
-- If the bots are paused (spend cap hit), a banner says so; Kyle gets a **Resume** button.
+Clara's tabs follow how a book gets made: **Overview → Ideas → Script → Illustrations → Building →
+Full book review** (bottom bar on a phone, sidebar on desktop). All books, Progress, To-do &
+accounts and Money are under More. Kyle has his own tabs (Overview, Books, Progress, Inbox,
+System, Money) and can switch to Clara's view; family sees Overview, Books and Progress, read-only.
+Details: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md).
+
+- **Overview:** *Up next* per book, what needs her, Tell the team, photos, each book's steps.
+- **Ideas:** every idea, any kind (book, printable, merch, social, business, anything), with filters.
+- **Script:** the whole script page by page in her words (`pages.text_final`, kept apart from the
+  AI draft for the KDP/copyright record); approving it starts the illustrations.
+- **Illustrations:** the art as it comes in; approve the cover.
+- **Building:** words and pictures together, the print files; approve the layout.
+- **Full book review:** read it start to finish, then the final OK. Nothing publishes without it.
+- Money for Clara shows sales only; costs are Kyle's. If the bots are paused, a banner says so.
 
 ## What runs every 30 minutes
 
@@ -78,7 +84,7 @@ Each step is isolated: one failure is emailed and the rest still run; the Action
 | Schema, `sheet:setup`, doctor, dry run | built |
 | Gatekeeper: spend guard, integrity, QC + preflight, image downscale | built |
 | Clara sync, messages → lessons, rewrite record, alerts, digest, backup | built |
-| Panel: 8 tabs, sign-in, book workspace, messages, uploads, pause/resume, accounts | built |
+| Panel: Clara/Kyle views, phone tab bar, book editor, ideas, to-do, inbox, system | built |
 | Rubrics (all task types), brand bible + style guide drafts | written; Clara approves the brand docs |
 | Etsy publish | stub until Etsy API approval (packet fallback) |
 | Photo registration from Drive inbox (bot-side uploads) | uploads via panel are registered; manual Drive drops aren't yet |

@@ -70,10 +70,15 @@ export async function triageRequest(requestId: string, action: "forward" | "seen
 export async function savePageText(pageId: string, text: string): Promise<Result> {
   const who = await editor();
   if (!who) return NOT_SIGNED_IN;
-  const core = await Core.load(["pages"]);
-  const ok = await core.update("pages", pageId, { text_final: text.trim(), text_final_by: who.role, text_final_at: nowIso() }, who.role);
-  refresh();
-  return ok ? { ok } : { ok, error: "A bot just updated this page — refresh to see it, then save again." };
+  if (!text.trim()) return { ok: false, error: "Type some words first." };
+  try {
+    const core = await Core.load(["pages"]);
+    const ok = await core.update("pages", pageId, { text_final: text.trim(), text_final_by: who.role, text_final_at: nowIso() }, who.role);
+    refresh();
+    return ok ? { ok } : { ok, error: "A bot just updated this page — refresh to see it, then save again." };
+  } catch {
+    return { ok: false, error: "Couldn't reach the Sheet. Your words are still here — tap Save again in a minute." };
+  }
 }
 
 // ---------- Photos & videos (Clara → MM Brand/photos/inbox) ----------
@@ -140,12 +145,15 @@ export async function familySignOut(): Promise<void> {
   redirect("/signin");
 }
 
-// ---------- Preview mode (sign-in not set up) ----------
+// ---------- "Viewing as" (Kyle, and preview mode) ----------
 
-/** Switches whose view the preview shows. Sets a cookie only; never touches the Sheet. */
+/**
+ * Flips whose view is shown: Clara's or Kyle's. Sets a cookie only; never touches the Sheet.
+ * Allowed in preview mode and for Kyle; writes still act as whoever is really signed in.
+ */
 export async function previewAs(role: PanelRole): Promise<Result> {
-  if (authConfigured()) return { ok: false, error: "Preview switching is off once sign-in is set up." };
-  (await cookies()).set(PREVIEW_COOKIE, role === "kyle" ? "kyle" : "mom", { path: "/", sameSite: "lax" });
+  if (authConfigured() && (await me())?.role !== "kyle") return { ok: false, error: "Only Kyle can switch views." };
+  (await cookies()).set(PREVIEW_COOKIE, role === "kyle" ? "kyle" : "mom", { path: "/", sameSite: "lax", maxAge: 60 * 60 * 24 * 365 });
   return { ok: true };
 }
 
@@ -161,13 +169,17 @@ export async function setSystemStatus(value: "RUN" | "HALT"): Promise<Result> {
   return { ok };
 }
 
+/** Kyle can update any account; Clara can mark the ones she owns (status only). */
 export async function setAccountStatus(accountId: string, status: string, loginEmail?: string): Promise<Result> {
-  const who = await me();
-  if (who?.role !== "kyle") return { ok: false, error: "Only Kyle can update accounts." };
+  const who = await editor();
+  if (!who) return NOT_SIGNED_IN;
   const core = await Core.load(["accounts"]);
+  const row = core.rows("accounts").find((a) => a.account_id === accountId);
+  if (!row) return { ok: false, error: "That account isn't in the list." };
+  if (who.role !== "kyle" && (!row.owner.toLowerCase().includes("clara") || loginEmail !== undefined)) return { ok: false, error: "Only Kyle can change this one." };
   const patch: Record<string, string> = { status };
   if (loginEmail !== undefined) patch.login_email = loginEmail.trim();
-  const ok = await core.update("accounts", accountId, patch, "kyle");
+  const ok = await core.update("accounts", accountId, patch, who.role);
   refresh();
-  return { ok };
+  return ok ? { ok } : { ok, error: "That row just changed — refresh and try again." };
 }

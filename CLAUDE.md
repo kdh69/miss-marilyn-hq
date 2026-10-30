@@ -29,8 +29,9 @@ Scripts load `.env` automatically (Node `--env-file-if-exists`).
 QC is manual while there's no `ANTHROPIC_API_KEY`: when asked to run QC, `npm run qc` lists the
 queue; read each task's rubric and files, then record `npm run qc -- <task_id> pass|fail "<text>"`.
 
-Panel roles: kyle (everything), mom (no costs/Money), family (read-only, Google `:family` or the
-`FAMILY_PASSWORD`). Every panel write goes through `editor()` in `apps/web/auth.ts`.
+Panel roles: kyle (everything), mom (no costs: Money shows sales only), family (read-only, Google
+`:family` or the `FAMILY_PASSWORD`). Every panel write goes through `editor()` in `apps/web/auth.ts`;
+what each view shows is `viewer()` in `apps/web/lib/viewer.ts` (Kyle can switch to Clara's view).
 Away from the laptop: see [docs/REMOTE.md](docs/REMOTE.md).
 
 Next up: Etsy publish once API access lands;
