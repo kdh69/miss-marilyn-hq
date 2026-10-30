@@ -57,6 +57,11 @@ Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing
   Kyle's brief for the Orchestrator (her story plus the corrections) is the `kyle → orchestrator` idea
   in `requests`; the Orchestrator turns it into book_plan → story_draft → character sheets → art.
   Gussie is a dog (black-and-tan, photos in MM Brand → photos → inbox); the bible has his entry.
+- **Book 1 progress (night of 2026-10-30):** T-0023 book plan (Orchestrator, in progress);
+  T-0024 story passed QC on attempt 2 and is `awaiting_mom` on her Script step (rewrite in her words);
+  T-0025 character sheets in the Quality Checker loop (Gussie redrawn from his photos and passing;
+  Miss M's markings, the lineup scale and the colour Doc still being fixed). Page art and cover wait for T-0025.
+  Gussie's photos are assets P-20261030-001/002 (MM Brand → photos → inbox → Gussie).
 - **Book 2 = MM-B01 "Flies to See Her Grandparents"**, `paused`, `series_no` 2. Every open task is
   `blocked` with "Book paused"; QC skips paused books. Its 32-page draft gets cut to 24 when it resumes.
   The Miss M / Mama / Papa character sheets in T-0012 carry over into Book 1.
@@ -69,7 +74,7 @@ Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing
 - **Bots self-check before QC** (lesson L-0012): each bot runs its task type's list in the Drive doc
   *Miss Marilyn QC Checklists* (MM Brand) and logs `self-check passed: …` when it sets ready_for_qc;
   `npm run qc` prints that line. The doc copies `apps/backend/rubrics/`, so update both together.
-  New team rules live in `lessons` (L-0008–L-0012), which every bot reads each run, so Grok
+  New team rules live in `lessons` (L-0008–L-0016; L-0015 honest log rows, L-0016 all QC fixes in the same task), which every bot reads each run, so Grok
   descriptions don't need re-pasting for rule changes. MM Brand also holds the series bible and style guide as Docs.
 - **Every book is 24 pages now** (KDP's minimum): 10 story spreads, story text on 11–15 pages, under
   50 words a spread. Series bible §3, the story rubric and the Producer prompt say so.
