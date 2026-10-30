@@ -2,7 +2,7 @@
 
 export const WHO: Record<string, string> = {
   mom: "Clara", kyle: "Kyle", orchestrator: "Team", story_producer: "Story writer", illustrator: "Artist",
-  builder: "Layout", publisher: "Publisher", growth: "Marketing", scout: "Scout", backend: "System",
+  builder: "Layout", publisher: "Publisher", growth: "Marketing", scout: "Scout", quality_checker: "Quality Checker", backend: "System",
 };
 
 export const KIND: Record<string, string> = { note: "Note", change: "Change", idea: "Idea", question: "Question", rule: "House rule" };
@@ -22,7 +22,7 @@ export const TASK_TYPE: Record<string, string> = {
   social_batch: "Social posts", email: "Email", lead_magnet: "Freebie", photo_request: "Photos of Miss M", dryrun: "Test run",
 };
 
-export const PRODUCT_STATUS: Record<string, string> = { concept: "Idea", in_production: "In the works", live: "On sale", retired: "Retired" };
+export const PRODUCT_STATUS: Record<string, string> = { concept: "Idea", in_production: "In the works", paused: "On pause", live: "On sale", retired: "Retired" };
 
 export const MOM_ITEM: Record<string, string> = { approve: "Approve", photos: "Send photos", rewrite: "Make the words yours", kdp_publish: "OK to publish" };
 

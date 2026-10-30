@@ -10,12 +10,15 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { Core } from "@mm/core";
 import { qcGate } from "./jobs/gatekeeper";
-import { activeLessons, rubricPath } from "./lib/qc";
+import { activeLessons, parkedBooks, rubricPath } from "./lib/qc";
 
 async function list(core: Core) {
   const types = new Map(core.rows("task_types").map((t) => [t.task_type, t]));
   const assets = new Map(core.rows("assets").map((a) => [a.asset_id, a]));
-  const queue = core.rows("tasks").filter((t) => t.status === "ready_for_qc");
+  const parked = parkedBooks(core);
+  const waiting = core.rows("tasks").filter((t) => t.status === "ready_for_qc");
+  const queue = waiting.filter((t) => !parked.has(t.product_id));
+  if (waiting.length > queue.length) console.log(`Skipping ${waiting.length - queue.length} on paused or retired books.`);
   if (!queue.length) return console.log("Nothing waiting for QC.");
   for (const t of queue) {
     const type = types.get(t.task_type);
@@ -24,6 +27,10 @@ async function list(core: Core) {
     console.log(`  product ${t.product_id}${t.sku ? ` / ${t.sku}` : ""}, owner ${t.owner}, attempt ${(Number(t.qc_attempts) || 0) + 1}`);
     console.log(`  rubric  ${fileURLToPath(existsSync(file) ? file : rubricPath(""))}`);
     console.log(`  goes to Clara on pass: ${type?.needs_mom === "TRUE" ? "yes" : "no"}`);
+    const sent = [...core.rows("log")].reverse().find((l) => l.task_id === t.task_id && l.to_status === "ready_for_qc");
+    console.log(`  bot's self-check: ${/self-check/i.test(sent?.message ?? "") ? sent!.message : "(none logged; L-0012 asks for one)"}`);
+    const review = [...core.rows("log")].reverse().find((l) => l.task_id === t.task_id && l.actor === "quality_checker");
+    console.log(`  Quality Checker:  ${review ? review.message : "(no review logged; L-0013 asks for one)"}`);
     console.log(`  brief   ${t.brief.replace(/\n/g, "\n          ")}`);
     for (const id of t.output_asset_ids.split(",").map((s) => s.trim()).filter(Boolean)) {
       const a = assets.get(id);

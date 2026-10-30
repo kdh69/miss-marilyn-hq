@@ -1,4 +1,4 @@
-# Handoff — where things stand (2026-10-29, evening)
+# Handoff — where things stand (2026-10-30, evening)
 
 Read this first when picking the project back up. Setup steps in full: [`SETUP.md`](SETUP.md).
 Working away from the laptop: [`REMOTE.md`](REMOTE.md). Bot descriptions: [`bot-prompts.md`](bot-prompts.md).
@@ -15,6 +15,18 @@ Grok bots ──write──▶ MM Core Sheet ◀──read/write── Backend (
 ```
 
 Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing.
+
+### How an approval moves
+
+1. **Mom clicks** Approve / Changes / Reject in the panel — on her Overview or in the step it belongs to
+   (Script, Illustrations, Building, Full book review) → saved to `mom_queue` instantly. Her per-page
+   picture and page approvals are done notes in `requests`; they don't move tasks.
+2. **Next backend tick** (:07 and :37 past each hour) applies it: Approve → `approved` → `done` (nothing
+   to publish yet); Changes → `changes_requested` with her note (Changes waits until she types one);
+   Reject → `cancelled`. Each change gets a log row.
+3. **The bots react only when the Orchestrator sweeps.** Grok bots don't watch the Sheet. On a sweep the
+   Orchestrator sends `changes_requested` work back to its owner and creates the next task after a `done`.
+   Nothing schedules sweeps yet, so send `@Orchestrator sweep` (or set up Grok scheduling, step 2 below).
 
 ## State right now
 
@@ -39,44 +51,62 @@ Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing
   `doctor` and `dryrun` both pass on Actions. Uploads are the only red item, so the weekly backup step
   fails (and GitHub emails Kyle) until the owner token is set.
 
-### The board after today's QC
+### The board (after the book reorder, 2026-10-30)
 
-- **Passed, waiting on Mom:** T-0003 Ollie front cover (on her Overview → Illustrations to approve).
-- **Failed, back to the bots** (notes in each task's `qc_notes`):
-  - T-0013 Miss M cover: yarn ball instead of red string, no nose beauty mark, propeller plane, Mama too orange.
-  - T-0001 Ollie story: no `art_brief`/`characters` on any page, brave pebble/pocket continuity, p31 notes missing.
-  - T-0006 / T-0016 KDP packets: missing AI-content answers, ISBN, trim, bleed, paper, file links.
-  - T-0007 / T-0017 Etsy listings: bundle files not made yet, no page count; T-0017 title is 165 chars.
-- **Blocked:** the Ollie interior art and print files (T-0002, T-0004, T-0005). The art was lost in an
-  Oct 28 reset; only low-res Oct 24 PDFs survive, in Kyle's Orchestrator chat. Probably a redraw.
-- **In progress:** Miss M character sheets and redraw (T-0012), Miss M story (T-0011), interior (T-0014).
+- **Book 1 = MM-B02 "Miss Marilyn Makes a Friend"**, Clara's playground story, `in_production`, P1.
+  Kyle's brief for the Orchestrator (her story plus the corrections) is the `kyle → orchestrator` idea
+  in `requests`; the Orchestrator turns it into book_plan → story_draft → character sheets → art.
+  Gussie is a dog (black-and-tan, photos in MM Brand → photos → inbox); the bible has his entry.
+- **Book 2 = MM-B01 "Flies to See Her Grandparents"**, `paused`, `series_no` 2. Every open task is
+  `blocked` with "Book paused"; QC skips paused books. Its 32-page draft gets cut to 24 when it resumes.
+  The Miss M / Mama / Papa character sheets in T-0012 carry over into Book 1.
+- **Ollie (OL-B01) is archived:** product and SKUs `retired`, all its tasks `cancelled`, its requests
+  closed. Rows and Drive files are kept; the panel and the bots ignore it.
+- **Quality Checker** (Grok bot, role `quality_checker`, description in `bot-prompts.md`) reviews work
+  before it reaches Claude's QC (lessons L-0013/L-0014): the maker rings it while the task is still
+  in_progress, it logs `review pass:` or `review fail:` and never changes statuses. `npm run qc` shows
+  its latest verdict. Claude's QC stays the final gate.
+- **Bots self-check before QC** (lesson L-0012): each bot runs its task type's list in the Drive doc
+  *Miss Marilyn QC Checklists* (MM Brand) and logs `self-check passed: …` when it sets ready_for_qc;
+  `npm run qc` prints that line. The doc copies `apps/backend/rubrics/`, so update both together.
+  New team rules live in `lessons` (L-0008–L-0012), which every bot reads each run, so Grok
+  descriptions don't need re-pasting for rule changes. MM Brand also holds the series bible and style guide as Docs.
+- **Every book is 24 pages now** (KDP's minimum): 10 story spreads, story text on 11–15 pages, under
+  50 words a spread. Series bible §3, the story rubric and the Producer prompt say so.
+- **Marketing and Etsy** for Book 2 stay blocked with it.
 
 ## Kyle — outstanding, in order
 
-Done 2026-10-30: merged `panel-preview` into `main` (#9), set the GitHub secrets, ran `doctor` and
-`dryrun` on Actions, connected Vercel to GitHub.
+Done 2026-10-30: merged `panel-preview` into `main` (#9, #10), set the GitHub secrets, ran `doctor`
+and `dryrun` on Actions, connected Vercel to GitHub, passed the QC results back to the Orchestrator,
+and merged the panel redesign (Clara's tabs: Overview → Ideas → Script → Illustrations → Building →
+Full book review; see `PANEL-PLAN.md`) together with `panel-preview`.
 
-1. **Pass the QC results back:** send the Orchestrator the QC hand-back (failed tasks back to todo with
-   fixes, printable_set tasks for both bundles, MM-B01-PB price, Miss M lessons).
-2. **Uploads:** Google Cloud → OAuth consent screen → **Publish app**, then `npm run google:authorize`
+**First, if not done yet:** run `npm run sheet:setup` once on the laptop so the Sheet's dropdowns
+include the new `paused` product status and `quality_checker` role (safe to re-run; it only repairs).
+
+1. **QC when work comes back:** ask Claude to "run QC" (or "status" to read the board).
+2. **Orchestrator sweeps:** ask Grok whether the Orchestrator can sweep on a schedule (9am and 6pm New
+   York). Until then, send `@Orchestrator sweep` after Mom answers things.
+3. **Uploads:** Google Cloud → OAuth consent screen → **Publish app**, then `npm run google:authorize`
    (laptop) and sign in as the owner of *Miss Marilyn Business*. Save `GOOGLE_OWNER_REFRESH_TOKEN` to
    `.env`, GitHub secrets and Vercel, then redeploy. Until then the panel's photo upload shows a
    friendly "not switched on yet" message; drop photos in Drive under MM Brand → photos instead.
-3. **Grok:** paste each bot's new description from [`bot-prompts.md`](bot-prompts.md) (house rules + role),
-   and rename the room from "Coloring Books For Kids" to "Miss Marilyn HQ". Send Scout the
-   story-plus-coloring research topic.
-4. **Ollie art:** attach the Oct 24 Ollie PDFs in the Orchestrator chat, then decide recover vs. redraw.
+4. **Grok:** paste each bot's new description from [`bot-prompts.md`](bot-prompts.md) (house rules + role;
+   changed 2026-10-30: one series, book order by `series_no`, no work on paused/retired books, 24 pages),
+   and upload `docs/brand/series-bible.md` and `style-guide.md` to **MM Brand** (it has only `photos/`,
+   and the bots are told to read them there). Rename the room from "Coloring Books For Kids" to
+   "Miss Marilyn HQ". Send Scout the story-plus-coloring research topic.
 5. Delete the service account key file from Downloads (its copies live in `.env` and the secrets).
 6. **Later:** Resend + a verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); a password manager
-   (Bitwarden's free plan covers two people); whether Grok can schedule the Orchestrator's sweeps.
+   (Bitwarden's free plan covers two people).
 
 ## Mom — outstanding
 
-- **Pick the author name** (pen name or real name). It blocks the Ollie upload and both KDP packets.
+- **Pick the author name** (pen name or real name). It blocks Book 1's KDP packet.
 - **Rewrite each page in her own words** in the panel's **Script** step (the whole script, page by page), then approve it. Builder prints only her words
-  (`text_final`); both books have none yet.
-- **Approve the Ollie cover** in the Illustrations step.
-- **Miss M material:** 15–20 photos and 2–3 videos; Zoey's photos and description; the rescue story and
+  (`text_final`). Book 1's pages come once the Producer drafts them.
+- **Miss M material:** 15–20 photos and 2–3 videos; the rescue story and
   dedication for the "Meet the Real Miss Marilyn" page.
 - **Business setup:** LLC + EIN, business bank account and card, brand domain; then KDP, Etsy,
   Meta Business Suite, Pinterest and an email list tool.
@@ -88,10 +118,14 @@ Done 2026-10-30: merged `panel-preview` into `main` (#9), set the GitHub secrets
 - Coloring versions: **not a product yet.** When they happen, each book gets a free coloring PDF
   ("Color & Tell Your Own Story") through a QR code / link page at the back of the book that collects
   the parent's email. No coloring SKUs and no new format. Illustrator saves ink line layers now so it's ready.
-- Bots work on both series, upload every source file to Drive (the Oct 28 reset lost files kept only
+- Bots upload every source file to Drive (the Oct 28 reset lost files kept only
   locally), and label everything they make `rights_source=AI`.
 - Miss Marilyn art: watercolor and ink, beauty mark on every page, no humans, red string (never a yarn
-  ball), Mama cream/ginger, Papa gray tabby. These belong in the `lessons` tab; check the Orchestrator wrote them.
+  ball), Mama cream/ginger, Papa gray tabby. These are in the `lessons` tab.
+- 2026-10-30: Ollie archived; Clara's playground story is Book 1 (MM-B02); the flying book is Book 2 (MM-B01), paused.
+  Product IDs don't change; `series_no` is the book number. Every book is 24 pages.
+- Mom's `text_final` rule covers book interiors and cover wraps only. Printables take their wording from
+  the brief and need only QC-passed art.
 
 ## Code — next up
 

@@ -29,8 +29,8 @@ page that doesn't. If two attempts don't match the character sheet, set the task
 
 ### Character sheets (build before any page art)
 
-For each recurring character (Miss M, Zoey, Mama, Papa, Nonna, Poppy; Ollie and family for the
-practice book), the Illustrator delivers one character sheet that Clara approves:
+For each recurring character (Miss M, Zoey, Mama, Papa, Nonna, Poppy, and each book's new
+friends), the Illustrator delivers one character sheet that Clara approves:
 
 - **Turnaround:** front, three-quarter, side, back, all at the same scale.
 - **Expressions:** happy, excited, nervous/worried, sad, proud, sleepy, surprised, and the
@@ -53,7 +53,7 @@ Locked character colours come from the character sheet. Until then:
 |---|---|---|
 | Miss M coat / markings | [TO FILL FROM PHOTOS] | from real photos only |
 | Miss M collar | [TO FILL] | |
-| Zoey coat / markings | [TO FILL FROM PHOTOS] | from real photos only |
+| Zoey coat / markings | cream-to-apricot goldendoodle, wavy-curly coat, pink harness | from real photos only (`zoey-*`) |
 
 **World palette — starting point** (warm, soft, slightly muted; not neon, not grey):
 
@@ -127,14 +127,14 @@ zone calm (sky, wall, floor, grass):
 - Same zone style for the same kind of page across the book (don't jump around).
 
 **Fixed pages:** title page (cover art crop or a vignette + title + series + author), copyright
-page (plain Cream, small Andika), page 32 "Meet the Real Miss Marilyn" (photo + text, layout in
+page (plain Cream, small Andika), the last page (24) "Meet the Real Miss Marilyn" (photo + text, layout in
 the series bible section 9).
 
 ## 5. Cover rules
 
 Full wrap, one PDF: **back + spine + front**, plus 0.125 in bleed on all outer edges. Height 8.75 in;
 width 17.25 in + spine (spine = page count x `config!kdp_spine_per_page_in`, 0.002347 in per page
-for premium colour; ~0.075 in at 32 pages). Preflight checks size and spine.
+for premium colour; ~0.056 in at 24 pages). Preflight checks size and spine.
 
 **Front (right-hand panel):**
 - Miss M is the focal point, recognisable at thumbnail size (~1 in wide on Amazon).

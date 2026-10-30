@@ -146,8 +146,14 @@ export function bookPages(s: Snapshot, productId: string) {
     });
 }
 
-/** Books that aren't retired. */
-export const activeBooks = (s: Snapshot) => s.products.filter((p) => p.status !== "retired");
+/** Books that aren't retired, in series order, paused ones last. */
+export const activeBooks = (s: Snapshot) =>
+  s.products
+    .filter((p) => p.status !== "retired")
+    .sort((a, b) => Number(a.status === "paused") - Number(b.status === "paused") || (Number(a.series_no) || 99) - (Number(b.series_no) || 99));
+
+/** Books the team is working on: active and not paused. */
+export const workingBooks = (s: Snapshot) => activeBooks(s).filter((p) => p.status !== "paused");
 
 /** The task of a step for a book: the open one if any, else the latest. */
 export function stepTask(s: Snapshot, productId: string, key: string) {
@@ -178,7 +184,8 @@ export function upNext(s: Snapshot) {
     const ok = pageApprovals(s, id, what);
     return bookPages(s, id).filter((p) => p.art_id && !ok[p.page_number]).length;
   };
-  return activeBooks(s).map((p) => {
+  // Paused books don't get an "Up next" line.
+  return workingBooks(s).map((p) => {
     const id = p.product_id;
     const st = bookStage(s, id);
     const pages = s.pages.filter((x) => x.product_id === id).sort((a, b) => Number(a.page_number) - Number(b.page_number));

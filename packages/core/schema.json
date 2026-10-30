@@ -1126,6 +1126,7 @@
       "publisher",
       "growth",
       "scout",
+      "quality_checker",
       "kyle",
       "mom",
       "backend"
@@ -1210,6 +1211,7 @@
     "product_status": [
       "concept",
       "in_production",
+      "paused",
       "live",
       "retired"
     ],
