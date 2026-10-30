@@ -117,6 +117,7 @@ export function sample(): Snapshot {
       { request_id: "Q-03", created_at: ago(30), from: "mom", to: "kyle", kind: "idea", body: "What about a Halloween coloring page with Miss M in a pumpkin costume?", status: "new", reply: "" },
       { request_id: "Q-04", created_at: ago(50), from: "mom", to: "orchestrator", kind: "rule", body: "Miss M's collar is always red, in every book.", status: "done", reply: "Got it — added to the series bible.", reply_by: "orchestrator" },
       { request_id: "Q-05", created_at: ago(70), from: "orchestrator", to: "mom", product_id: "OL-B01", kind: "question", body: "Should Grandpa Otter wear glasses?", status: "done", reply: "Yes! Little round ones.", reply_by: "mom" },
+      { request_id: "Q-06", created_at: ago(10), from: "mom", to: "orchestrator", product_id: "OL-B01", page_number: "1", kind: "note", body: "Picture approved for page 1.", status: "done", reply: "" },
     ]),
     research: rows([
       { research_id: "R-01", date: day(), topic: "Sibling printables", research_type: "trend", finding: "Searches for new-sibling activity pages are rising this month.", numbers: "+38% in 30 days", confidence: "med", suggested_action: "A Big Sibling activity pack to sell next to the Ollie book", status: "new" },
@@ -159,7 +160,13 @@ export function sample(): Snapshot {
       { ts: ago(40), actor: "mom", task_id: "T-0010", from_status: "awaiting_mom", to_status: "approved", message: "Love the cover!" },
       { ts: ago(41), actor: "backend", task_id: "T-0010", from_status: "approved", to_status: "done", message: "" },
     ]),
-    assets: [], transactions, costs,
+    // Pages 1–8 of Ollie are drawn (placeholder pictures in sample mode); 9–12 are still being drawn.
+    assets: rows(Array.from({ length: 8 }, (_, i) => {
+      const n = String(i + 1);
+      return { asset_id: `OL-B01-ART-${n}`, task_id: "T-0002", product_id: "OL-B01", asset_type: "page_art", page_number: n, version: "1",
+        file_url: `https://drive.google.com/file/d/sample-art-ollie-book-page-${n.padStart(2, "0")}/view`, file_name: `OL-B01 page ${n}`,
+        rights_source: "AI", status: "final", created_at: ago(48), updated_at: ago(48) };
+    })), transactions, costs,
     config: rows([{ key: "daily_bot_cap_usd", value: "15" }, { key: "daily_qc_cap_usd", value: "5" }, { key: "system_status", value: "RUN" }]),
   } as Snapshot;
 }

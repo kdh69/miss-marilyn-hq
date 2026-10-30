@@ -154,7 +154,7 @@ export function bookPages(s: Snapshot, productId: string) {
     .sort((a, b) => Number(a.page_number) - Number(b.page_number))
     .map((p) => {
       const art = assets.get(p.art_asset_id) ?? latestArt.get(p.page_number);
-      return { ...p, art_id: driveId(art?.file_url), text: p.text_final || p.text_draft } as Row;
+      return { ...p, art_id: driveId(art?.file_url), art_at: art?.created_at ?? "", text: p.text_final || p.text_draft } as Row;
     });
 }
 
@@ -203,4 +203,24 @@ export function upNext(s: Snapshot) {
     else line = { step: st.label, text: st.now.replace(/\.$/, ""), href: at(st.key), mine: false };
     return { id, title: p.title, index: st.index, ...line };
   });
+}
+
+export const PICTURE_OK = "Picture approved for page";
+
+/**
+ * Pages whose current picture Clara approved. An approval is a done note in `requests`
+ * ("Picture approved for page 3."); a newer picture on that page clears it, so she always signs
+ * off on the art that's there now.
+ */
+export function pictureApprovals(s: Snapshot, productId: string): Record<string, string> {
+  const pages = new Map(bookPages(s, productId).map((p) => [p.page_number, p]));
+  const out: Record<string, string> = {};
+  for (const r of s.requests) {
+    if (r.product_id !== productId || !r.page_number || !r.body.startsWith(PICTURE_OK)) continue;
+    const p = pages.get(r.page_number);
+    if (!p?.art_id) continue;
+    if (p.art_at && r.created_at < p.art_at) continue; // approved an older picture
+    if (!out[r.page_number] || r.created_at > out[r.page_number]) out[r.page_number] = r.created_at;
+  }
+  return out;
 }

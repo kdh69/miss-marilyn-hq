@@ -209,6 +209,13 @@ Clara's panel now follows how a book actually gets made. Her tabs are the steps:
   script in one box split by "Page N" lines; saving sends back only the pages she changed, and a
   missing "Page N" line blocks the save). Each page has *Suggest the picture*: her idea goes to the
   team as a note on that page ("Picture idea for page 3: …") and shows under the picture plan.
+- **Illustrations, same treatment:** book number and a cover thumbnail head it. Two tabs: *Page by
+  page* (each picture large, her words beside it, the picture plan, *Approve picture* or *Ask for a
+  change*; an approved picture folds to a thin "✓ Approved" line with a thumbnail and Edit) and
+  *All pictures* (every picture at once, ✓ on approved ones; tap one to open its page). A picture
+  approval is a done note in `requests` ("Picture approved for page 3."), so it needs no new column
+  and gives the team no work; a newer picture on that page clears it. A change request goes to the
+  team as "Picture change for page 3: …". Sample mode shows placeholder pictures for Ollie pages 1–8.
 - **Illustrations:** pages drawn so far, the cover, and the cover approval. Tap a page to look
   closer or ask for a change.
 - **Building** and **Full book review** use the book page view (picture + her words, page by

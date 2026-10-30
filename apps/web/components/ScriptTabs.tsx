@@ -37,27 +37,32 @@ export function ScriptTabs({ productId, pages, notes, canWrite }: { productId: s
   );
 }
 
-/** What the picture on this page will show, her suggestions so far, and a box to suggest one. */
-function PicturePlan({ productId, page, ideas, canWrite }: { productId: string; page: Page; ideas: Page[]; canWrite: boolean }) {
+/**
+ * What the picture on this page will show, her notes about it so far, and a box to add one.
+ * Script uses it to suggest the picture; Illustrations uses it to ask for a change.
+ */
+export function PicturePlan({ productId, page, ideas, canWrite, prefix = PIC, action = "Suggest the picture", placeholder = "e.g. Ollie hugging the shell, Mama smiling behind him", sentMsg = "Sent to the artist ✓" }: {
+  productId: string; page: Page; ideas: Page[]; canWrite: boolean; prefix?: string; action?: string; placeholder?: string; sentMsg?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [idea, setIdea] = useState("");
   const [msg, setMsg] = useState("");
   const [sent, setSent] = useState<string[]>([]);
   const [pending, start] = useTransition();
   const send = () => start(async () => {
-    const body = `${PIC} ${page.page_number}: ${idea.trim()}`;
+    const body = `${prefix} ${page.page_number}: ${idea.trim()}`;
     const r = await sendMessage({ kind: "change", productId, pageNumber: page.page_number, body }).catch(() => ({ ok: false, error: "Couldn't reach the panel — try again in a minute." }));
-    if (r.ok) { setSent((x) => [...x, idea.trim()]); setIdea(""); setOpen(false); setMsg("Sent to the artist ✓"); }
+    if (r.ok) { setSent((x) => [...x, idea.trim()]); setIdea(""); setOpen(false); setMsg(sentMsg); }
     else setMsg(r.error ?? "Didn't send");
   });
-  const mine = [...ideas.map((n) => n.body.replace(/^Picture idea for page \d+:\s*/, "")), ...sent];
+  const mine = [...ideas.map((n) => n.body.replace(/^Picture (idea|change) for page \d+:\s*/, "")), ...sent];
 
   return (
     <div className="mb-3 rounded-2xl bg-violet-500/[0.06] px-3 py-2.5 text-sm">
       <div className="flex items-start gap-2">
         <span aria-hidden>🖼️</span>
         <p className="min-w-0 flex-1"><span className="font-semibold">Picture:</span> {page.art_brief || <span className="text-[var(--quiet)]">not planned yet</span>}</p>
-        {canWrite && !open && <button onClick={() => setOpen(true)} className="shrink-0 text-violet-700 underline">Suggest the picture</button>}
+        {canWrite && !open && <button onClick={() => setOpen(true)} className="shrink-0 text-violet-700 underline">{action}</button>}
       </div>
       {mine.length > 0 && (
         <ul className="mt-1.5 flex flex-col gap-1 pl-6">
@@ -67,7 +72,7 @@ function PicturePlan({ productId, page, ideas, canWrite }: { productId: string; 
       {open && (
         <div className="mt-2 flex flex-col gap-2 sm:flex-row">
           <input value={idea} onChange={(e) => setIdea(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && idea.trim() && !pending) send(); }}
-            placeholder="e.g. Ollie hugging the shell, Mama smiling behind him" autoFocus
+            placeholder={placeholder} autoFocus
             className="min-h-11 min-w-0 flex-1 rounded-xl border border-black/10 bg-white px-3 text-[15px] outline-none focus:border-violet-400" />
           <div className="flex gap-2">
             <button disabled={pending || !idea.trim()} onClick={send} className={btn.small}>Send</button>
