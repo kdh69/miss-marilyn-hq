@@ -84,3 +84,10 @@ export const IDEA_KINDS: { id: string; label: string; emoji: string; prefix: str
 export function ideaKind(body = "") {
   return IDEA_KINDS.find((k) => k.prefix && body.toLowerCase().startsWith(k.prefix.trim().toLowerCase()))?.id ?? "other";
 }
+
+/** Series names for each product line. */
+export const LINE: Record<string, string> = { OL: "Ollie's Firsts", MM: "The Adventures of Miss Marilyn" };
+
+/** "Ollie's Firsts · Book 1" — the series and book number, when the Sheet has them. */
+export const bookNumber = (p?: Record<string, string>) =>
+  p ? [LINE[p.line] ?? p.line, p.series_no ? `Book ${p.series_no}` : ""].filter(Boolean).join(" · ") : "";

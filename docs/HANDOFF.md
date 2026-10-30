@@ -18,7 +18,9 @@ Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing
 
 ### How an approval moves
 
-1. **Mom clicks** Approve / Changes / Reject on her Today list → saved to `mom_queue` instantly.
+1. **Mom clicks** Approve / Changes / Reject in the panel — on her Overview or in the step it belongs to
+   (Script, Illustrations, Building, Full book review) → saved to `mom_queue` instantly. Her per-page
+   picture and page approvals are done notes in `requests`; they don't move tasks.
 2. **Next backend tick** (:07 and :37 past each hour) applies it: Approve → `approved` → `done` (nothing
    to publish yet); Changes → `changes_requested` with her note (Changes waits until she types one);
    Reject → `cancelled`. Each change gets a log row.
@@ -81,7 +83,12 @@ Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing
 ## Kyle — outstanding, in order
 
 Done 2026-10-30: merged `panel-preview` into `main` (#9, #10), set the GitHub secrets, ran `doctor`
-and `dryrun` on Actions, connected Vercel to GitHub, passed the QC results back to the Orchestrator.
+and `dryrun` on Actions, connected Vercel to GitHub, passed the QC results back to the Orchestrator,
+and merged the panel redesign (Clara's tabs: Overview → Ideas → Script → Illustrations → Building →
+Full book review; see `PANEL-PLAN.md`) together with `panel-preview`.
+
+**First, if not done yet:** run `npm run sheet:setup` once on the laptop so the Sheet's dropdowns
+include the new `paused` product status and `quality_checker` role (safe to re-run; it only repairs).
 
 1. **QC when work comes back:** ask Claude to "run QC" (or "status" to read the board).
 2. **Orchestrator sweeps:** ask Grok whether the Orchestrator can sweep on a schedule (9am and 6pm New
@@ -127,7 +134,8 @@ and `dryrun` on Actions, connected Vercel to GitHub, passed the QC results back 
 
 ## Code — next up
 
-- Verify the panel on a phone with real data, signed in as each role.
+- Verify the panel on a phone with real data, signed in as each role. First real saves to try: a
+  page's words (Script), a picture approval (Illustrations), a page approval (Building).
 - Book progress counts tasks per product, so a book with few tasks can look further along than it is.
 - **Etsy publish** once API access is approved (stub in `apps/backend/src/jobs/etsyPublish.ts`).
 - **Money tab imports:** KDP royalty report + Etsy sales CSV → `transactions`.

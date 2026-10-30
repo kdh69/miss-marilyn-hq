@@ -1,11 +1,11 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Art } from "@/components/BookWorkspace";
 import { Approval } from "@/components/NeedsYou";
+import { PageTabs } from "@/components/PageTabs";
 import { StepShell, pickBook } from "@/components/StepShell";
 import { Bar, Card, Empty, Pill } from "@/components/ui";
-import { bookPages, driveId, getSnapshot, latestAsset, stepAsk, stepTask } from "@/lib/data";
-import { TASK_STATUS } from "@/lib/labels";
+import { bookPages, driveId, getSnapshot, latestAsset, pageApprovals, stepAsk, stepTask } from "@/lib/data";
+import { bookNumber } from "@/lib/labels";
 import { canSee, viewer } from "@/lib/viewer";
 
 /** Step 3 — Illustrations. The approved script gets its pictures; Clara looks them over and OKs the cover. */
@@ -21,38 +21,29 @@ export default async function Illustrations({ searchParams }: { searchParams: Pr
   const ask = stepAsk(s, id, "art");
   const cover = latestAsset(s, id, ["cover_art"]);
   const scriptDone = stepTask(s, id, "script")?.status === "done";
+  const product = s.products.find((p) => p.product_id === id);
+  const notes = s.requests.filter((r) => r.product_id === id && r.page_number);
 
   return (
     <StepShell step="art" s={s} view={v.view} selected={id}>
       <Card>
+        <div className="mb-2 flex items-start gap-4">
+          <div className="w-20 shrink-0 overflow-hidden rounded-xl shadow-sm md:w-28" title="Front cover"><Art id={driveId(cover?.file_url)} brief="" small /></div>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wide text-orange-700">{bookNumber(product) || id}</p>
+            <h2 className="text-xl font-semibold">{product?.title}</h2>
+            <p className="text-sm text-[var(--quiet)]">{cover?.file_url ? "Front cover is in" : "Front cover is being drawn"}</p>
+          </div>
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <Pill tone={pages.length && drawn === pages.length ? "good" : "accent-2"}>{drawn} of {pages.length} pages drawn</Pill>
-          <span className="text-[15px]">{!scriptDone ? "Pictures start once you approve the script." : task ? `Art: ${(TASK_STATUS[task.status] ?? task.status).toLowerCase()}.` : "The artist starts soon."}</span>
+          <span className="text-[15px]">{!scriptDone && !drawn ? "Pictures start once you approve the script." : pages.length && drawn === pages.length ? "All the pictures are in." : drawn ? "The artist is drawing the rest." : task?.status === "blocked" ? "The artist is stuck — Kyle is looking." : "The artist starts soon."}</span>
         </div>
         {pages.length > 0 && <div className="mt-3"><Bar pct={Math.round((drawn / pages.length) * 100)} tone="accent-2" /></div>}
         {ask && <div className="mt-3"><Approval item={ask} labels={{ yes: "Approve the cover", changes: "Ask for changes" }} /></div>}
       </Card>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-[220px_1fr]">
-        <Card title="Cover">
-          <div className="overflow-hidden rounded-2xl"><Art id={driveId(cover?.file_url)} brief="the front cover" large /></div>
-        </Card>
-        <Card title="Pages" action={<span className="text-xs text-[var(--quiet)]">Tap a page to look closer or ask for a change</span>}>
-          {pages.length ? (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {pages.map((p) => (
-                <Link key={p.page_id} href={`/books/${id}?page=${p.page_number}`} className="overflow-hidden rounded-2xl border border-white bg-white/70 transition hover:border-orange-300">
-                  <Art id={p.art_id} brief={p.art_brief} />
-                  <div className="p-2.5">
-                    <p className="text-[11px] font-semibold text-[var(--quiet)]">Page {p.page_number}</p>
-                    <p className="mt-0.5 line-clamp-2 text-xs">{p.text || "—"}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : <Empty>No pages yet.</Empty>}
-        </Card>
-      </div>
+      {pages.length ? <PageTabs mode="art" productId={id} pages={pages} approved={pageApprovals(s, id, "picture")} notes={notes} canWrite={v.canWrite} /> : <Card><Empty>No pages yet.</Empty></Card>}
     </StepShell>
   );
 }

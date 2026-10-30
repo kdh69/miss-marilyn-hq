@@ -110,17 +110,6 @@ export function todoList(s: Snapshot, view: string | null): TodoItem[] {
   return items.sort((a, b) => (a.when || "9999").localeCompare(b.when || "9999"));
 }
 
-/** The next page in each book that's still in the draft's words, for "Keep writing". */
-export function nextToWrite(s: Snapshot) {
-  return workingBooks(s)
-    .map((p) => {
-      const pages = s.pages.filter((x) => x.product_id === p.product_id).sort((a, b) => Number(a.page_number) - Number(b.page_number));
-      const left = pages.filter((x) => !x.text_final);
-      return left.length ? { productId: p.product_id, title: p.title, page: left[0].page_number, left: left.length, total: pages.length } : null;
-    })
-    .filter((x): x is NonNullable<typeof x> => !!x);
-}
-
 export function greeting() {
   const hour = Number(new Date().toLocaleString("en-US", { timeZone: "America/New_York", hour: "numeric", hour12: false }));
   return hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
@@ -153,7 +142,7 @@ export function bookPages(s: Snapshot, productId: string) {
     .sort((a, b) => Number(a.page_number) - Number(b.page_number))
     .map((p) => {
       const art = assets.get(p.art_asset_id) ?? latestArt.get(p.page_number);
-      return { ...p, art_id: driveId(art?.file_url), text: p.text_final || p.text_draft } as Row;
+      return { ...p, art_id: driveId(art?.file_url), art_at: art?.created_at ?? "", text: p.text_final || p.text_draft } as Row;
     });
 }
 
@@ -190,6 +179,12 @@ export function latestAsset(s: Snapshot, productId: string, types: string[]) {
  * following the steps: approve what's waiting, else keep making the script hers, else see what's new.
  */
 export function upNext(s: Snapshot) {
+  // Pages that are ready to look at (they have a picture) but Clara hasn't approved yet.
+  const unapproved = (id: string, what: "picture" | "layout") => {
+    const ok = pageApprovals(s, id, what);
+    return bookPages(s, id).filter((p) => p.art_id && !ok[p.page_number]).length;
+  };
+  // Paused books don't get an "Up next" line.
   return workingBooks(s).map((p) => {
     const id = p.product_id;
     const st = bookStage(s, id);
@@ -203,9 +198,35 @@ export function upNext(s: Snapshot) {
     else if (ask("art")) line = { step: "Art", text: "Approve the cover", href: at("art"), mine: true };
     else if (ask("script")) line = { step: "Script", text: "Read the script and approve it", href: at("script"), mine: true };
     else if (st.key === "script" && draftOnly) line = { step: "Script", text: `Make the script yours — page ${draftOnly.page_number} is next`, href: at("script"), mine: true };
+    else if (st.key === "art" && unapproved(id, "picture")) line = { step: "Art", text: `Approve ${unapproved(id, "picture")} picture${unapproved(id, "picture") > 1 ? "s" : ""}`, href: at("art"), mine: true };
+    else if (st.key === "build" && unapproved(id, "layout")) line = { step: "Build", text: `Look over ${unapproved(id, "layout")} finished page${unapproved(id, "layout") > 1 ? "s" : ""}`, href: at("build"), mine: true };
+    else if (st.key === "review") line = { step: "Review", text: "Read the whole book, start to finish", href: at("review"), mine: true };
     else if (st.key === "idea") line = { step: "Idea", text: "The team is planning it", href: "/ideas", mine: false };
     else if (st.key === "done") line = { step: "Done", text: "On sale", href: `/books/${id}`, mine: false };
     else line = { step: st.label, text: st.now.replace(/\.$/, ""), href: at(st.key), mine: false };
     return { id, title: p.title, index: st.index, ...line };
   });
+}
+
+const APPROVED: Record<"picture" | "layout", string> = { picture: "Picture approved for page", layout: "Layout approved for page" };
+
+/**
+ * Pages Clara approved, per kind: the picture (Illustrations) or the finished page (Building).
+ * An approval is a done note in `requests` ("Layout approved for page 3."). It only counts if it's
+ * newer than what it approved: the picture for a picture; the picture, her words and the latest
+ * interior PDF for a layout — so she always signs off on what's there now.
+ */
+export function pageApprovals(s: Snapshot, productId: string, what: "picture" | "layout"): Record<string, string> {
+  const pages = new Map(bookPages(s, productId).map((p) => [p.page_number, p]));
+  const layoutAt = what === "layout" ? latestAsset(s, productId, ["interior_pdf"])?.created_at ?? "" : "";
+  const out: Record<string, string> = {};
+  for (const r of s.requests) {
+    if (r.product_id !== productId || !r.page_number || !r.body.startsWith(APPROVED[what])) continue;
+    const p = pages.get(r.page_number);
+    if (!p?.art_id) continue;
+    const since = [p.art_at, what === "layout" ? p.text_final_at : "", layoutAt].filter(Boolean).sort().pop() ?? "";
+    if (since && r.created_at < since) continue;
+    if (!out[r.page_number] || r.created_at > out[r.page_number]) out[r.page_number] = r.created_at;
+  }
+  return out;
 }
