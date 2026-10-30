@@ -50,7 +50,8 @@ Details: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md).
 
 - **Overview:** *Up next* per book, what needs her, Tell the team, photos, each book's steps.
 - **Ideas:** every idea, any kind (book, printable, merch, social, business, anything), with filters.
-- **Script:** the whole script page by page in her words (`pages.text_final`, kept apart from the
+- **Script:** page by page (with each page's picture plan and *Suggest the picture*) or all the text
+  in one box; the whole script in her words (`pages.text_final`, kept apart from the
   AI draft for the KDP/copyright record); approving it starts the illustrations.
 - **Illustrations:** the art as it comes in; approve the cover.
 - **Building:** words and pictures together, the print files; approve the layout.

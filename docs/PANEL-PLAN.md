@@ -203,6 +203,12 @@ Clara's panel now follows how a book actually gets made. Her tabs are the steps:
   `rewrite` ask → Done) is what starts the illustrations. "Drop it" is hidden here so a whole
   story can't be cancelled by a mis-tap. A warning shows how many pages are still the draft's
   words, because only her words print.
+- **Script, after Clara's first look:** the book's series and number head it ("Ollie's Firsts ·
+  Book 1"). Two tabs: *Page by page* (each page: the picture plan, her words in a tall box, *Save &
+  approve*; a saved page folds to a thin "✓ Approved" line with Edit) and *All text* (the whole
+  script in one box split by "Page N" lines; saving sends back only the pages she changed, and a
+  missing "Page N" line blocks the save). Each page has *Suggest the picture*: her idea goes to the
+  team as a note on that page ("Picture idea for page 3: …") and shows under the picture plan.
 - **Illustrations:** pages drawn so far, the cover, and the cover approval. Tap a page to look
   closer or ask for a change.
 - **Building** and **Full book review** use the book page view (picture + her words, page by

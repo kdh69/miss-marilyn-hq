@@ -108,7 +108,8 @@ export function Art({ id, brief, large = false, small = false }: { id: string; b
 
 /**
  * Her words for the page. Saves on its own two seconds after she stops typing, or when she taps Save.
- * `compact`: the script view, many pages stacked — smaller box, inline Save, no floating button.
+ * `compact`: the script view, many pages stacked — inline Save, no floating button, and once a page
+ * is saved it folds to a thin "Approved" line (tap Edit to open it again).
  */
 export function PageText({ page, canEdit, compact = false }: { page: Page; canEdit: boolean; compact?: boolean }) {
   const [text, setText] = useState(page.text_final || page.text_draft || "");
@@ -121,23 +122,27 @@ export function PageText({ page, canEdit, compact = false }: { page: Page; canEd
   const [touched, setTouched] = useState(false);
   const dirty = touched && text.trim() !== savedText.trim();
   const hers = !!savedText;
+  // Script view: saved pages fold to a thin line. Typing pauses (autosave) never fold it mid-sentence;
+  // only Save or leaving the box does.
+  const [open, setOpen] = useState(!hers);
   // Latest values for the unmount flush (switching pages must never drop her words).
   const latest = useRef({ text, savedText, sending: "", touched });
   latest.current.text = text;
   latest.current.touched = touched;
   latest.current.savedText = savedText;
 
-  const save = useCallback((value: string) => {
+  const save = useCallback((value: string, fold = false) => {
+    if (fold && !dirty && savedText) { setOpen(false); return; }
     if (!canEdit || !latest.current.touched || !value.trim() || value.trim() === savedText.trim() || value === latest.current.sending) return;
     latest.current.sending = value;
     setState("saving");
     start(async () => {
       const r = await savePageText(page.page_id, value).catch(() => ({ ok: false, error: "Couldn't reach the panel. Your words are still here — tap Save again in a minute." } as { ok: boolean; error?: string }));
       latest.current.sending = "";
-      if (r.ok) { setSavedText(value); setState("saved"); }
+      if (r.ok) { setSavedText(value); setState("saved"); if (fold) setOpen(false); }
       else { setErr(r.error ?? "Didn't save"); setState("error"); }
     });
-  }, [canEdit, page.page_id, savedText]);
+  }, [canEdit, page.page_id, savedText, dirty]);
 
   // Leaving this page (another page, another tab): save what's typed.
   useEffect(() => () => {
@@ -163,15 +168,25 @@ export function PageText({ page, canEdit, compact = false }: { page: Page; canEd
 
   const status = state === "saving" ? "Saving…" : state === "error" ? err : dirty ? "Not saved yet" : hers ? "Saved · these are your words" : "Change anything and it saves as your words";
 
+  if (compact && hers && !open && !dirty) {
+    return (
+      <div className="flex items-start gap-3 rounded-2xl bg-emerald-500/10 px-3 py-2.5">
+        <span className="mt-0.5 shrink-0 rounded-full bg-emerald-600 px-2 py-0.5 text-[11px] font-semibold text-white">✓ Approved</span>
+        <p className="min-w-0 flex-1 text-[15px] leading-snug">{savedText}</p>
+        {canEdit && <button onClick={() => setOpen(true)} className="shrink-0 text-sm text-orange-700 underline">Edit</button>}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2">
       {!compact && <p className="text-sm font-semibold">{hers ? "Your words" : "The draft — make it yours"}</p>}
-      <textarea value={text} onChange={(e) => { setText(e.target.value); setTouched(true); }} onBlur={() => dirty && save(text)} disabled={!canEdit}
-        rows={compact ? 3 : 6} spellCheck aria-label={`Page ${page.page_number} words`}
+      <textarea value={text} onChange={(e) => { setText(e.target.value); setTouched(true); }} onBlur={() => (compact ? save(text, true) : dirty && save(text))} disabled={!canEdit}
+        rows={compact ? 7 : 6} spellCheck aria-label={`Page ${page.page_number} words`}
         className="w-full rounded-2xl border border-black/10 bg-white p-4 text-[17px] leading-relaxed outline-none focus:border-orange-400 disabled:opacity-70" />
       <div className="flex items-center justify-between gap-3">
         <span className={`text-sm ${state === "error" ? "text-red-600" : "text-[var(--quiet)]"}`}>{canEdit ? status : "View only"}</span>
-        <span className={compact ? "" : "hidden md:block"}><button disabled={!canEdit || !dirty || !text.trim() || state === "saving"} onClick={() => save(text)} className={compact ? btn.small : btn.primary}>Save</button></span>
+        <span className={compact ? "" : "hidden md:block"}><button disabled={!canEdit || !dirty || !text.trim() || state === "saving"} onClick={() => save(text, compact)} className={compact ? btn.small : btn.primary}>{compact ? "Save & approve" : "Save"}</button></span>
       </div>
       {page.text_draft && (
         <details className="text-sm text-[var(--quiet)]">

@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
-import { PageText } from "@/components/BookWorkspace";
+import { ScriptTabs } from "@/components/ScriptTabs";
 import { MessageBox } from "@/components/MessageBox";
 import { Approval } from "@/components/NeedsYou";
 import { StepShell, pickBook } from "@/components/StepShell";
 import { Card, Empty, Pill } from "@/components/ui";
 import { bookPages, getSnapshot, stepAsk, stepTask } from "@/lib/data";
-import { TASK_STATUS } from "@/lib/labels";
+import { TASK_STATUS, bookNumber } from "@/lib/labels";
 import { canSee, viewer } from "@/lib/viewer";
 
 /**
@@ -27,6 +27,8 @@ export default async function Script({ searchParams }: { searchParams: Promise<{
 
 function ScriptView({ s, id, canWrite }: { s: Awaited<ReturnType<typeof getSnapshot>>; id: string; canWrite: boolean }) {
   const pages = bookPages(s, id);
+  const product = s.products.find((p) => p.product_id === id);
+  const notes = s.requests.filter((r) => r.product_id === id && r.page_number);
   const task = stepTask(s, id, "script");
   const ask = stepAsk(s, id, "script");
   const yours = pages.filter((p) => p.text_final).length;
@@ -39,6 +41,8 @@ function ScriptView({ s, id, canWrite }: { s: Awaited<ReturnType<typeof getSnaps
   return (
     <>
       <Card>
+        <p className="text-xs font-semibold uppercase tracking-wide text-orange-700">{bookNumber(product) || id}</p>
+        <h2 className="mb-2 text-xl font-semibold">{product?.title}</h2>
         <div className="flex flex-wrap items-center gap-2">
           <Pill tone={task?.status === "done" ? "good" : task?.status === "awaiting_mom" ? "accent" : "quiet"}>{task?.status === "done" ? "Approved" : task?.status === "awaiting_mom" ? "Ready for you" : "In the works"}</Pill>
           <span className="text-[15px]">{status}</span>
@@ -53,17 +57,7 @@ function ScriptView({ s, id, canWrite }: { s: Awaited<ReturnType<typeof getSnaps
       </Card>
 
       {pages.length ? (
-        <ol className="flex flex-col gap-3">
-          {pages.map((p) => (
-            <li key={p.page_id} className="glass rounded-3xl p-4 md:p-5">
-              <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-                <p className="text-sm font-semibold">Page {p.page_number}{p.text_final ? <span className="ml-2 font-normal text-orange-700">· your words</span> : null}</p>
-                {p.art_brief && <p className="text-xs text-[var(--quiet)]">Picture: {p.art_brief}</p>}
-              </div>
-              <PageText page={p} canEdit={canWrite} compact />
-            </li>
-          ))}
-        </ol>
+        <ScriptTabs productId={id} pages={pages} notes={notes} canWrite={canWrite} />
       ) : <Card><Empty>The script shows up here page by page as soon as the team writes it.</Empty></Card>}
 
       {canWrite && (

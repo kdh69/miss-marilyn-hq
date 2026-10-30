@@ -119,5 +119,5 @@ export const btn = {
   primary: "inline-flex min-h-11 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-orange-500 px-5 text-[15px] font-semibold text-white shadow-sm transition disabled:opacity-40",
   secondary: "inline-flex min-h-11 items-center justify-center rounded-full border border-orange-500 px-5 text-[15px] font-semibold text-orange-600 disabled:opacity-40",
   quiet: "inline-flex min-h-11 items-center justify-center rounded-full bg-black/5 px-4 text-[15px] disabled:opacity-40",
-  small: "inline-flex min-h-9 items-center justify-center rounded-full bg-orange-500 px-4 text-sm font-semibold text-white disabled:opacity-40",
+  small: "inline-flex min-h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-orange-500 px-4 text-sm font-semibold text-white disabled:opacity-40",
 };
