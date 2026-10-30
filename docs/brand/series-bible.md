@@ -139,8 +139,10 @@ classrooms are much easier to draw and read, and the photo page keeps the real-c
 
 - **Why she's here:** Zoey was the family's real dog and has passed away. She appears in every
   book as Miss M's best friend to honour her. This is a tribute, so treat her with care.
-- **Looks:** [TO FILL FROM PHOTOS: breed/size, coat colours and markings], [TO FILL: collar
-  colour]. Clara supplies the reference photos.
+- **Looks** (from Clara's photos, MM Brand → photos → inbox, `zoey-*`): a cream-to-apricot
+  goldendoodle, bigger than Miss M. Soft, wavy-curly coat all over; a shaggy fringe over warm
+  brown eyes; long fluffy ears; dark brown nose; a big plumed tail. Always wears her **pink
+  harness**. Gentle, a little goofy smile, sometimes with her tongue out.
 - **Personality** (*draft — Clara to confirm*): loyal, bouncy, big-hearted, always happy to see
   Miss M. Braver about some things (noise, new people), more nervous about others (baths, the
   vacuum), so the two friends take turns helping each other.
