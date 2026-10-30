@@ -1,10 +1,18 @@
-# Panel redesign plan: Clara's view and Kyle's view
+# Panel redesign: Clara's view and Kyle's view
 
-Why: on a phone the panel is a long scroll of cards with no clear next step. Only four of the
-eight tabs fit on screen, the Today page spends a whole screen on stat tiles before anything
-Clara can act on, and the book editor sits below a grid of six page thumbnails. Clara's
-priorities, in order, are: **write and edit books → see progress → jot ideas → accounts, socials
-and a to-do list → money**. The panel should read in that order on every screen size.
+Goal: phone and desktop equally good. Not a phone layout stretched to a desktop, and not a
+desktop layout squeezed onto a phone. Each screen is laid out for both: the phone gets a bottom
+tab bar, one column, a sticky save button and stacked rows; the desktop gets a sidebar, the
+editor beside the art, tables, and keyboard arrows to move between pages.
+
+Why: the old panel was a long scroll of cards with no clear next step. Only four of the eight
+tabs fit on a phone, the Today page spent a whole screen on stat tiles before anything Clara
+could act on, and the book editor sat below a grid of six page thumbnails. Clara's priorities,
+in order, are: **write and edit books → see progress → jot ideas → accounts, socials and a
+to-do list → money**. The panel reads in that order on every screen size.
+
+Status: steps 1–8 below are built (branch `panel-view-toggle`). What's left is polish from
+real use: Clara's first session on her phone will tell us which words still read wrong.
 
 The view toggle (done): Kyle's sidebar has a *Viewing as: Clara / Kyle* switch. It changes what
 is rendered, never who is writing; server actions always use the signed-in identity. Clara never
@@ -105,20 +113,30 @@ Books and Progress reuse Clara's components with IDs and statuses turned on.
 - Minimum tap target 44px; inputs 16px+ so iOS doesn't zoom.
 - No horizontal page scroll anywhere; tables become stacked rows on phones.
 
-## 9. Build order
+## 9. Build order (all done)
 
-1. **Shell**: bottom tabs, role-based tab sets, account sheet, remove Today. (small)
-2. **Book editor**: page strip + single page + sticky save + autosave + draft toggle. (the big one)
-3. **Needs you strip** on the shelf and inside each book; retire TodayItem's layout. (small)
-4. **Progress** stage track per book. (small)
-5. **Ideas** notepad + Scout cards. (medium)
-6. **To-do + Accounts** with Clara's account write and the week strip. (medium; schema
-   unchanged, one new server action with an owner check)
-7. **Money** copy pass. (tiny)
-8. **New book** flow. (small; one request row)
+1. **Shell**: bottom tabs, role-based tab sets, account sheet, Today removed. Old routes
+   (`/messages`, `/next`, `/trends`, `/accounts`) redirect to their new homes.
+2. **Book editor**: page strip + single page + sticky save + autosave + draft toggle.
+3. **Needs you strip** on the shelf and inside each book.
+4. **Progress** stage track per book.
+5. **Ideas** notepad + Scout cards.
+6. **To-do + Accounts** with Clara's account write (owner check in `setAccountStatus`) and the
+   week strip.
+7. **Money** copy pass.
+8. **New book** flow (one `idea` request row).
 
-Each step is its own commit and passes `npm run check`. Steps 1 and 2 ship first because they
-are what Clara will touch on day one.
+## 10. Phone vs desktop checklist
+
+| | Phone | Desktop |
+| --- | --- | --- |
+| Navigation | bottom tab bar, 5 tabs, icons + labels | sidebar, same 5 |
+| Account / view switch | avatar → sheet | bottom of sidebar |
+| Book editor | art, then words, Save rides above the tab bar while unsaved | art beside words, Save inline, ← → keys change page |
+| Tables | stacked label/value rows | real tables |
+| Header actions | stack under the title | sit to the right of the title |
+| Inputs | 16px so iOS doesn't zoom | inherit |
+| Sideways scroll | none (checked) | none (checked) |
 
 ## Rules kept
 

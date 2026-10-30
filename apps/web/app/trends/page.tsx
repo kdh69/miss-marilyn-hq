@@ -1,14 +1,8 @@
-import { Card } from "@/components/ui";
-import { Table } from "@/components/Table";
-import { getSnapshot } from "@/lib/data";
+import { redirect } from "next/navigation";
+import { viewer } from "@/auth";
 
-export default async function Trends() {
-  const s = await getSnapshot();
-  const rows = [...s.research].reverse();
-  return (
-    <Card title="What Scout found">
-      <Table rows={rows} cols={[["topic", "Topic"], ["finding", "Finding"], ["confidence", "Confidence"], ["suggested_action", "Idea"]]} empty="No research yet." />
-      {/* TODO: "Make this a product" button → creates a book_plan request for the Orchestrator */}
-    </Card>
-  );
+/** Moved: this lives under the new tabs now. */
+export default async function Moved() {
+  const v = await viewer();
+  redirect(v.view === "kyle" ? "/inbox" : "/ideas");
 }

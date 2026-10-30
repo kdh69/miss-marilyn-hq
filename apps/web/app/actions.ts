@@ -136,13 +136,17 @@ export async function setSystemStatus(value: "RUN" | "HALT"): Promise<Result> {
   return { ok };
 }
 
+/** Kyle can update any account; Clara can update the ones she owns (status only). */
 export async function setAccountStatus(accountId: string, status: string, loginEmail?: string): Promise<Result> {
   const who = await me();
-  if (who?.role !== "kyle") return { ok: false, error: "Only Kyle can update accounts." };
+  if (!who) return NOT_SIGNED_IN;
   const core = await Core.load(["accounts"]);
+  const row = core.rows("accounts").find((a) => a.account_id === accountId);
+  if (!row) return { ok: false, error: "That account isn't in the list." };
+  if (who.role !== "kyle" && (!row.owner.toLowerCase().includes("clara") || loginEmail !== undefined)) return { ok: false, error: "Only Kyle can change this one." };
   const patch: Record<string, string> = { status };
   if (loginEmail !== undefined) patch.login_email = loginEmail.trim();
-  const ok = await core.update("accounts", accountId, patch, "kyle");
+  const ok = await core.update("accounts", accountId, patch, who.role);
   refresh();
-  return { ok };
+  return ok ? { ok } : { ok, error: "That row just changed — refresh and try again." };
 }

@@ -27,3 +27,12 @@ body {
   backdrop-filter: blur(22px) saturate(160%);
   -webkit-backdrop-filter: blur(22px) saturate(160%);
 }
+
+/* Phone tab bar sits above the home indicator. */
+.tabbar { padding-bottom: max(10px, env(safe-area-inset-bottom)); background: rgb(255 255 255 / 0.88); }
+.topbar { background: rgb(255 255 255 / 0.8); }
+
+/* 16px+ inputs so iOS doesn't zoom on focus. Utilities still win (layered). */
+@layer base {
+  input, textarea, select { font-size: 16px; }
+}

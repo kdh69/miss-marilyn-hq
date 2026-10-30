@@ -1,6 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { Core, type Row } from "@mm/core";
+import { STAGE_TRACK, TASK_STATUS, TASK_TYPE } from "./labels";
 
 const TABS = ["tasks", "assets", "products", "skus", "listings", "content", "mom_queue", "pages", "requests", "research", "accounts", "costs", "transactions", "log", "config"] as const;
 type Tab = (typeof TABS)[number];
@@ -79,6 +80,8 @@ function sample(): Snapshot {
 
 export const STAGES = ["story_draft", "art_page", "art_cover", "interior_layout", "cover_wrap", "kdp_packet"];
 
+const OPEN = (t: Row) => !["done", "cancelled"].includes(t.status);
+
 /** Rough book progress: share of the production chain that's done. */
 export function bookProgress(s: Snapshot, productId: string) {
   const tasks = s.tasks.filter((t) => t.product_id === productId && t.status !== "cancelled");
@@ -86,6 +89,71 @@ export function bookProgress(s: Snapshot, productId: string) {
   const done = tasks.filter((t) => t.status === "done").length;
   const current = tasks.find((t) => t.status !== "done");
   return { pct: Math.round((done / tasks.length) * 100), stage: current ? current.title : "Complete" };
+}
+
+/** Where a book is on the Story → Art → Layout → Publish → On sale track, in plain words. */
+export function bookStage(s: Snapshot, productId: string) {
+  const product = s.products.find((p) => p.product_id === productId);
+  const tasks = s.tasks.filter((t) => t.product_id === productId && t.status !== "cancelled");
+  const pages = s.pages.filter((p) => p.product_id === productId);
+  const yours = pages.filter((p) => p.text_final).length;
+  const stageOf = (type: string) => Math.max(0, STAGE_TRACK.findIndex((st) => st.types.includes(type)));
+  const open = tasks.filter(OPEN);
+  const live = product?.status === "live" || s.listings.some((l) => l.sku.startsWith(productId) && l.status === "live");
+  let index = live ? 4 : open.length ? Math.min(...open.map((t) => stageOf(t.task_type))) : tasks.length ? Math.min(3, Math.max(...tasks.map((t) => stageOf(t.task_type))) + 1) : 0;
+  if (live) index = 4;
+  const waitingOnYou = tasks.filter((t) => t.status === "awaiting_mom");
+  const working = open.filter((t) => !["awaiting_mom", "todo"].includes(t.status)).sort((a, b) => stageOf(a.task_type) - stageOf(b.task_type));
+  const queued = open.filter((t) => t.status === "todo");
+  const name = (t: Row) => TASK_TYPE[t.task_type] ?? t.title;
+  const now = live ? "On sale." : working.length ? `${name(working[0])}: ${(TASK_STATUS[working[0].status] ?? working[0].status).toLowerCase()}.` : waitingOnYou.length ? "Waiting on you." : queued.length ? `${name(queued[0])} is next in line.` : tasks.length ? "All done." : "Not started yet.";
+  const waiting = waitingOnYou.length ? waitingOnYou.map(name).join(", ") : pages.length && yours < pages.length ? `${pages.length - yours} page${pages.length - yours > 1 ? "s" : ""} still in the draft's words` : "";
+  const next = queued.length ? name(queued[0]) : index < 4 ? STAGE_TRACK[index + 1]?.label ?? "" : "";
+  const done = tasks.filter((t) => t.status === "done").length;
+  return { index, label: STAGE_TRACK[index].label, now, waiting, next, pct: tasks.length ? Math.round((done / tasks.length) * 100) : 0, pages: pages.length, yours };
+}
+
+export type NeedsYouItem =
+  | { kind: "approve"; id: string; productId: string; title: string; item: Row }
+  | { kind: "question"; id: string; productId: string; title: string; request: Row };
+
+/** Everything waiting on the person looking: approvals in mom_queue and unanswered questions to them. */
+export function needsYou(s: Snapshot, view: "mom" | "kyle"): NeedsYouItem[] {
+  const taskProduct = (taskId: string) => s.tasks.find((t) => t.task_id === taskId)?.product_id ?? "";
+  const approvals: NeedsYouItem[] = view === "mom"
+    ? s.mom_queue.filter((m) => !m.answer && !m.processed_at).map((m) => ({ kind: "approve", id: m.item_id, productId: taskProduct(m.task_id), title: m.summary, item: m }))
+    : [];
+  const questions: NeedsYouItem[] = s.requests
+    .filter((r) => r.to === view && !r.reply && !["done", "wont_do"].includes(r.status))
+    .map((r) => ({ kind: "question", id: r.request_id, productId: r.product_id, title: r.body, request: r }));
+  return [...approvals, ...questions];
+}
+
+export const bookTitle = (s: Snapshot, productId: string) => s.products.find((p) => p.product_id === productId)?.title ?? productId;
+
+export type TodoItem = { id: string; when: string; what: string; where: string; href: string; done?: boolean };
+
+/** Clara's to-do list: approvals, questions, her own accounts, this week's posts. Sorted by date, undated last. */
+export function todoList(s: Snapshot, view: "mom" | "kyle"): TodoItem[] {
+  const items: TodoItem[] = [];
+  for (const n of needsYou(s, view)) {
+    const due = n.kind === "approve" ? s.tasks.find((t) => t.task_id === n.item.task_id)?.due_date ?? "" : n.request.created_at.slice(0, 10);
+    items.push({ id: n.id, when: due, what: n.title, where: n.productId ? bookTitle(s, n.productId) : "The business", href: n.productId ? `/books/${n.productId}` : view === "mom" ? "/ideas" : "/inbox" });
+  }
+  const mine = view === "mom" ? "clara" : "kyle";
+  for (const a of s.accounts.filter((a) => ["todo", "in_progress", "waiting"].includes(a.status) && a.owner.toLowerCase().includes(mine) && a.phase === "now")) {
+    items.push({ id: a.account_id, when: "", what: `Set up ${a.service}`, where: "Accounts", href: view === "mom" ? "/todo#accounts" : "/system#accounts" });
+  }
+  const weekEnd = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
+  for (const c of s.content.filter((c) => ["approved", "scheduled"].includes(c.status) && c.scheduled_for && c.scheduled_for.slice(0, 10) <= weekEnd)) {
+    items.push({ id: c.content_id, when: c.scheduled_for.slice(0, 10), what: `Post goes out: ${c.hook || c.content_type}`, where: c.channel, href: "/todo" });
+  }
+  return items.sort((a, b) => (a.when || "9999").localeCompare(b.when || "9999"));
+}
+
+/** When the backend last ran, from the log. */
+export function lastTick(s: Snapshot) {
+  return [...s.log].reverse().find((l) => l.actor === "backend")?.ts ?? "";
 }
 
 export function spendToday(s: Snapshot) {
