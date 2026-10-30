@@ -5,6 +5,7 @@ Grok bots and Claude QC write into it; a backend runs every 30 minutes on GitHub
 works from her own panel (Next.js on Vercel).
 
 - Design: [Phase 1 Build Spec](https://claude.ai/artifact/SK5iZFL8TkRLKDzAwv5ihP)
+- **Picking this up? Start with [`docs/HANDOFF.md`](docs/HANDOFF.md)** — what is done and what is outstanding.
 - Setup, in order: [`docs/SETUP.md`](docs/SETUP.md) · live checklist: [Launch Checklist](https://claude.ai/artifact/FzUU8wZjrWifR9sv6Ejrpy)
 - Accounts: [`docs/ACCOUNTS.md`](docs/ACCOUNTS.md) · bot prompts: [`docs/bot-prompts.md`](docs/bot-prompts.md)
 - Brand drafts for MM Brand: [`docs/brand/`](docs/brand/)

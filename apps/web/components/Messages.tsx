@@ -7,7 +7,7 @@ const WHO: Record<string, string> = { mom: "Clara", kyle: "Kyle", orchestrator: 
 const KIND: Record<string, string> = { note: "Note", change: "Change", idea: "Idea", question: "Question", rule: "Rule" };
 const STATUS: Record<string, string> = { new: "New", seen: "Seen", in_progress: "On it", done: "Done", wont_do: "Not doing" };
 
-export function MessageItem({ r, viewer }: { r: Req; viewer: "mom" | "kyle" | null }) {
+export function MessageItem({ r, viewer }: { r: Req; viewer: "mom" | "kyle" | "family" | null }) {
   const [reply, setReply] = useState("");
   const [msg, setMsg] = useState("");
   const [pending, start] = useTransition();

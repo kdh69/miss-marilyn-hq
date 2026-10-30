@@ -1,17 +1,21 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
-import { authConfigured, me, signOut } from "@/auth";
+import { PreviewSwitch } from "@/components/PreviewSwitch";
+import { authConfigured, me, signOut, type PanelRole } from "@/auth";
 import { SystemBanner } from "@/components/SystemBanner";
 import { getSnapshot } from "@/lib/data";
+import { hiddenTabs, viewerRole } from "@/lib/viewer";
+import { familySignOut } from "@/app/actions";
 
-async function UserChip() {
-  if (!authConfigured()) return <p className="mt-6 hidden text-xs text-[var(--quiet)] md:block">Preview mode — sign-in not set up, editing off.</p>;
+async function UserChip({ viewer }: { viewer: PanelRole | null }) {
+  if (!authConfigured()) return <PreviewSwitch as={viewer === "kyle" ? "kyle" : "mom"} />;
   const who = await me();
   if (!who) return null;
+  const out = who.role === "family" && !who.email ? familySignOut : async () => { "use server"; await signOut({ redirectTo: "/signin" }); };
   return (
-    <form className="mt-6 hidden md:block" action={async () => { "use server"; await signOut({ redirectTo: "/signin" }); }}>
-      <p className="text-xs text-[var(--quiet)]">Signed in as {who.role === "mom" ? "Clara" : "Kyle"}</p>
+    <form className="mt-6 hidden md:block" action={out}>
+      <p className="text-xs text-[var(--quiet)]">Signed in as {who.name || who.email}{who.role === "family" ? " (view only)" : ""}</p>
       <button className="text-xs text-[var(--quiet)] underline">Sign out</button>
     </form>
   );
@@ -21,8 +25,12 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Miss Marilyn HQ", description: "Clara's control panel" };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [s, who] = await Promise.all([getSnapshot().catch(() => null), me()]);
+  const [s, viewer] = await Promise.all([getSnapshot().catch(() => null), viewerRole()]);
   const halted = s?.config.find((c) => c.key === "system_status")?.value === "HALT";
+  const open = (r: Record<string, string>) => r.to === viewer && !r.reply && !["done", "wont_do"].includes(r.status);
+  const waiting = s ? s.mom_queue.filter((m) => !m.answer && !m.processed_at).length : 0;
+  const forMe = s ? s.requests.filter(open).length : 0;
+  const badges = { "/": viewer === "mom" ? waiting + forMe : forMe, "/messages": forMe };
   return (
     <html lang="en">
       <body>
@@ -34,13 +42,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </div>
         <div className="mx-auto flex max-w-6xl flex-col gap-4 p-4 md:flex-row md:p-6">
           <aside className="glass rounded-3xl p-4 md:sticky md:top-6 md:h-[calc(100vh-3rem)] md:w-56 md:shrink-0">
-            <p className="text-[15px] font-semibold">Miss Marilyn</p>
-            <p className="mb-4 text-xs text-[var(--quiet)]">Control panel</p>
-            <Nav />
-            <UserChip />
+            <div className="mb-4 flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-violet-500 text-sm font-bold text-white shadow-sm">M</span>
+              <div>
+                <p className="text-[15px] font-semibold leading-tight">Miss Marilyn</p>
+                <p className="text-xs text-[var(--quiet)]">Control panel</p>
+              </div>
+            </div>
+            <Nav badges={badges} hidden={hiddenTabs(viewer)} />
+            <UserChip viewer={viewer} />
           </aside>
           <main className="min-w-0 flex-1">
-            <SystemBanner halted={halted} viewer={who?.role ?? null} />
+            <SystemBanner halted={halted} viewer={viewer} />
             {children}
           </main>
         </div>

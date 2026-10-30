@@ -1,11 +1,13 @@
 /**
  * npm run dryrun — pushes one fake task through the real pipeline and cleans up:
- *   bot writes task + asset → QC (real Claude call) → Clara's queue → Clara approves
- *   → backend applies it → done; plus a message and a page edit round-trip.
- * Costs a few cents of QC. Touches only rows it creates (IDs start with T-DRY / Q-DRY / *-DRY).
+ *   bot writes task + asset → QC (real Claude call, or a recorded pass in manual QC mode)
+ *   → Clara's queue → Clara approves → backend applies it → done; plus a message and a
+ *   page edit round-trip. Costs a few cents of QC with ANTHROPIC_API_KEY, nothing without.
+ *   Touches only rows it creates (IDs start with T-DRY / Q-DRY / *-DRY).
  */
 import { Core, nowIso } from "@mm/core";
 import { qcGate } from "./jobs/gatekeeper";
+import { autoQcEnabled } from "./lib/qc";
 import { momSync, processRequests } from "./jobs/momSync";
 
 const stamp = nowIso().replace(/\D/g, "").slice(0, 12);
@@ -41,12 +43,13 @@ async function main() {
   }]);
   check("task + asset rows written", true, TASK);
 
-  console.log("\n2. Backend QC (real Claude call)");
+  const auto = autoQcEnabled();
+  console.log(`\n2. Backend QC (${auto ? "real Claude call" : "manual QC mode: recorded pass, as npm run qc would"})`);
   core = await Core.load();
-  await qcGate(core, true, TASK);
+  await qcGate(core, true, TASK, auto ? undefined : async () => ({ result: "pass", notes: "manual QC: dry run", summaryForMom: "Dry run item, please approve." }));
   core = await Core.load();
   let task = core.rows("tasks").find((t) => t.task_id === TASK);
-  check("QC ran and logged a cost", core.rows("costs").some((c) => c.task_id === TASK && c.category === "qc_api"), task?.qc_notes?.slice(0, 60));
+  if (auto) check("QC ran and logged a cost", core.rows("costs").some((c) => c.task_id === TASK && c.category === "qc_api"), task?.qc_notes?.slice(0, 60));
   if (!check("QC passed → waiting on Clara", task?.status === "awaiting_mom", `status=${task?.status}`)) return;
   const item = core.rows("mom_queue").find((m) => m.task_id === TASK);
   if (!check("item on Clara's Today list", !!item, item?.summary)) return;

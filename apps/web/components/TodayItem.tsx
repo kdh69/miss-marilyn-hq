@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import { answerItem } from "@/app/actions";
 import { PhotoUpload } from "./PhotoUpload";
+import { ago } from "@/lib/labels";
 
 const VERB: Record<string, string> = { approve: "Approve", photos: "Send photos", rewrite: "Rewrite story", kdp_publish: "Publish on KDP" };
 
@@ -22,8 +23,12 @@ export function TodayItem({ item }: { item: Record<string, string> }) {
     <div className="rounded-2xl border border-white bg-white/65 p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-orange-600">{VERB[item.item_type] ?? "Review"}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-orange-700">
+            {VERB[item.item_type] ?? "Review"}
+            {item.requested_at && <span className="ml-2 font-normal normal-case tracking-normal text-[var(--quiet)]">{ago(item.requested_at)}</span>}
+          </p>
           <p className="mt-1 font-semibold">{item.summary}</p>
+          {item.qc_summary && <p className="mt-0.5 text-sm text-[var(--quiet)]">✓ {item.qc_summary}</p>}
           {item.preview_url && (
             <a href={item.preview_url} target="_blank" className="mt-1 inline-block text-sm text-violet-600 underline">Open preview</a>
           )}

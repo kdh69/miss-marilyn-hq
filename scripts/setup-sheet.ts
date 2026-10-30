@@ -102,11 +102,11 @@ async function main() {
       });
     }
 
-    // Row 1 is Kyle-only on every tab (owner can always edit).
-    reqs.push({ addProtectedRange: { protectedRange: { description: `${PROTECT_TAG}:header:${t.name}`, range: { sheetId: id, startRowIndex: 0, endRowIndex: 1 }, editors: { users: [] } } } });
+    // Row 1 is Kyle-only on every tab (owner can always edit). The service account stays an editor
+    // everywhere: Sheets refuses a protection that removes the caller, and re-runs rewrite row 1.
+    reqs.push({ addProtectedRange: { protectedRange: { description: `${PROTECT_TAG}:header:${t.name}`, range: { sheetId: id, startRowIndex: 0, endRowIndex: 1 }, editors: { users: [serviceEmail] } } } });
     if (wholeLocked) {
-      const editors = t.kyleOnly ? [] : [serviceEmail];
-      reqs.push({ addProtectedRange: { protectedRange: { description: `${PROTECT_TAG}:tab:${t.name}`, range: { sheetId: id, startRowIndex: 1 }, editors: { users: editors } } } });
+      reqs.push({ addProtectedRange: { protectedRange: { description: `${PROTECT_TAG}:tab:${t.name}`, range: { sheetId: id, startRowIndex: 1 }, editors: { users: [serviceEmail] } } } });
     } else if (lockedFrom >= 0) {
       reqs.push({ addProtectedRange: { protectedRange: { description: `${PROTECT_TAG}:backend:${t.name}`, range: { sheetId: id, startRowIndex: 1, startColumnIndex: lockedFrom, endColumnIndex: headers.length }, editors: { users: [serviceEmail] } } } });
     }

@@ -49,8 +49,8 @@ the panel's Progress page within a minute. Then set its status to `cancelled` (a
 If columns shift or rows can't be appended: stop and ask Claude for the bot API fallback.
 
 ## 5. GitHub (repo → Settings → Secrets and variables → Actions)
-Required: `GOOGLE_SERVICE_ACCOUNT_JSON`, `MM_CORE_SHEET_ID`, `ANTHROPIC_API_KEY`, `KYLE_EMAIL`.
-Optional: `CLARA_EMAIL`, `RESEND_API_KEY`, `NOTIFY_FROM`, `PANEL_URL`, `AUTH_GOOGLE_ID`,
+Required: `GOOGLE_SERVICE_ACCOUNT_JSON`, `MM_CORE_SHEET_ID`, `KYLE_EMAIL`.
+Optional: `ANTHROPIC_API_KEY` (without it QC is manual, see below), `CLARA_EMAIL`, `RESEND_API_KEY`, `NOTIFY_FROM`, `PANEL_URL`, `AUTH_GOOGLE_ID`,
 `AUTH_GOOGLE_SECRET`, `GOOGLE_OWNER_REFRESH_TOKEN`.
 Then Actions → **MM backend tick** → Run workflow → `doctor`, then `dryrun`. Both green = live.
 
@@ -65,6 +65,13 @@ Then Actions → **MM backend tick** → Run workflow → `doctor`, then `dryrun
 - [ ] Clara approves `docs/brand/series-bible.md` and `style-guide.md` → upload to **MM Brand**.
 - [ ] Paste the prompts from `docs/bot-prompts.md` into the 7 bots.
 - [ ] Confirm whether Grok can schedule the Orchestrator (else send `@Orchestrator sweep` twice a day).
+
+## Manual QC (no ANTHROPIC_API_KEY)
+The backend leaves finished work at `ready_for_qc`. In Claude Code, ask Claude to run QC:
+`npm run qc` lists each waiting task with its brief, files, rubric and lessons; after review,
+`npm run qc -- T-0012 pass "one sentence for Clara"` or `npm run qc -- T-0012 fail "what to fix"`.
+Completeness and KDP preflight still run first. A pass goes to Clara's queue (or `done`); the
+second fail escalates. Check the queue at least daily, or bots sit idle waiting on it.
 
 ## Weekly
 - Compare Grok billing to `costs` (`ai_credits`). Clear **escalated**/**blocked**. Triage Clara's messages.

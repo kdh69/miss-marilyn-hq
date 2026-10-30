@@ -1,6 +1,6 @@
 # Notes for Claude Code
 
-Read the README first, then the spec it links (sections 2–7, 9, 9b are the build contract).
+Read [docs/HANDOFF.md](docs/HANDOFF.md) for current state, then the README, then the spec it links (sections 2–7, 9, 9b are the build contract).
 
 Rules that hold everywhere:
 - `packages/core/schema.json` is the source of truth for tabs, headers, dropdowns, ID columns
@@ -18,7 +18,7 @@ Rules that hold everywhere:
 - Times: ISO 8601 UTC in cells; the daily spend cap resets on the New York day.
 
 Commands: `npm run check` (typecheck + tests + panel build), `npm run doctor`, `npm run dryrun`,
-`npm run backend` (one tick), `npm run web`, `npm run sheet:setup`.
+`npm run backend` (one tick), `npm run web`, `npm run sheet:setup`, `npm run qc` (manual QC).
 Scripts load `.env` automatically (Node `--env-file-if-exists`).
 
 - Drive file creation goes through `driveWriter()` (owner token if set, else service account);
@@ -26,5 +26,12 @@ Scripts load `.env` automatically (Node `--env-file-if-exists`).
 - Backend steps are isolated in `apps/backend/src/run.ts`; add new jobs with `step(...)`.
 - New tab or column: edit `schema.json`, run `npm test` (integrity tests), then `sheet:setup`.
 
-Next up: bot API fallback if the Grok row test fails; Etsy publish once API access lands;
+QC is manual while there's no `ANTHROPIC_API_KEY`: when asked to run QC, `npm run qc` lists the
+queue; read each task's rubric and files, then record `npm run qc -- <task_id> pass|fail "<text>"`.
+
+Panel roles: kyle (everything), mom (no costs/Money), family (read-only, Google `:family` or the
+`FAMILY_PASSWORD`). Every panel write goes through `editor()` in `apps/web/auth.ts`.
+Away from the laptop: see [docs/REMOTE.md](docs/REMOTE.md).
+
+Next up: Etsy publish once API access lands;
 KDP report + Etsy sales import for the Money tab; register photos dropped straight into Drive.

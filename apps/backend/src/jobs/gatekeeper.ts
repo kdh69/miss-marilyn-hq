@@ -4,7 +4,7 @@
  */
 import { Core, isLegalTransition, nowIso, type Row } from "@mm/core";
 import { notifyKyle } from "../lib/notify";
-import { runQc } from "../lib/qc";
+import { autoQcEnabled, runQc, type QcResult } from "../lib/qc";
 import { pushToMom } from "./momSync";
 import { needsPreflight, preflight } from "../lib/preflight";
 
@@ -66,8 +66,17 @@ async function revert(core: Core, task: Row, to: string, why: string) {
   await notifyKyle(`${task.task_id} reverted to ${to} — ${why}`);
 }
 
-export async function qcGate(core: Core, qcBudgetLeft: boolean, onlyTaskId?: string): Promise<void> {
+export type Judge = (task: Row, assets: Row[], rubric: string) => Promise<QcResult>;
+
+/**
+ * Moves ready_for_qc tasks through completeness → preflight → `judge`. The judge is
+ * Claude (runQc) when ANTHROPIC_API_KEY is set; otherwise tasks wait at ready_for_qc
+ * until Kyle records a verdict with `npm run qc`, which passes its own judge.
+ */
+export async function qcGate(core: Core, qcBudgetLeft: boolean, onlyTaskId?: string, judge?: Judge): Promise<void> {
   if (!qcBudgetLeft) return;
+  judge ??= autoQcEnabled() ? (task, assets, rubric) => runQc(core, task, assets, rubric) : undefined;
+  if (!judge) return;
   const types = new Map(core.rows("task_types").map((t) => [t.task_type, t]));
   const assets = new Map(core.rows("assets").map((a) => [a.asset_id, a]));
   const maxAttempts = Number(core.config("qc_max_attempts") || 2);
@@ -97,7 +106,7 @@ export async function qcGate(core: Core, qcBudgetLeft: boolean, onlyTaskId?: str
     const pre = needsPreflight(task.task_type) ? await preflight(core, task, taskAssets).catch((e) => [`preflight error: ${String(e).slice(0, 150)}`]) : [];
     const result = pre.length
       ? { result: "fail" as const, notes: `PREFLIGHT (KDP specs):\n${pre.join("\n")}`, summaryForMom: "" }
-      : await runQc(core, task, taskAssets, type?.qc_rubric ?? "");
+      : await judge(task, taskAssets, type?.qc_rubric ?? "");
     const attempts = (Number(task.qc_attempts) || 0) + 1;
     const patch = { qc_result: result.result, qc_notes: result.notes, qc_at: nowIso(), qc_attempts: String(attempts) };
 
