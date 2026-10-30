@@ -27,6 +27,8 @@ async function list(core: Core) {
     console.log(`  product ${t.product_id}${t.sku ? ` / ${t.sku}` : ""}, owner ${t.owner}, attempt ${(Number(t.qc_attempts) || 0) + 1}`);
     console.log(`  rubric  ${fileURLToPath(existsSync(file) ? file : rubricPath(""))}`);
     console.log(`  goes to Clara on pass: ${type?.needs_mom === "TRUE" ? "yes" : "no"}`);
+    const sent = [...core.rows("log")].reverse().find((l) => l.task_id === t.task_id && l.to_status === "ready_for_qc");
+    console.log(`  bot's self-check: ${/self-check/i.test(sent?.message ?? "") ? sent!.message : "(none logged; L-0012 asks for one)"}`);
     console.log(`  brief   ${t.brief.replace(/\n/g, "\n          ")}`);
     for (const id of t.output_asset_ids.split(",").map((s) => s.trim()).filter(Boolean)) {
       const a = assets.get(id);

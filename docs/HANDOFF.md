@@ -60,6 +60,11 @@ Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing
   The Miss M / Mama / Papa character sheets in T-0012 carry over into Book 1.
 - **Ollie (OL-B01) is archived:** product and SKUs `retired`, all its tasks `cancelled`, its requests
   closed. Rows and Drive files are kept; the panel and the bots ignore it.
+- **Bots self-check before QC** (lesson L-0012): each bot runs its task type's list in the Drive doc
+  *Miss Marilyn QC Checklists* (MM Brand) and logs `self-check passed: …` when it sets ready_for_qc;
+  `npm run qc` prints that line. The doc copies `apps/backend/rubrics/`, so update both together.
+  New team rules live in `lessons` (L-0008–L-0012), which every bot reads each run, so Grok
+  descriptions don't need re-pasting for rule changes. MM Brand also holds the series bible and style guide as Docs.
 - **Every book is 24 pages now** (KDP's minimum): 10 story spreads, story text on 11–15 pages, under
   50 words a spread. Series bible §3, the story rubric and the Producer prompt say so.
 - **Marketing and Etsy** for Book 2 stay blocked with it.
