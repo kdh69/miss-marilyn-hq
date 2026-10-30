@@ -35,7 +35,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     authorized: async ({ auth: s, request }) => {
       if (!authConfigured()) return true; // preview mode: read-only sample, writes refused in actions
-      if (request.nextUrl.pathname.startsWith("/signin")) return true;
+      if (["/signin", "/privacy"].some((p) => request.nextUrl.pathname.startsWith(p))) return true;
       return !!s?.user || (await isFamilyCookie(request.cookies.get(FAMILY_COOKIE)?.value));
     },
   },
