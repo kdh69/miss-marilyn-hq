@@ -5,7 +5,7 @@ import { NeedsYou } from "@/components/NeedsYou";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { Card, Empty, PageHeader, StageTrack, StatRow, btn } from "@/components/ui";
 import { Table } from "@/components/Table";
-import { bookStage, getSnapshot, greeting, lastTick, needsYou, nextToWrite, spendToday, todoList } from "@/lib/data";
+import { bookStage, getSnapshot, greeting, lastTick, needsYou, spendToday, todoList, upNext } from "@/lib/data";
 import { WHO, when } from "@/lib/labels";
 
 const usd = (n: number) => `${n < 0 ? "-" : ""}$${Math.abs(n).toFixed(2)}`;
@@ -19,7 +19,7 @@ export default async function Overview() {
   const titles = Object.fromEntries(s.products.map((p) => [p.product_id, p.title]));
   const books = s.products.filter((p) => p.status !== "retired");
   const inWorks = books.filter((p) => p.status === "in_production").length;
-  const write = nextToWrite(s);
+  const next = upNext(s).sort((a, b) => Number(b.mine) - Number(a.mine));
   const pagesTotal = s.pages.filter((p) => books.some((b) => b.product_id === p.product_id));
   const pagesYours = pagesTotal.filter((p) => p.text_final).length;
   const sales = s.transactions.reduce((a, t) => a + (Number(t.net_usd) || 0), 0);
@@ -62,16 +62,23 @@ export default async function Overview() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
         {/* Left: what to do */}
         {!family && <div className="flex flex-col gap-4 lg:col-span-3">
-          {v.view === "mom" && write[0] && (
-            <Link href={`/books/${write[0].productId}?page=${write[0].page}`} className="glass flex items-center gap-4 rounded-3xl p-4 transition hover:bg-white/70 md:p-5">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-500 text-xl text-white" aria-hidden>✎</span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-xs font-semibold uppercase tracking-wide text-orange-600">Keep writing</span>
-                <span className="block text-[17px] font-semibold leading-snug">{write[0].title}</span>
-                <span className="block text-sm text-[var(--quiet)]">Page {write[0].page} is next · {write[0].left} of {write[0].total} pages still in the draft&apos;s words</span>
-              </span>
-              <span className="text-xl text-[var(--quiet)]">›</span>
-            </Link>
+          {v.view === "mom" && next.length > 0 && (
+            <Card title="Up next">
+              <ul className="flex flex-col divide-y divide-black/5">
+                {next.map((n) => (
+                  <li key={n.id}>
+                    <Link href={n.href} className="flex items-center gap-3 py-3">
+                      <span className={`w-16 shrink-0 rounded-full px-2 py-1 text-center text-[11px] font-semibold ${n.mine ? "bg-orange-500 text-white" : "bg-black/5 text-[var(--quiet)]"}`}>{n.step}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[15px] font-semibold leading-snug">{n.text}</span>
+                        <span className="block text-xs text-[var(--quiet)]">{n.title}</span>
+                      </span>
+                      <span className="text-[var(--quiet)]">›</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
           )}
 
           {items.length ? <NeedsYou items={items} viewer={v.view} titles={titles} /> : (
@@ -96,11 +103,11 @@ export default async function Overview() {
               {books.map((p) => {
                 const st = bookStage(s, p.product_id);
                 return (
-                  <Link key={p.product_id} href={`/books/${p.product_id}`} className="block">
-                    <p className="font-semibold">{p.title}</p>
-                    <div className="my-2"><StageTrack index={st.index} /></div>
+                  <div key={p.product_id}>
+                    <Link href={`/books/${p.product_id}`} className="font-semibold hover:text-orange-700">{p.title}</Link>
+                    <div className="my-2"><StageTrack index={st.index} book={p.product_id} /></div>
                     <p className="text-sm text-[var(--quiet)]">{st.now}{st.waiting && !family ? <span className="text-orange-700"> · {kyle ? "On Clara" : "On you"}: {st.waiting}</span> : ""}</p>
-                  </Link>
+                  </div>
                 );
               })}
               {!books.length && <Empty>No books yet.</Empty>}

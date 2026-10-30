@@ -28,7 +28,7 @@ export default async function Book({ params, searchParams }: { params: Promise<{
         eyebrow={technical ? `${id} · ${book.status}${book.lesson_theme ? ` · ${book.lesson_theme}` : ""}` : `${PRODUCT_STATUS[book.status] ?? book.status}${book.lesson_theme ? ` · about ${book.lesson_theme}` : ""}`}
         sub={st.now}
       />
-      <div className="px-1"><StageTrack index={st.index} /></div>
+      <div className="px-1"><StageTrack index={st.index} book={id} /></div>
 
       <NeedsYou items={items} viewer={v.view} showBook={false} />
 

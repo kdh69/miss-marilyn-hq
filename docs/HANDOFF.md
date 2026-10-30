@@ -41,7 +41,7 @@ Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing
 
 ### The board after today's QC
 
-- **Passed, waiting on Mom:** T-0003 Ollie front cover (on her Overview to approve).
+- **Passed, waiting on Mom:** T-0003 Ollie front cover (on her Overview → Illustrations to approve).
 - **Failed, back to the bots** (notes in each task's `qc_notes`):
   - T-0013 Miss M cover: yarn ball instead of red string, no nose beauty mark, propeller plane, Mama too orange.
   - T-0001 Ollie story: no `art_brief`/`characters` on any page, brave pebble/pocket continuity, p31 notes missing.
@@ -73,9 +73,9 @@ Done 2026-10-30: merged `panel-preview` into `main` (#9), set the GitHub secrets
 ## Mom — outstanding
 
 - **Pick the author name** (pen name or real name). It blocks the Ollie upload and both KDP packets.
-- **Rewrite each page in her own words** on the panel (Overview → *Keep writing*, or Books → a book). Builder prints only her words
+- **Rewrite each page in her own words** in the panel's **Script** step (the whole script, page by page), then approve it. Builder prints only her words
   (`text_final`); both books have none yet.
-- **Approve the Ollie cover** on her Overview.
+- **Approve the Ollie cover** in the Illustrations step.
 - **Miss M material:** 15–20 photos and 2–3 videos; Zoey's photos and description; the rescue story and
   dedication for the "Meet the Real Miss Marilyn" page.
 - **Business setup:** LLC + EIN, business bank account and card, brand domain; then KDP, Etsy,

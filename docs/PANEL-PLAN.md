@@ -185,6 +185,37 @@ Main gained a family role and a costs rule while this was being built. Both hold
 - **Costs are Kyle's.** Clara's Money tab shows sales only; costs, profit and bot spend are on Kyle's.
 - Every write still goes through `editor()`; `viewer()` only decides what is shown.
 
+## 14. Clara's flow (after talking it through with her)
+
+Clara's panel now follows how a book actually gets made. Her tabs are the steps:
+
+**Overview → Ideas → Script → Illustrations → Building → Full book review**
+
+- **Overview:** *Up next*, one line per book with the action for its step (approve the script,
+  approve the cover, look over the layout, give the final OK), then what needs her, Tell the team,
+  photos, every book's step track (tap a step to jump there), coming up, Scout.
+- **Ideas** is the HQ for every idea, not just books: Book, Printable, Merch, Social, Business or
+  Anything. The kind leads the text ("Merch idea: …") so the team and the filters know what it is;
+  no new columns. A book idea asks for a working title, lesson and ages and becomes a book. The
+  Orchestrator prompt says what to do with each kind.
+- **Script:** the whole script on one screen, page by page, each page editable in her words
+  (autosave; the untouched draft is never saved as hers). Approving the script (the story's
+  `rewrite` ask → Done) is what starts the illustrations. "Drop it" is hidden here so a whole
+  story can't be cancelled by a mis-tap. A warning shows how many pages are still the draft's
+  words, because only her words print.
+- **Illustrations:** pages drawn so far, the cover, and the cover approval. Tap a page to look
+  closer or ask for a change.
+- **Building** and **Full book review** use the book page view (picture + her words, page by
+  page), as on a book's own page. Building adds what's being put together, the print files and
+  the layout approval; Review adds a checklist (all pages hers, all drawn, layout approved) and the
+  final OK — nothing publishes without it.
+- Each step page has a row of books: the ones on this step first, a dot where one needs her.
+- Tab badges count what's waiting on each step. All books, Progress, To-do & accounts and Money
+  moved to **More** (sidebar on desktop, the avatar sheet on a phone).
+- Kyle keeps his tabs; the steps are under his More. Family doesn't see the step pages.
+- A book's step is the earliest step with open work; tasks outside the steps (a photo request)
+  don't move it. Steps and their task types live in `STAGE_TRACK` in `apps/web/lib/labels.ts`.
+
 ## Rules kept
 
 - The panel still writes only `mom_queue` answers, `requests`, `pages.text_final*`, photos, and

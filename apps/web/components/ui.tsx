@@ -82,16 +82,26 @@ export function Bar({ pct, tone = "accent" }: { pct: number; tone?: "accent" | "
   );
 }
 
-/** Story → Art → Layout → Publish → On sale, with the current stage lit. */
-export function StageTrack({ index }: { index: number }) {
+/**
+ * Idea → Script → Art → Build → Review, with the current step lit. Pass `book` to make each step a
+ * link to that step's page for the book.
+ */
+export function StageTrack({ index, book }: { index: number; book?: string }) {
   return (
-    <ol className="flex items-center gap-1" aria-label="Stage">
-      {STAGE_TRACK.map((st, i) => (
-        <li key={st.key} className="flex flex-1 flex-col gap-1">
-          <span className={`h-1.5 rounded-full ${i < index ? "bg-orange-500" : i === index ? "bg-orange-500/70 ring-2 ring-orange-200" : "bg-black/10"}`} />
-          <span className={`text-[11px] ${i === index ? "font-semibold text-orange-700" : i < index ? "text-[var(--ink)]" : "text-[var(--quiet)]"}`}>{st.label}</span>
-        </li>
-      ))}
+    <ol className="flex items-center gap-1" aria-label="Steps">
+      {STAGE_TRACK.map((st, i) => {
+        const body = (
+          <>
+            <span className={`block h-1.5 rounded-full ${i < index ? "bg-orange-500" : i === index ? "bg-orange-500/70 ring-2 ring-orange-200" : "bg-black/10"}`} />
+            <span className={`mt-1 block text-[11px] ${i === index ? "font-semibold text-orange-700" : i < index ? "text-[var(--ink)]" : "text-[var(--quiet)]"}`}>{st.short}</span>
+          </>
+        );
+        return (
+          <li key={st.key} className="min-w-0 flex-1">
+            {book ? <Link href={`${st.href}${st.key === "idea" ? "" : `?book=${book}`}`} className="block" aria-current={i === index ? "step" : undefined}>{body}</Link> : body}
+          </li>
+        );
+      })}
     </ol>
   );
 }
@@ -106,7 +116,7 @@ export function Empty({ children }: { children: ReactNode }) {
 }
 
 export const btn = {
-  primary: "inline-flex min-h-11 items-center justify-center rounded-full bg-orange-500 px-5 text-[15px] font-semibold text-white shadow-sm transition disabled:opacity-40",
+  primary: "inline-flex min-h-11 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-orange-500 px-5 text-[15px] font-semibold text-white shadow-sm transition disabled:opacity-40",
   secondary: "inline-flex min-h-11 items-center justify-center rounded-full border border-orange-500 px-5 text-[15px] font-semibold text-orange-600 disabled:opacity-40",
   quiet: "inline-flex min-h-11 items-center justify-center rounded-full bg-black/5 px-4 text-[15px] disabled:opacity-40",
   small: "inline-flex min-h-9 items-center justify-center rounded-full bg-orange-500 px-4 text-sm font-semibold text-white disabled:opacity-40",

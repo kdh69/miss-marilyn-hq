@@ -9,8 +9,8 @@ import { btn } from "./ui";
 
 type Row = Record<string, string>;
 export type NeedsYouItem =
-  | { kind: "approve"; id: string; productId: string; title: string; item: Row }
-  | { kind: "question"; id: string; productId: string; title: string; request: Row };
+  | { kind: "approve"; id: string; productId: string; title: string; item: Row; href: string }
+  | { kind: "question"; id: string; productId: string; title: string; request: Row; href: string };
 
 /**
  * The "Needs you" strip: one row per thing waiting on the person looking, one button each.
@@ -24,7 +24,7 @@ export function NeedsYou({ items, viewer, titles = {}, showBook = true }: { item
       <div className="flex flex-col gap-3">
         {items.map((n) =>
           n.kind === "approve"
-            ? <Approval key={n.id} item={n.item} book={showBook && n.productId ? { id: n.productId, title: titles[n.productId] ?? n.productId } : undefined} />
+            ? <Approval key={n.id} item={n.item} book={showBook && n.productId ? { href: n.href, title: titles[n.productId] ?? n.productId } : undefined} />
             : <MessageItem key={n.id} r={n.request} viewer={viewer} bookTitle={showBook ? titles[n.productId] : undefined} />,
         )}
       </div>
@@ -32,13 +32,14 @@ export function NeedsYou({ items, viewer, titles = {}, showBook = true }: { item
   );
 }
 
-function Approval({ item, book }: { item: Row; book?: { id: string; title: string } }) {
+/** One ask from the team: what it is, one button, and "Ask for changes" where that applies. */
+export function Approval({ item, book, labels }: { item: Row; book?: { href: string; title: string }; labels?: { yes?: string; changes?: string } }) {
   const [note, setNote] = useState("");
   const [open, setOpen] = useState(false);
   const [msg, setMsg] = useState("");
   const [pending, start] = useTransition();
   const primary = item.item_type === "approve" || item.item_type === "kdp_publish" ? "Approve" : "Done";
-  const label = item.item_type === "rewrite" ? "I've done it" : item.item_type === "photos" ? "Sent them" : item.item_type === "kdp_publish" ? "Yes, publish" : "Approve";
+  const label = labels?.yes ?? (item.item_type === "rewrite" ? "Approve the script" : item.item_type === "photos" ? "Sent them" : item.item_type === "kdp_publish" ? "Yes, publish" : "Approve");
 
   const send = (a: "Approve" | "Changes" | "Reject" | "Done") =>
     start(async () => {
@@ -50,16 +51,16 @@ function Approval({ item, book }: { item: Row; book?: { id: string; title: strin
 
   return (
     <div className="rounded-2xl border border-white bg-white/80 p-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-orange-600">{MOM_ITEM[item.item_type] ?? "Review"}{book && <> · <Link href={`/books/${book.id}`} className="underline">{book.title}</Link></>}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-orange-600">{MOM_ITEM[item.item_type] ?? "Review"}{book && <> · <Link href={book.href} className="underline">{book.title}</Link></>}</p>
       <p className="mt-1 text-[15px] font-semibold">{item.summary}</p>
       {item.qc_summary && <p className="mt-1 text-sm text-[var(--quiet)]">{item.qc_summary}</p>}
       {item.preview_url && <a href={item.preview_url} target="_blank" className="mt-1 inline-block text-sm text-violet-600 underline">Open the preview</a>}
-      {item.item_type === "rewrite" && book && <Link href={`/books/${book.id}`} className="mt-1 block text-sm text-violet-600 underline">Open the book to write</Link>}
+      {item.item_type === "rewrite" && book && <Link href={book.href} className="mt-1 block text-sm text-violet-600 underline">Open the script</Link>}
       {item.item_type === "photos" && <div className="mt-3"><PhotoUpload taskId={item.task_id} label="Upload photos" /></div>}
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button disabled={pending} onClick={() => send(primary)} className={btn.primary}>{label}</button>
-        {(item.item_type === "approve" || item.item_type === "kdp_publish") && !open && (
-          <button onClick={() => setOpen(true)} className={btn.quiet}>Ask for changes</button>
+        {["approve", "kdp_publish", "rewrite"].includes(item.item_type) && !open && (
+          <button onClick={() => setOpen(true)} className={btn.quiet}>{labels?.changes ?? "Ask for changes"}</button>
         )}
       </div>
       {open && (
@@ -67,7 +68,7 @@ function Approval({ item, book }: { item: Row; book?: { id: string; title: strin
           <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="What should change?" rows={3} className="rounded-xl border border-black/10 bg-white p-3 outline-none focus:border-orange-400" />
           <div className="flex flex-wrap gap-2">
             <button disabled={pending || !note.trim()} onClick={() => send("Changes")} className={btn.secondary}>Send changes</button>
-            <button disabled={pending} onClick={() => send("Reject")} className={btn.quiet}>No, drop this</button>
+            {item.item_type !== "rewrite" && <button disabled={pending} onClick={() => send("Reject")} className={btn.quiet}>No, drop this</button>}
           </div>
         </div>
       )}

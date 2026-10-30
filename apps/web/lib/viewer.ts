@@ -44,7 +44,7 @@ export async function viewerName(): Promise<string> {
 const HIDDEN: Record<PanelRole, string[]> = {
   kyle: [],
   mom: ["/inbox", "/system"],
-  family: ["/money", "/accounts", "/messages", "/inbox", "/system", "/ideas", "/todo"],
+  family: ["/money", "/accounts", "/messages", "/inbox", "/system", "/ideas", "/todo", "/script", "/art", "/build", "/review"],
 };
 export const hiddenTabs = (role: PanelRole | null) => (role ? HIDDEN[role] : []);
 export const canSee = (role: PanelRole | null, href: string) => !!role && !HIDDEN[role].includes(href);

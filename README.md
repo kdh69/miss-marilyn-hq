@@ -42,29 +42,20 @@ Folder IDs live in the Sheet's `config` tab.
 
 ## How Clara works in the panel
 
-Tabs on the phone's bottom bar and the desktop sidebar: five for Clara, six for Kyle, three for
-family (read-only). Kyle can flip to Clara's view with the *Viewing as* switch (it only changes
-what is shown; writes stay his).
-Plan and rationale: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md).
+Clara's tabs follow how a book gets made: **Overview → Ideas → Script → Illustrations → Building →
+Full book review** (bottom bar on a phone, sidebar on desktop). All books, Progress, To-do &
+accounts and Money are under More. Kyle has his own tabs (Overview, Books, Progress, Inbox,
+System, Money) and can switch to Clara's view; family sees Overview, Books and Progress, read-only.
+Details: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md).
 
-- **Overview** (home): greeting, headline numbers, *Keep writing* (straight to her next page
-  still in the draft's words), a "Needs you" strip (approvals, questions, photo asks — one
-  button each), *Tell the team*, photo upload, each book's stage, what's coming up, Scout's latest.
-- **Books:** the shelf, with a badge on any book that needs her. In a book: one page at a time, art large, her words in big type, autosave,
-  the AI draft under "Show the AI draft" (`pages.text_final` stays apart from `text_draft` for the
-  KDP/copyright record). Page notes and the book thread sit below. **+ New book** sends the team
-  a book idea.
-- **Progress:** one card per book on the Story → Art → Layout → Publish → On sale track, with
-  now / on you / next.
-- **Ideas:** a notepad (ideas, notes, "always do this" house rules), plus Scout's finds with
-  a *Let's make this* button.
-- **To-do:** everything waiting on her in date order, this week's posts, and her accounts and
-  socials (she can mark her own accounts done).
-- **Money:** sales by book. Costs and profit are Kyle's only.
-- **Kyle — Overview:** what to route, what's stuck, what's on Clara, bot spend, books, latest
-  activity. **Inbox:** Clara's notes to route (*Send to bots*, *I handled it*, *Not doing*), stuck
-  tasks, what's waiting on Clara, bot spend. **System:** pause/resume, last tick, config, accounts.
-- If the bots are paused (spend cap hit), a banner says so; Kyle gets a **Resume** button.
+- **Overview:** *Up next* per book, what needs her, Tell the team, photos, each book's steps.
+- **Ideas:** every idea, any kind (book, printable, merch, social, business, anything), with filters.
+- **Script:** the whole script page by page in her words (`pages.text_final`, kept apart from the
+  AI draft for the KDP/copyright record); approving it starts the illustrations.
+- **Illustrations:** the art as it comes in; approve the cover.
+- **Building:** words and pictures together, the print files; approve the layout.
+- **Full book review:** read it start to finish, then the final OK. Nothing publishes without it.
+- Money for Clara shows sales only; costs are Kyle's. If the bots are paused, a banner says so.
 
 ## What runs every 30 minutes
 

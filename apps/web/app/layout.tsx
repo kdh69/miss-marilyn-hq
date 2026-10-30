@@ -7,7 +7,7 @@ import { authConfigured, me, signOut } from "@/auth";
 import { viewer } from "@/lib/viewer";
 import { familySignOut } from "@/app/actions";
 import { SystemBanner } from "@/components/SystemBanner";
-import { getSnapshot } from "@/lib/data";
+import { getSnapshot, needsYou } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -28,6 +28,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const toggleView = v.view === "kyle" ? "kyle" : "mom";
   const hq = v.view === "kyle" ? "Kyle's HQ" : v.view === "family" ? "Family view" : "Clara's HQ";
   const signedOut = !preview && !who; // only the sign-in page renders without a session
+  // Badges: each ask counts on the page where it's done (its step), and in total on Overview.
+  const badges: Record<string, number> = {};
+  if (s) for (const n of needsYou(s, v.view)) {
+    const path = n.href.split("?")[0];
+    if (path !== "/") badges[path] = (badges[path] ?? 0) + 1;
+    badges["/"] = (badges["/"] ?? 0) + 1;
+  }
+  if (v.view === "kyle" && s) badges["/inbox"] = s.requests.filter((r) => r.to === "kyle" && !r.reply && !["done", "wont_do"].includes(r.status)).length;
 
   return (
     <html lang="en">
@@ -46,7 +54,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <p className="text-[15px] font-semibold leading-tight">Miss Marilyn</p>
             <p className="text-[11px] text-[var(--quiet)]">{hq}</p>
           </div>
-          <AccountSheet name={name} view={toggleView} canSwitch={v.canSwitch} preview={preview} family={family} signOut={preview ? undefined : doSignOut} />
+          <AccountSheet name={name} view={toggleView} tabs={v.view} canSwitch={v.canSwitch} preview={preview} family={family} signOut={preview ? undefined : doSignOut} />
         </header>
 
         <div className="mx-auto flex max-w-6xl flex-col md:flex-row md:gap-6 md:p-6">
@@ -54,7 +62,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <aside className="glass hidden rounded-3xl p-4 md:sticky md:top-6 md:flex md:h-[calc(100vh-3rem)] md:w-60 md:shrink-0 md:flex-col">
             <p className="text-[15px] font-semibold">Miss Marilyn</p>
             <p className="mb-4 text-xs text-[var(--quiet)]">{hq}</p>
-            <SideNav view={v.view} />
+            <SideNav view={v.view} badges={badges} />
             <div className="mt-auto">
               {preview ? <p className="text-xs text-[var(--quiet)]">Preview mode — sign-in not set up, nothing saves.</p>
                 : <form action={doSignOut}><p className="text-xs text-[var(--quiet)]">Signed in as {name}{family ? " (view only)" : ""}</p><button className="text-xs text-[var(--quiet)] underline">Sign out</button></form>}
@@ -67,7 +75,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {children}
           </main>
         </div>
-        <TabBar view={v.view} />
+        <TabBar view={v.view} badges={badges} />
         </>}
       </body>
     </html>

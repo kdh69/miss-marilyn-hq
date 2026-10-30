@@ -1,7 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { Core, type Row } from "@mm/core";
-import { STAGE_TRACK, TASK_STATUS, TASK_TYPE } from "./labels";
+import { STAGE_TRACK, TASK_STATUS, TASK_TYPE, stageOfType } from "./labels";
 import { sample } from "./sample";
 
 const TABS = ["tasks", "assets", "products", "skus", "listings", "content", "mom_queue", "pages", "requests", "research", "accounts", "costs", "transactions", "log", "config"] as const;
@@ -40,36 +40,47 @@ export function bookStage(s: Snapshot, productId: string) {
   const tasks = s.tasks.filter((t) => t.product_id === productId && t.status !== "cancelled");
   const pages = s.pages.filter((p) => p.product_id === productId);
   const yours = pages.filter((p) => p.text_final).length;
-  const stageOf = (type: string) => Math.max(0, STAGE_TRACK.findIndex((st) => st.types.includes(type)));
+  const stageOf = (type: string) => STAGE_TRACK.findIndex((st) => st.types.includes(type));
+  // Only work that belongs to a step moves a book along (a photo request, say, doesn't).
+  const stepped = tasks.filter((t) => stageOf(t.task_type) >= 0);
   const open = tasks.filter(OPEN);
+  const openStepped = stepped.filter(OPEN);
   const live = product?.status === "live" || s.listings.some((l) => l.sku.startsWith(productId) && l.status === "live");
-  let index = live ? 4 : open.length ? Math.min(...open.map((t) => stageOf(t.task_type))) : tasks.length ? Math.min(3, Math.max(...tasks.map((t) => stageOf(t.task_type))) + 1) : 0;
-  if (live) index = 4;
+  // The step the book is on: the earliest step with open work. Nothing open: the step after the
+  // last finished one. On sale: past every step.
+  const last = STAGE_TRACK.length;
+  const index = live ? last : openStepped.length ? Math.min(...openStepped.map((t) => stageOf(t.task_type))) : stepped.length ? Math.min(last - 1, Math.max(...stepped.map((t) => stageOf(t.task_type))) + 1) : 0;
   const waitingOnYou = tasks.filter((t) => t.status === "awaiting_mom");
   const working = open.filter((t) => !["awaiting_mom", "todo"].includes(t.status)).sort((a, b) => stageOf(a.task_type) - stageOf(b.task_type));
   const queued = open.filter((t) => t.status === "todo");
   const name = (t: Row) => TASK_TYPE[t.task_type] ?? t.title;
   const now = live ? "On sale." : working.length ? `${name(working[0])}: ${(TASK_STATUS[working[0].status] ?? working[0].status).toLowerCase()}.` : waitingOnYou.length ? "Waiting on you." : queued.length ? `${name(queued[0])} is next in line.` : tasks.length ? "All done." : "Not started yet.";
   const waiting = waitingOnYou.length ? waitingOnYou.map(name).join(", ") : pages.length && yours < pages.length ? `${pages.length - yours} page${pages.length - yours > 1 ? "s" : ""} still in the draft's words` : "";
-  const next = queued.length ? name(queued[0]) : index < 4 ? STAGE_TRACK[index + 1]?.label ?? "" : "";
+  const next = queued.length ? name(queued[0]) : STAGE_TRACK[index + 1]?.label ?? "";
   const done = tasks.filter((t) => t.status === "done").length;
-  return { index, label: STAGE_TRACK[index].label, now, waiting, next, pct: tasks.length ? Math.round((done / tasks.length) * 100) : 0, pages: pages.length, yours };
+  return { index, key: STAGE_TRACK[index]?.key ?? "done", label: STAGE_TRACK[index]?.label ?? "On sale", now, waiting, next, pct: tasks.length ? Math.round((done / tasks.length) * 100) : 0, pages: pages.length, yours };
 }
 
 export type NeedsYouItem =
-  | { kind: "approve"; id: string; productId: string; title: string; item: Row }
-  | { kind: "question"; id: string; productId: string; title: string; request: Row };
+  | { kind: "approve"; id: string; productId: string; title: string; item: Row; href: string }
+  | { kind: "question"; id: string; productId: string; title: string; request: Row; href: string };
+
+/** The page where this ask is done: its step's page for that book, else the book itself. */
+export function stepHref(s: Snapshot, taskId: string, productId: string) {
+  const st = stageOfType(s.tasks.find((t) => t.task_id === taskId)?.task_type);
+  return st && productId ? `${st.href}?book=${productId}` : productId ? `/books/${productId}` : "/";
+}
 
 /** Everything waiting on the person looking: approvals in mom_queue and unanswered questions to them. */
 export function needsYou(s: Snapshot, view: string | null): NeedsYouItem[] {
   if (view !== "mom" && view !== "kyle") return []; // family: read-only, nothing waits on them
   const taskProduct = (taskId: string) => s.tasks.find((t) => t.task_id === taskId)?.product_id ?? "";
   const approvals: NeedsYouItem[] = view === "mom"
-    ? s.mom_queue.filter((m) => !m.answer && !m.processed_at).map((m) => ({ kind: "approve", id: m.item_id, productId: taskProduct(m.task_id), title: m.summary, item: m }))
+    ? s.mom_queue.filter((m) => !m.answer && !m.processed_at).map((m) => ({ kind: "approve", id: m.item_id, productId: taskProduct(m.task_id), title: m.summary, item: m, href: stepHref(s, m.task_id, taskProduct(m.task_id)) }))
     : [];
   const questions: NeedsYouItem[] = s.requests
     .filter((r) => r.to === view && !r.reply && !["done", "wont_do"].includes(r.status))
-    .map((r) => ({ kind: "question", id: r.request_id, productId: r.product_id, title: r.body, request: r }));
+    .map((r) => ({ kind: "question", id: r.request_id, productId: r.product_id, title: r.body, request: r, href: r.product_id ? `/books/${r.product_id}` : "/" }));
   return [...approvals, ...questions];
 }
 
@@ -86,7 +97,7 @@ export function todoList(s: Snapshot, view: string | null): TodoItem[] {
     const due = n.kind === "approve" ? s.tasks.find((t) => t.task_id === n.item.task_id)?.due_date ?? "" : n.request.created_at.slice(0, 10);
     // Approvals and publish asks need the real button (they can spend or publish); only Done-type asks get a tick.
     const finish = n.kind === "approve" && ["photos", "rewrite"].includes(n.item.item_type) ? { kind: "item" as const, id: n.id } : undefined;
-    items.push({ id: n.id, when: due, what: n.title, where: n.productId ? bookTitle(s, n.productId) : "The business", href: n.productId ? `/books/${n.productId}` : n.kind === "approve" ? "/books" : view === "mom" ? "/ideas" : "/inbox", finish });
+    items.push({ id: n.id, when: due, what: n.title, where: n.productId ? bookTitle(s, n.productId) : "The business", href: n.href, finish });
   }
   const mine = view === "mom" ? "clara" : "kyle";
   for (const a of s.accounts.filter((a) => ["todo", "in_progress", "waiting"].includes(a.status) && a.owner.toLowerCase().includes(mine) && a.phase === "now")) {
@@ -145,4 +156,51 @@ export function bookPages(s: Snapshot, productId: string) {
       const art = assets.get(p.art_asset_id) ?? latestArt.get(p.page_number);
       return { ...p, art_id: driveId(art?.file_url), text: p.text_final || p.text_draft } as Row;
     });
+}
+
+/** Books that aren't retired. */
+export const activeBooks = (s: Snapshot) => s.products.filter((p) => p.status !== "retired");
+
+/** The task of a step for a book: the open one if any, else the latest. */
+export function stepTask(s: Snapshot, productId: string, key: string) {
+  const types = STAGE_TRACK.find((st) => st.key === key)?.types ?? [];
+  const ts = s.tasks.filter((t) => t.product_id === productId && types.includes(t.task_type) && t.status !== "cancelled");
+  return ts.find((t) => OPEN(t)) ?? ts[ts.length - 1];
+}
+
+/** Clara's open ask (mom_queue) for a step of a book, if there is one. */
+export function stepAsk(s: Snapshot, productId: string, key: string) {
+  const types = STAGE_TRACK.find((st) => st.key === key)?.types ?? [];
+  const ids = new Set(s.tasks.filter((t) => t.product_id === productId && types.includes(t.task_type)).map((t) => t.task_id));
+  return s.mom_queue.find((m) => ids.has(m.task_id) && !m.answer && !m.processed_at);
+}
+
+/** Latest file of some types for a book (cover art, interior PDF…), from assets. */
+export function latestAsset(s: Snapshot, productId: string, types: string[]) {
+  return [...s.assets].reverse().find((a) => a.product_id === productId && types.includes(a.asset_type) && a.status !== "superseded");
+}
+
+/**
+ * What Clara does next on each book, in her words, and where she does it. One line per book,
+ * following the steps: approve what's waiting, else keep making the script hers, else see what's new.
+ */
+export function upNext(s: Snapshot) {
+  return activeBooks(s).map((p) => {
+    const id = p.product_id;
+    const st = bookStage(s, id);
+    const pages = s.pages.filter((x) => x.product_id === id).sort((a, b) => Number(a.page_number) - Number(b.page_number));
+    const draftOnly = pages.find((x) => !x.text_final);
+    const ask = (key: string) => stepAsk(s, id, key);
+    const at = (key: string) => `${STAGE_TRACK.find((x) => x.key === key)!.href}?book=${id}`;
+    let line: { step: string; text: string; href: string; mine: boolean };
+    if (ask("review")) line = { step: "Review", text: "Read the finished book and give the final OK", href: at("review"), mine: true };
+    else if (ask("build")) line = { step: "Build", text: "Look over the layout and approve it", href: at("build"), mine: true };
+    else if (ask("art")) line = { step: "Art", text: "Approve the cover", href: at("art"), mine: true };
+    else if (ask("script")) line = { step: "Script", text: "Read the script and approve it", href: at("script"), mine: true };
+    else if (st.key === "script" && draftOnly) line = { step: "Script", text: `Make the script yours — page ${draftOnly.page_number} is next`, href: at("script"), mine: true };
+    else if (st.key === "idea") line = { step: "Idea", text: "The team is planning it", href: "/ideas", mine: false };
+    else if (st.key === "done") line = { step: "Done", text: "On sale", href: `/books/${id}`, mine: false };
+    else line = { step: st.label, text: st.now.replace(/\.$/, ""), href: at(st.key), mine: false };
+    return { id, title: p.title, index: st.index, ...line };
+  });
 }

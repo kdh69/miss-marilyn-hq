@@ -23,9 +23,11 @@ export function BookWorkspace({ productId, pages, requests, viewer, canEdit, tec
   const touch = useRef<{ x: number; y: number } | null>(null);
   const go = (d: number) => setI((x) => Math.min(pages.length - 1, Math.max(0, x + d)));
 
-  // Keep the chosen thumbnail in view; arrow keys move between pages when not typing.
+  // Keep the chosen thumbnail in view by scrolling the strip sideways only — never the page.
   useEffect(() => {
-    stripRef.current?.children[i]?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+    const strip = stripRef.current;
+    const thumb = strip?.children[i] as HTMLElement | undefined;
+    if (strip && thumb) strip.scrollTo({ left: thumb.offsetLeft - strip.clientWidth / 2 + thumb.clientWidth / 2, behavior: "smooth" });
   }, [i]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -53,7 +55,7 @@ export function BookWorkspace({ productId, pages, requests, viewer, canEdit, tec
       </div>
 
       {/* Page strip */}
-      <div ref={stripRef} className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:px-0" style={{ scrollbarWidth: "none" }}>
+      <div ref={stripRef} className="relative -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:px-0" style={{ scrollbarWidth: "none" }}>
         {pages.map((p, k) => (
           <button key={p.page_id} onClick={() => setI(k)} aria-label={`Page ${p.page_number}`} aria-current={k === i}
             className={`relative w-[72px] shrink-0 overflow-hidden rounded-xl border-2 bg-white/70 transition ${k === i ? "border-orange-500" : "border-transparent"}`}>
@@ -92,7 +94,7 @@ export function BookWorkspace({ productId, pages, requests, viewer, canEdit, tec
   );
 }
 
-function Art({ id, brief, large = false, small = false }: { id: string; brief: string; large?: boolean; small?: boolean }) {
+export function Art({ id, brief, large = false, small = false }: { id: string; brief: string; large?: boolean; small?: boolean }) {
   if (id) {
     // eslint-disable-next-line @next/next/no-img-element
     return <img src={`/api/asset/${id}`} alt={brief} className={`aspect-square w-full object-cover ${large ? "rounded-2xl" : ""}`} />;
@@ -104,8 +106,11 @@ function Art({ id, brief, large = false, small = false }: { id: string; brief: s
   );
 }
 
-/** Her words for the page. Saves on its own two seconds after she stops typing, or when she taps Save. */
-function PageText({ page, canEdit }: { page: Page; canEdit: boolean }) {
+/**
+ * Her words for the page. Saves on its own two seconds after she stops typing, or when she taps Save.
+ * `compact`: the script view, many pages stacked — smaller box, inline Save, no floating button.
+ */
+export function PageText({ page, canEdit, compact = false }: { page: Page; canEdit: boolean; compact?: boolean }) {
   const [text, setText] = useState(page.text_final || page.text_draft || "");
   const [savedText, setSavedText] = useState(page.text_final || "");
   const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -160,13 +165,13 @@ function PageText({ page, canEdit }: { page: Page; canEdit: boolean }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-sm font-semibold">{hers ? "Your words" : "The draft — make it yours"}</p>
+      {!compact && <p className="text-sm font-semibold">{hers ? "Your words" : "The draft — make it yours"}</p>}
       <textarea value={text} onChange={(e) => { setText(e.target.value); setTouched(true); }} onBlur={() => dirty && save(text)} disabled={!canEdit}
-        rows={6} spellCheck
+        rows={compact ? 3 : 6} spellCheck aria-label={`Page ${page.page_number} words`}
         className="w-full rounded-2xl border border-black/10 bg-white p-4 text-[17px] leading-relaxed outline-none focus:border-orange-400 disabled:opacity-70" />
       <div className="flex items-center justify-between gap-3">
         <span className={`text-sm ${state === "error" ? "text-red-600" : "text-[var(--quiet)]"}`}>{canEdit ? status : "View only"}</span>
-        <span className="hidden md:block"><button disabled={!canEdit || !dirty || !text.trim() || state === "saving"} onClick={() => save(text)} className={btn.primary}>Save</button></span>
+        <span className={compact ? "" : "hidden md:block"}><button disabled={!canEdit || !dirty || !text.trim() || state === "saving"} onClick={() => save(text)} className={compact ? btn.small : btn.primary}>Save</button></span>
       </div>
       {page.text_draft && (
         <details className="text-sm text-[var(--quiet)]">
@@ -176,7 +181,7 @@ function PageText({ page, canEdit }: { page: Page; canEdit: boolean }) {
         </details>
       )}
       {/* Phone: the Save button rides above the tab bar while there's something to save. */}
-      {canEdit && dirty && (
+      {canEdit && dirty && !compact && (
         <div className="fixed inset-x-4 bottom-[calc(72px+env(safe-area-inset-bottom))] z-30 md:hidden">
           <button disabled={state === "saving"} onClick={() => save(text)} className={`${btn.primary} w-full shadow-lg`}>{state === "saving" ? "Saving…" : "Save my words"}</button>
         </div>

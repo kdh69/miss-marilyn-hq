@@ -33,14 +33,18 @@ export const CHANNEL: Record<string, string> = {
   PINTEREST: "Pinterest", INSTAGRAM: "Instagram", TIKTOK: "TikTok", FACEBOOK: "Facebook", EMAIL: "Email",
 };
 
-/** The five stages a book moves through, in order, and the task types that belong to each. */
-export const STAGE_TRACK: { key: string; label: string; types: string[] }[] = [
-  { key: "story", label: "Story", types: ["book_plan", "story_draft"] },
-  { key: "art", label: "Art", types: ["art_page", "art_cover"] },
-  { key: "layout", label: "Layout", types: ["interior_layout", "cover_wrap", "printable_set"] },
-  { key: "publish", label: "Publish", types: ["kdp_packet", "etsy_listing"] },
-  { key: "live", label: "On sale", types: [] },
+/**
+ * How a book gets made, as Clara works it: Idea → Script → Illustrations → Building → Full book
+ * review. Each step owns some task types and has its own page in her panel.
+ */
+export const STAGE_TRACK: { key: string; label: string; short: string; href: string; types: string[]; blurb: string }[] = [
+  { key: "idea", label: "Idea", short: "Idea", href: "/ideas", types: ["book_plan"], blurb: "Jot it down; the team turns it into a plan." },
+  { key: "script", label: "Script", short: "Script", href: "/script", types: ["story_draft"], blurb: "Read the script, make the words yours, then approve it." },
+  { key: "art", label: "Illustrations", short: "Art", href: "/art", types: ["art_page", "art_cover"], blurb: "The approved script gets its pictures. Look them over and approve the cover." },
+  { key: "build", label: "Building", short: "Build", href: "/build", types: ["interior_layout", "cover_wrap", "printable_set"], blurb: "Words and pictures are put together into the printed book and its cover." },
+  { key: "review", label: "Full book review", short: "Review", href: "/review", types: ["kdp_packet", "etsy_listing"], blurb: "Read the finished book start to finish, then give the final OK." },
 ];
+export const stageOfType = (type = "") => STAGE_TRACK.find((st) => st.types.includes(type));
 
 export const when = (iso: string) => (iso ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "");
 
@@ -65,3 +69,18 @@ export const accountUrl = (service = "") => ACCOUNT_URLS.find(([m]) => service.t
 
 /** Accounts phases, folded into the two groups Clara needs. */
 export const SET_UP_NOW = ["now", "phase_0"];
+
+/** Kinds of idea. The prefix leads the request text so the team (and the filters) know what it is. */
+export const IDEA_KINDS: { id: string; label: string; emoji: string; prefix: string; placeholder: string }[] = [
+  { id: "book", label: "Book", emoji: "📖", prefix: "New book idea: ", placeholder: "What happens in it? A line or two is plenty." },
+  { id: "printable", label: "Printable", emoji: "🖍️", prefix: "Printable idea: ", placeholder: "Coloring pages, activity sheets, a chart…" },
+  { id: "merch", label: "Merch", emoji: "👕", prefix: "Merch idea: ", placeholder: "A shirt, a mug, a plush Miss Marilyn…" },
+  { id: "social", label: "Social", emoji: "📣", prefix: "Social idea: ", placeholder: "A post, a reel, something to share…" },
+  { id: "business", label: "Business", emoji: "💼", prefix: "Business idea: ", placeholder: "A shop, a partner, a price, a plan…" },
+  { id: "other", label: "Anything", emoji: "💡", prefix: "", placeholder: "Anything at all — the team sorts it out." },
+];
+
+/** Which kind an idea is, from how its text starts. */
+export function ideaKind(body = "") {
+  return IDEA_KINDS.find((k) => k.prefix && body.toLowerCase().startsWith(k.prefix.trim().toLowerCase()))?.id ?? "other";
+}

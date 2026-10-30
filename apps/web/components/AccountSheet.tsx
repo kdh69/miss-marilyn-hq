@@ -1,11 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 import { ViewToggle } from "./ViewToggle";
+import { Icon, MORE, type View } from "./Nav";
 
 /** Phone header button: who's signed in, the Clara/Kyle switch (Kyle only), sign out. */
-export function AccountSheet({ name, view, canSwitch, preview, family = false, signOut }: {
-  name: string; view: "mom" | "kyle"; canSwitch: boolean; preview: boolean; family?: boolean; signOut?: () => Promise<void>;
+export function AccountSheet({ name, view, tabs, canSwitch, preview, family = false, signOut }: {
+  name: string; view: "mom" | "kyle"; tabs: View; canSwitch: boolean; preview: boolean; family?: boolean; signOut?: () => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -23,6 +25,17 @@ export function AccountSheet({ name, view, canSwitch, preview, family = false, s
           <div role="dialog" aria-label="Account" className="w-full rounded-t-3xl bg-white p-5 pb-[max(2rem,env(safe-area-inset-bottom))] shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <p className="font-semibold">{preview ? `Preview of ${name}'s view` : `Signed in as ${name}${family ? " (view only)" : ""}`}</p>
             {preview && <p className="text-sm text-[var(--quiet)]">Sign-in isn't set up yet, so nothing saves.</p>}
+            {MORE[tabs].length > 0 && (
+              <ul className="mt-3 flex flex-col divide-y divide-black/5 rounded-2xl bg-black/[0.03]">
+                {MORE[tabs].map((t) => (
+                  <li key={t.href}>
+                    <Link href={t.href} onClick={() => setOpen(false)} className="flex min-h-12 items-center gap-3 px-4 text-[15px]">
+                      <Icon name={t.icon} className="h-5 w-5 text-[var(--quiet)]" />{t.long ?? t.label}<span className="ml-auto text-[var(--quiet)]">›</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
             {canSwitch && <ViewToggle view={view} />}
             {signOut && !preview && (
               <form action={signOut} className="mt-4">

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { replyRequest, triageRequest } from "@/app/actions";
-import { KIND, REQUEST_STATUS, WHO, when } from "@/lib/labels";
+import { IDEA_KINDS, KIND, REQUEST_STATUS, WHO, ideaKind, when } from "@/lib/labels";
 import { btn } from "./ui";
 
 type Req = Record<string, string>;
@@ -20,7 +20,7 @@ export function MessageItem({ r, viewer, bookTitle, compact = false }: { r: Req;
     <div className={`rounded-2xl border border-white bg-white/75 ${compact ? "p-3" : "p-4"}`}>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--quiet)]">
         <span className="font-semibold text-[var(--ink)]">{WHO[r.from] ?? r.from} → {WHO[r.to] ?? r.to}</span>
-        <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-violet-700">{KIND[r.kind] ?? r.kind}</span>
+        <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-violet-700">{r.kind === "idea" ? (() => { const k = IDEA_KINDS.find((x) => x.id === ideaKind(r.body))!; return k.id === "other" ? "💡 Idea" : `${k.emoji} ${k.label}`; })() : KIND[r.kind] ?? r.kind}</span>
         {where && <span>{where}{r.page_number ? ` · page ${r.page_number}` : ""}</span>}
         <span className="ml-auto">{viewer !== "kyle" && r.to === "kyle" && r.status === "seen" ? "Kyle saw it" : viewer !== "kyle" && r.to === "orchestrator" && r.status === "new" ? "Sent to the team" : REQUEST_STATUS[r.status] ?? r.status}{r.created_at ? ` · ${when(r.created_at)}` : ""}</span>
       </div>
