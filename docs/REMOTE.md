@@ -19,17 +19,19 @@ Three ways to work, from most to least capable:
 | Change GitHub secrets / Vercel env vars | ✅ their web dashboards | | |
 | Redeploy the panel as it is | ✅ Vercel dashboard → Redeploy | | |
 | Change code, run typecheck and tests, push, open a PR | | ✅ | |
-| Deploy a code change to the panel | | ✅ once Vercel is connected to GitHub: merge to `main` | until then: `vercel deploy --prod` |
+| Deploy a code change to the panel | ✅ merge the PR in the GitHub app | ✅ push a branch, open a PR, merge to `main` | |
 | Run QC (`npm run qc`), peek at the Sheet, `sheet:setup`, `doctor` locally | | ⚠️ only with Sheet keys set up (below) | ✅ |
 | `npm run google:authorize` (uploads token) | | ❌ | ✅ (the callback is `localhost`) |
 | Anything using `.env` values | | ⚠️ only what you add to the cloud environment | ✅ |
 
 ## Making cloud sessions useful
 
-- **Connect Vercel to GitHub first** (HANDOFF step 3). Then a cloud session can ship panel changes:
-  it pushes a branch, Vercel builds a preview, and merging the PR to `main` deploys production.
-- **Run the backend from GitHub** (HANDOFF steps 1–2). The every-30-minutes tick then needs no laptop at
-  all, and you can trigger `doctor` or `dryrun` from the GitHub app.
+- **Vercel is connected to GitHub** (since 2026-10-30): a cloud session pushes a branch, Vercel builds a
+  preview, and merging the PR to `main` deploys production.
+- **The backend runs from GitHub** every 30 minutes with no laptop, and you can trigger `doctor` or
+  `dryrun` from the GitHub app (Actions → MM backend tick → Run workflow).
+- **GitHub Actions minutes are free** because the repo is public. Scheduled runs pause after 60 days
+  with no commits; any commit restarts them.
 - **For QC from a cloud session**, add `GOOGLE_SERVICE_ACCOUNT_JSON` and `MM_CORE_SHEET_ID` as secret
   environment variables in that cloud environment's settings, and make sure its network access allows
   Google's APIs (`googleapis.com`, `oauth2.googleapis.com`). Then "run QC" works the same as on the laptop.
