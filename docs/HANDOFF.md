@@ -6,7 +6,7 @@ Working away from the laptop: [`REMOTE.md`](REMOTE.md). Bot descriptions: [`bot-
 ## How it fits together
 
 ```
-Grok bots ──write──▶ MM Core Sheet ◀──read/write── Backend (GitHub Actions, every 30 min; not on yet)
+Grok bots ──write──▶ MM Core Sheet ◀──read/write── Backend (GitHub Actions, every 30 min)
                           │
                           ▼ re-read every 60 s
             missmarilyn.vercel.app  (Kyle, Mom, family)
@@ -22,7 +22,7 @@ Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing
   - Kyle and Mom: *Continue with Google* (emails in `PANEL_USERS`). Mom never sees costs or the Money tab.
   - Family: shared password (`FAMILY_PASSWORD` in `.env` and Vercel) opens a read-only view: no
     Money, Accounts or Messages, no saving. Changing the password signs every family browser out.
-  - Deployed from the laptop with `vercel deploy --prod`. Vercel is **not** connected to GitHub yet.
+  - Vercel is connected to GitHub: merging to `main` deploys production; other branches get previews.
 - **MM Core Sheet:** built and shared with the service account (Editor on *Miss Marilyn Business*) and the
   bot Gmail (Editor on MM Core + MM Work, Viewer on MM Brand). `npm run doctor` is green except uploads.
 - **Google Cloud:** project `miss-marilyn-513120` under a plain Gmail (an organization blocked service
@@ -31,8 +31,10 @@ Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing
   Grok names map to Sheet roles: Producer=`story_producer`, Lister=`publisher`, Marketer=`growth`.
 - **QC is manual** (no `ANTHROPIC_API_KEY`): the backend leaves work at `ready_for_qc` and Kyle reviews
   with Claude. Adding a key later turns automatic QC back on.
-- **Backend on GitHub Actions:** not running. Secrets aren't set, and the schedule runs from `main`,
-  which doesn't have today's work yet (see step 1 below).
+- **Backend on GitHub Actions:** live since 2026-10-30, every 30 minutes from `main`. Secrets set:
+  `GOOGLE_SERVICE_ACCOUNT_JSON`, `MM_CORE_SHEET_ID`, `KYLE_EMAIL`, `CLARA_EMAIL`, `PANEL_URL`.
+  `doctor` and `dryrun` both pass on Actions. Uploads are the only red item, so the weekly backup step
+  fails (and GitHub emails Kyle) until the owner token is set.
 
 ### The board after today's QC
 
@@ -48,24 +50,21 @@ Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing
 
 ## Kyle — outstanding, in order
 
-1. **Merge `panel-preview` into `main`** (open a PR on GitHub). Scheduled workflows only run from `main`,
-   and `main` lacks manual QC: without it, the backend would move tasks to `in_qc` and fail on them.
-2. **GitHub secrets** (repo → Settings → Secrets and variables → Actions): `GOOGLE_SERVICE_ACCOUNT_JSON`,
-   `MM_CORE_SHEET_ID`, `KYLE_EMAIL`; optional `CLARA_EMAIL`, `PANEL_URL`. Copy values from `.env`.
-   Then Actions → *MM backend tick* → Run workflow → `doctor`, then `dryrun`. Until this is on,
-   Mom's Approve clicks are saved but nothing acts on them.
-3. **Connect Vercel to GitHub** (Vercel → project `missmarilyn` → Settings → Git, production branch
-   `main`, root directory `apps/web`). After that, merging to `main` deploys; no laptop needed.
-4. **Uploads:** Google Cloud → OAuth consent screen → **Publish app**, then `npm run google:authorize`
+Done 2026-10-30: merged `panel-preview` into `main` (#9), set the GitHub secrets, ran `doctor` and
+`dryrun` on Actions, connected Vercel to GitHub.
+
+1. **Pass the QC results back:** send the Orchestrator the QC hand-back (failed tasks back to todo with
+   fixes, printable_set tasks for both bundles, MM-B01-PB price, Miss M lessons).
+2. **Uploads:** Google Cloud → OAuth consent screen → **Publish app**, then `npm run google:authorize`
    (laptop) and sign in as the owner of *Miss Marilyn Business*. Save `GOOGLE_OWNER_REFRESH_TOKEN` to
    `.env`, GitHub secrets and Vercel, then redeploy. Until then the panel's photo upload shows a
    friendly "not switched on yet" message; drop photos in Drive under MM Brand → photos instead.
-5. **Grok:** paste each bot's new description from [`bot-prompts.md`](bot-prompts.md) (house rules + role),
+3. **Grok:** paste each bot's new description from [`bot-prompts.md`](bot-prompts.md) (house rules + role),
    and rename the room from "Coloring Books For Kids" to "Miss Marilyn HQ". Send Scout the
    story-plus-coloring research topic.
-6. **Ollie art:** attach the Oct 24 Ollie PDFs in the Orchestrator chat, then decide recover vs. redraw.
-7. Delete the service account key file from Downloads (its copies live in `.env` and the secrets).
-8. **Later:** Resend + a verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); a password manager
+4. **Ollie art:** attach the Oct 24 Ollie PDFs in the Orchestrator chat, then decide recover vs. redraw.
+5. Delete the service account key file from Downloads (its copies live in `.env` and the secrets).
+6. **Later:** Resend + a verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); a password manager
    (Bitwarden's free plan covers two people); whether Grok can schedule the Orchestrator's sweeps.
 
 ## Mom — outstanding
