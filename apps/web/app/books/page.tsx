@@ -1,30 +1,24 @@
 import Link from "next/link";
 import { viewer } from "@/auth";
-import { NeedsYou } from "@/components/NeedsYou";
 import { NewBook } from "@/components/NewBook";
 import { Empty, PageHeader, Pill, StageTrack } from "@/components/ui";
 import { bookPages, bookStage, getSnapshot, needsYou } from "@/lib/data";
 import { PRODUCT_STATUS } from "@/lib/labels";
 
-/** The shelf: what needs her, then every book. */
+/** The shelf: every book, with a badge where something needs her. */
 export default async function Books() {
   const [s, v] = await Promise.all([getSnapshot(), viewer()]);
   const items = needsYou(s, v.view);
-  const titles = Object.fromEntries(s.products.map((p) => [p.product_id, p.title]));
   const books = s.products.filter((p) => p.status !== "retired");
-  const hour = Number(new Date().toLocaleString("en-US", { timeZone: "America/New_York", hour: "numeric", hour12: false }));
-  const greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
-        title={v.view === "mom" ? `${greet}, Clara` : "Books"}
-        sub={items.length ? `${items.length} thing${items.length > 1 ? "s" : ""} need${items.length > 1 ? "" : "s"} you. Everything else is moving.` : "Nothing needs you right now. The team is working."}
+        title="Books"
+        sub={items.length ? <>Tap a book to write. <Link href="/" className="text-orange-700 underline">{items.length} thing{items.length > 1 ? "s" : ""} need{items.length > 1 ? "" : "s"} you</Link>.</> : "Tap a book to read and write its pages."}
         action={<NewBook canWrite={!!v.real} />}
       />
       {s._sample && <p className="px-1 text-xs text-[var(--quiet)]">Sample data — the Sheet isn't connected yet.</p>}
-
-      <NeedsYou items={items} viewer={v.view} titles={titles} />
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {books.map((p) => {

@@ -154,6 +154,23 @@ export function todoList(s: Snapshot, view: "mom" | "kyle"): TodoItem[] {
   return items.sort((a, b) => (a.when || "9999").localeCompare(b.when || "9999"));
 }
 
+/** The next page in each book that's still in the draft's words, for "Keep writing". */
+export function nextToWrite(s: Snapshot) {
+  return s.products
+    .filter((p) => p.status !== "retired")
+    .map((p) => {
+      const pages = s.pages.filter((x) => x.product_id === p.product_id).sort((a, b) => Number(a.page_number) - Number(b.page_number));
+      const left = pages.filter((x) => !x.text_final);
+      return left.length ? { productId: p.product_id, title: p.title, page: left[0].page_number, left: left.length, total: pages.length } : null;
+    })
+    .filter((x): x is NonNullable<typeof x> => !!x);
+}
+
+export function greeting() {
+  const hour = Number(new Date().toLocaleString("en-US", { timeZone: "America/New_York", hour: "numeric", hour12: false }));
+  return hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+}
+
 /** When the backend last ran, from the log. */
 export function lastTick(s: Snapshot) {
   return [...s.log].reverse().find((l) => l.actor === "backend")?.ts ?? "";

@@ -9,8 +9,8 @@ import { Table } from "@/components/Table";
 import { bookPages, bookStage, getSnapshot, needsYou } from "@/lib/data";
 import { CHANNEL, PRODUCT_STATUS } from "@/lib/labels";
 
-export default async function Book({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function Book({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ page?: string }> }) {
+  const [{ id }, { page: startPage }] = await Promise.all([params, searchParams]);
   const [s, v] = await Promise.all([getSnapshot(), viewer()]);
   const book = s.products.find((p) => p.product_id === id);
   if (!book) notFound();
@@ -33,7 +33,7 @@ export default async function Book({ params }: { params: Promise<{ id: string }>
       <NeedsYou items={items} viewer={v.view} showBook={false} />
 
       <Card title="Pages">
-        <BookWorkspace productId={id} pages={bookPages(s, id)} requests={requests} viewer={v.view} canEdit={!!v.real} technical={technical} />
+        <BookWorkspace productId={id} startPage={startPage} pages={bookPages(s, id)} requests={requests} viewer={v.view} canEdit={!!v.real} technical={technical} />
       </Card>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

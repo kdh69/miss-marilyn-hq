@@ -13,10 +13,10 @@ const isHers = (p: Page) => !!p.text_final;
  * One page at a time: a strip of thumbnails to move between pages, the art large, her words
  * in big type, a save button that stays on screen. The AI draft sits under "Show the draft".
  */
-export function BookWorkspace({ productId, pages, requests, viewer, canEdit, technical = false }: {
-  productId: string; pages: Page[]; requests: Req[]; viewer: "mom" | "kyle" | null; canEdit: boolean; technical?: boolean;
+export function BookWorkspace({ productId, pages, requests, viewer, canEdit, technical = false, startPage }: {
+  productId: string; pages: Page[]; requests: Req[]; viewer: "mom" | "kyle" | null; canEdit: boolean; technical?: boolean; startPage?: string;
 }) {
-  const [i, setI] = useState(0);
+  const [i, setI] = useState(() => Math.max(0, pages.findIndex((p) => p.page_number === startPage)));
   const page = pages[i];
   const yours = pages.filter(isHers).length;
   const stripRef = useRef<HTMLDivElement>(null);

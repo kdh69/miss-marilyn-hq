@@ -135,7 +135,7 @@ Books and Progress reuse Clara's components with IDs and statuses turned on.
 
 | | Phone | Desktop |
 | --- | --- | --- |
-| Navigation | bottom tab bar, 5 tabs, icons + labels | sidebar, same 5 |
+| Navigation | bottom tab bar, 6 tabs, icons + labels | sidebar, same 6 |
 | Account / view switch | avatar → sheet | bottom of sidebar |
 | Book editor | art, then words, Save rides above the tab bar while unsaved | art beside words, Save inline, ← → keys change page |
 | Tables | stacked label/value rows | real tables |
@@ -158,6 +158,23 @@ Books and Progress reuse Clara's components with IDs and statuses turned on.
 - **Her notes say where they went**: "Kyle saw it", "Sent to the team", "Team is on it".
 - **New book** asks for an age range. The book thread is collapsed under "Talk to the team".
 - **Kyle**: QC result and attempts in Progress; recent backend notes on System.
+
+## 12. Overview tab (added after review)
+
+The old Today page was missed: a single screen that says what's up. It's back as **Overview**,
+the first tab and the home page for both views (six tabs now; labels still fit on a 375px
+phone). It replaces "Books is home" from section 1.
+
+- **Clara:** greeting and one line; four numbers (needs you, books going, pages in her words,
+  sales); *Keep writing* → opens her next draft-only page directly (`/books/[id]?page=N`);
+  "Needs you"; *Tell the team*; photos; each book's stage track; coming up; Scout's latest.
+- **Kyle:** to route, stuck, on Clara, bots today; his questions; *Tell the bots*; books;
+  coming up; latest activity and last backend tick.
+- On phones the numbers are one compact strip, so *Keep writing* and "Needs you" are on the
+  first screen. On desktop they are the big tiles, with what-to-do on the left and
+  where-things-are on the right.
+- The Books shelf drops its "Needs you" strip (it lives on Overview and inside each book) and
+  links back to Overview when something is waiting.
 
 ## Rules kept
 

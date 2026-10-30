@@ -4,9 +4,10 @@ import { usePathname } from "next/navigation";
 
 type Tab = { href: string; label: string; icon: keyof typeof ICON };
 
-/** Five tabs each, in the order each person needs them. */
+/** Six tabs each: Overview first, then in the order each person needs them. */
 export const TABS: Record<"mom" | "kyle", Tab[]> = {
   mom: [
+    { href: "/", label: "Overview", icon: "home" },
     { href: "/books", label: "Books", icon: "book" },
     { href: "/progress", label: "Progress", icon: "track" },
     { href: "/ideas", label: "Ideas", icon: "bulb" },
@@ -14,6 +15,7 @@ export const TABS: Record<"mom" | "kyle", Tab[]> = {
     { href: "/money", label: "Money", icon: "coin" },
   ],
   kyle: [
+    { href: "/", label: "Overview", icon: "home" },
     { href: "/books", label: "Books", icon: "book" },
     { href: "/progress", label: "Progress", icon: "track" },
     { href: "/inbox", label: "Inbox", icon: "inbox" },
@@ -23,6 +25,7 @@ export const TABS: Record<"mom" | "kyle", Tab[]> = {
 };
 
 const ICON = {
+  home: "M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5z",
   book: "M4 4.5A2.5 2.5 0 0 1 6.5 2H20v16H6.5A2.5 2.5 0 0 0 4 20.5V4.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5",
   track: "M3 17h4l3-8 4 12 3-6h4",
   bulb: "M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z",
@@ -40,7 +43,7 @@ function Icon({ name, className = "" }: { name: keyof typeof ICON; className?: s
   );
 }
 
-const useActive = () => { const path = usePathname(); return (href: string) => path === href || path.startsWith(href + "/"); };
+const useActive = () => { const path = usePathname(); return (href: string) => href === "/" ? path === "/" : path === href || path.startsWith(href + "/"); };
 
 /** Desktop sidebar links. */
 export function SideNav({ view }: { view: "mom" | "kyle" }) {
@@ -67,7 +70,7 @@ export function TabBar({ view }: { view: "mom" | "kyle" }) {
       <nav className="tabbar glass fixed inset-x-0 bottom-0 z-40 flex justify-around border-t md:hidden" aria-label="Sections">
         {tabs.map((t) => (
           <Link key={t.href} href={t.href}
-            className={`flex min-w-[64px] flex-1 flex-col items-center gap-0.5 px-1 pt-2 text-[11px] ${isActive(t.href) ? "font-semibold text-orange-600" : "text-[var(--quiet)]"}`}>
+            className={`flex min-w-0 flex-1 flex-col items-center gap-0.5 px-0.5 pt-2 text-[10.5px] leading-tight ${isActive(t.href) ? "font-semibold text-orange-600" : "text-[var(--quiet)]"}`}>
             <Icon name={t.icon} className="h-6 w-6" />
             {t.label}
           </Link>

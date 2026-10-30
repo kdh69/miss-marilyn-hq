@@ -51,6 +51,29 @@ export function Stat({ label, value, sub, tone = "ink" }: { label: string; value
   );
 }
 
+/**
+ * Headline numbers. Phones get one compact strip (so what needs doing is on the first screen);
+ * wider screens get the big tiles.
+ */
+export function StatRow({ stats }: { stats: { label: string; short: string; value: string; sub?: string; tone?: "ink" | "accent" | "accent-2" }[] }) {
+  const color = (t?: string) => (t === "accent" ? "text-orange-500" : t === "accent-2" ? "text-violet-500" : "text-[var(--ink)]");
+  return (
+    <>
+      <div className="glass grid grid-cols-4 divide-x divide-black/5 rounded-2xl py-3 sm:hidden">
+        {stats.map((s) => (
+          <div key={s.label} className="px-2 text-center">
+            <p className={`text-xl font-semibold tabular-nums ${color(s.tone)}`}>{s.value}</p>
+            <p className="text-[11px] leading-tight text-[var(--quiet)]">{s.short}{s.sub ? ` ${s.sub}` : ""}</p>
+          </div>
+        ))}
+      </div>
+      <div className="hidden grid-cols-2 gap-3 sm:grid lg:grid-cols-4">
+        {stats.map((s) => <Stat key={s.label} label={s.label} value={s.value} sub={s.sub} tone={s.tone} />)}
+      </div>
+    </>
+  );
+}
+
 export function Bar({ pct, tone = "accent" }: { pct: number; tone?: "accent" | "accent-2" }) {
   return (
     <div className="h-2 w-full rounded-full bg-black/5">

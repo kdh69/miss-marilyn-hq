@@ -14,7 +14,7 @@ packages/core            schema.json (tabs, columns, dropdowns, status rules) + 
 apps/backend             the 30-min tick: gatekeeper, Clara sync, messages, Etsy, alerts, digest, backup
 apps/backend/preflight   KDP PDF checker (Python, PyMuPDF) + tests
 apps/backend/rubrics     Claude QC rubric per task type
-apps/web                 the panel: Books, Progress, Ideas, To-do, Money (Clara) · Books, Progress, Inbox, System, Money (Kyle)
+apps/web                 the panel: Overview, Books, Progress, Ideas, To-do, Money (Clara) · Overview, Books, Progress, Inbox, System, Money (Kyle)
 scripts                  sheet:setup, google:authorize
 tests                    schema integrity + status-rule tests
 ```
@@ -41,12 +41,14 @@ Folder IDs live in the Sheet's `config` tab.
 
 ## How Clara works in the panel
 
-Five tabs on the phone's bottom bar and the desktop sidebar. Kyle sees his own five, and can flip
+Six tabs on the phone's bottom bar and the desktop sidebar. Kyle sees his own six, and can flip
 to Clara's view with the *Viewing as* switch (it only changes what is shown; writes stay his).
 Plan and rationale: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md).
 
-- **Books** (home): a "Needs you" strip (approvals, questions, photo asks — one button each),
-  then the shelf. In a book: one page at a time, art large, her words in big type, autosave,
+- **Overview** (home): greeting, headline numbers, *Keep writing* (straight to her next page
+  still in the draft's words), a "Needs you" strip (approvals, questions, photo asks — one
+  button each), *Tell the team*, photo upload, each book's stage, what's coming up, Scout's latest.
+- **Books:** the shelf, with a badge on any book that needs her. In a book: one page at a time, art large, her words in big type, autosave,
   the AI draft under "Show the AI draft" (`pages.text_final` stays apart from `text_draft` for the
   KDP/copyright record). Page notes and the book thread sit below. **+ New book** sends the team
   a book idea.
@@ -57,7 +59,8 @@ Plan and rationale: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md).
 - **To-do:** everything waiting on her in date order, this week's posts, and her accounts and
   socials (she can mark her own accounts done).
 - **Money:** sales, costs, profit, by book.
-- **Kyle — Inbox:** Clara's notes to route (*Send to bots*, *I handled it*, *Not doing*), stuck
+- **Kyle — Overview:** what to route, what's stuck, what's on Clara, bot spend, books, latest
+  activity. **Inbox:** Clara's notes to route (*Send to bots*, *I handled it*, *Not doing*), stuck
   tasks, what's waiting on Clara, bot spend. **System:** pause/resume, last tick, config, accounts.
 - If the bots are paused (spend cap hit), a banner says so; Kyle gets a **Resume** button.
 
