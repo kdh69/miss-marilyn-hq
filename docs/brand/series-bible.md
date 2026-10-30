@@ -183,11 +183,12 @@ classrooms are much easier to draw and read, and the photo page keeps the real-c
 ### Side characters (per book)
 
 New friends, teachers, pilots and neighbours can appear in a single book. Keep them simple,
-friendly, and any animal **except** a cat or a dog (so the family stays visually distinct).
+friendly, and any animal, cats and dogs included. Draw each one clearly different from the
+family and Zoey (colours, shape, accessories) so a child never mixes them up.
 Give each one a plain name a child can say (Pip, Lulu, Benny). No side character returns unless
 the Orchestrator's brief says so.
 
-**Exception — Gussie (Book 1, MM-B02), a dog at Clara's request.** Based on a real dog; reference
+**Gussie (Book 1, MM-B02), a dog.** Based on a real dog; reference
 photos are in MM Brand → photos → inbox (`gussie-*`).
 - **Looks:** a young, lean black-and-tan dog. Short, shiny black coat; tan eyebrow dots, tan
   cheeks and muzzle, tan chest and lower legs (the legs a little brindled). Long slim muzzle,
