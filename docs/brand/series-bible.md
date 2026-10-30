@@ -14,7 +14,7 @@ characters are and what the stories do.
 Miss Marilyn ("Miss M") is a small rescue cat with a big curious heart. In each book she goes on
 one everyday adventure that feels huge to a little kid (a plane ride, a visit to her grandparents,
 the first day of school). Something about it feels new or a bit wobbly, she works through it with
-her family and her best friend Zoey, she sneezes at least once ("Achoo!"), and by the end she has
+her family (and sometimes her best friend Zoey), she sneezes at least once ("Achoo!"), and by the end she has
 learned one small, true thing about growing up.
 
 The books star a real cat. The last page of every book shows a real photo of Miss Marilyn, so
@@ -137,8 +137,9 @@ classrooms are much easier to draw and read, and the photo page keeps the real-c
 
 ### Zoey — Miss M's best friend (the family dog)
 
-- **Why she's here:** Zoey was the family's real dog and has passed away. She appears in every
-  book as Miss M's best friend to honour her. This is a tribute, so treat her with care.
+- **Why she's here:** Zoey was the family's real dog and has passed away. She appears as Miss M's
+  best friend to honour her, but **not in every book**: only when the Orchestrator's brief or
+  Clara's story includes her (Book 1 doesn't). This is a tribute, so treat her with care.
 - **Looks** (from Clara's photos, MM Brand → photos → inbox, `zoey-*`): a cream-to-apricot
   goldendoodle, bigger than Miss M. Soft, wavy-curly coat all over; a shaggy fringe over warm
   brown eyes; long fluffy ears; dark brown nose; a big plumed tail. Always wears her **pink
@@ -198,8 +199,8 @@ photos are in MM Brand → photos → inbox (`gussie-*`).
   pup (Miss M's size).
 - **Personality:** shy and a little sad at first, sitting off to the side; warms up fast once
   someone says hello, and laughs easily after that.
-- **Keep him distinct from Zoey** (the family's dog): different colours, shape and collar, so a
-  child never mixes them up. If Zoey's reference photos are close, ask Clara before drawing either.
+- **Keep him distinct from Zoey** (the family's dog) if they're ever in a book together: he's
+  black-and-tan and sleek, she's a cream curly goldendoodle in a pink harness.
 
 ## 7. World and setting
 

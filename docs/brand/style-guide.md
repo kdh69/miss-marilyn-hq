@@ -53,7 +53,7 @@ Locked character colours come from the character sheet. Until then:
 |---|---|---|
 | Miss M coat / markings | [TO FILL FROM PHOTOS] | from real photos only |
 | Miss M collar | [TO FILL] | |
-| Zoey coat / markings | [TO FILL FROM PHOTOS] | from real photos only |
+| Zoey coat / markings | cream-to-apricot goldendoodle, wavy-curly coat, pink harness | from real photos only (`zoey-*`) |
 
 **World palette — starting point** (warm, soft, slightly muted; not neon, not grey):
 

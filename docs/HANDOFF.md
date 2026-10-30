@@ -90,7 +90,7 @@ and `dryrun` on Actions, connected Vercel to GitHub, passed the QC results back 
 - **Pick the author name** (pen name or real name). It blocks Book 1's KDP packet.
 - **Rewrite each page in her own words** in the panel's **Script** step (the whole script, page by page), then approve it. Builder prints only her words
   (`text_final`). Book 1's pages come once the Producer drafts them.
-- **Miss M material:** 15–20 photos and 2–3 videos; Zoey's photos and description; the rescue story and
+- **Miss M material:** 15–20 photos and 2–3 videos; the rescue story and
   dedication for the "Meet the Real Miss Marilyn" page.
 - **Business setup:** LLC + EIN, business bank account and card, brand domain; then KDP, Etsy,
   Meta Business Suite, Pinterest and an email list tool.
