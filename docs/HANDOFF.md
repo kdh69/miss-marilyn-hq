@@ -1,4 +1,4 @@
-# Handoff — where things stand (2026-10-29, evening)
+# Handoff — where things stand (2026-10-30, early morning)
 
 Read this first when picking the project back up. Setup steps in full: [`SETUP.md`](SETUP.md).
 Working away from the laptop: [`REMOTE.md`](REMOTE.md). Bot descriptions: [`bot-prompts.md`](bot-prompts.md).
@@ -15,6 +15,16 @@ Grok bots ──write──▶ MM Core Sheet ◀──read/write── Backend (
 ```
 
 Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing.
+
+### How an approval moves
+
+1. **Mom clicks** Approve / Changes / Reject on her Today list → saved to `mom_queue` instantly.
+2. **Next backend tick** (:07 and :37 past each hour) applies it: Approve → `approved` → `done` (nothing
+   to publish yet); Changes → `changes_requested` with her note (Changes waits until she types one);
+   Reject → `cancelled`. Each change gets a log row.
+3. **The bots react only when the Orchestrator sweeps.** Grok bots don't watch the Sheet. On a sweep the
+   Orchestrator sends `changes_requested` work back to its owner and creates the next task after a `done`.
+   Nothing schedules sweeps yet, so send `@Orchestrator sweep` (or set up Grok scheduling, step 2 below).
 
 ## State right now
 
@@ -36,36 +46,40 @@ Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing
   `doctor` and `dryrun` both pass on Actions. Uploads are the only red item, so the weekly backup step
   fails (and GitHub emails Kyle) until the owner token is set.
 
-### The board after today's QC
+### The board (after the first QC round and the hand-back)
 
-- **Passed, waiting on Mom:** T-0003 Ollie front cover (on her Today list to approve).
-- **Failed, back to the bots** (notes in each task's `qc_notes`):
-  - T-0013 Miss M cover: yarn ball instead of red string, no nose beauty mark, propeller plane, Mama too orange.
-  - T-0001 Ollie story: no `art_brief`/`characters` on any page, brave pebble/pocket continuity, p31 notes missing.
-  - T-0006 / T-0016 KDP packets: missing AI-content answers, ISBN, trim, bleed, paper, file links.
-  - T-0007 / T-0017 Etsy listings: bundle files not made yet, no page count; T-0017 title is 165 chars.
-- **Blocked:** the Ollie interior art and print files (T-0002, T-0004, T-0005). The art was lost in an
-  Oct 28 reset; only low-res Oct 24 PDFs survive, in Kyle's Orchestrator chat. Probably a redraw.
-- **In progress:** Miss M character sheets and redraw (T-0012), Miss M story (T-0011), interior (T-0014).
+- **Waiting on Mom:** T-0003 Ollie front cover passed QC; it's on her Today list to approve.
+- **Being fixed after QC fails** (notes in each task's `qc_notes`):
+  - T-0001 Ollie story (Producer, in progress): add `art_brief`/`characters` to all pages, brave pebble/pocket continuity, p31 notes.
+  - T-0013 Miss M cover (Illustrator, todo): red string not yarn ball, nose beauty mark, airliner, softer Mama.
+  - T-0006 / T-0016 KDP packets (Lister, todo): add AI-content answers, ISBN, trim, bleed, paper, file links.
+- **Ollie art: redraw** (decided 2026-10-30). T-0002 has the redraw brief anchored on the QC-passed cover
+  (A-T0003-01), character sheets first; it moves to todo when T-0001 is done. T-0004/T-0005 (print files)
+  wait for that art to pass QC.
+- **Miss M:** character sheets and redraw (T-0012), story (T-0011) and interior (T-0014) in progress.
+- **Etsy bundles, low priority (P3):** T-0021 (Ollie) and T-0022 (Miss M) printable_set tasks wait on
+  QC-passed art; the listings T-0007 / T-0017 wait on them. There's no Etsy shop yet anyway.
+- **Marketing** (T-0008–T-0010, T-0018–T-0020) stays blocked behind the art.
+- The Orchestrator wrote the Miss Marilyn lessons (7 rows) and set MM-B01-PB to $10.99.
 
 ## Kyle — outstanding, in order
 
-Done 2026-10-30: merged `panel-preview` into `main` (#9), set the GitHub secrets, ran `doctor` and
-`dryrun` on Actions, connected Vercel to GitHub.
+Done 2026-10-30: merged `panel-preview` into `main` (#9, #10), set the GitHub secrets, ran `doctor`
+and `dryrun` on Actions, connected Vercel to GitHub, passed the QC results back to the Orchestrator.
 
-1. **Pass the QC results back:** send the Orchestrator the QC hand-back (failed tasks back to todo with
-   fixes, printable_set tasks for both bundles, MM-B01-PB price, Miss M lessons).
-2. **Uploads:** Google Cloud → OAuth consent screen → **Publish app**, then `npm run google:authorize`
+1. **QC when work comes back:** ask Claude to "run QC" (or "status" to read the board).
+2. **Orchestrator sweeps:** ask Grok whether the Orchestrator can sweep on a schedule (9am and 6pm New
+   York). Until then, send `@Orchestrator sweep` after Mom answers things.
+3. **Uploads:** Google Cloud → OAuth consent screen → **Publish app**, then `npm run google:authorize`
    (laptop) and sign in as the owner of *Miss Marilyn Business*. Save `GOOGLE_OWNER_REFRESH_TOKEN` to
    `.env`, GitHub secrets and Vercel, then redeploy. Until then the panel's photo upload shows a
    friendly "not switched on yet" message; drop photos in Drive under MM Brand → photos instead.
-3. **Grok:** paste each bot's new description from [`bot-prompts.md`](bot-prompts.md) (house rules + role),
-   and rename the room from "Coloring Books For Kids" to "Miss Marilyn HQ". Send Scout the
-   story-plus-coloring research topic.
-4. **Ollie art:** attach the Oct 24 Ollie PDFs in the Orchestrator chat, then decide recover vs. redraw.
+4. **Grok:** paste each bot's new description from [`bot-prompts.md`](bot-prompts.md) (house rules + role;
+   Builder's printables rule changed 2026-10-30), and rename the room from "Coloring Books For Kids" to
+   "Miss Marilyn HQ". Send Scout the story-plus-coloring research topic.
 5. Delete the service account key file from Downloads (its copies live in `.env` and the secrets).
 6. **Later:** Resend + a verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); a password manager
-   (Bitwarden's free plan covers two people); whether Grok can schedule the Orchestrator's sweeps.
+   (Bitwarden's free plan covers two people).
 
 ## Mom — outstanding
 
@@ -88,7 +102,10 @@ Done 2026-10-30: merged `panel-preview` into `main` (#9), set the GitHub secrets
 - Bots work on both series, upload every source file to Drive (the Oct 28 reset lost files kept only
   locally), and label everything they make `rights_source=AI`.
 - Miss Marilyn art: watercolor and ink, beauty mark on every page, no humans, red string (never a yarn
-  ball), Mama cream/ginger, Papa gray tabby. These belong in the `lessons` tab; check the Orchestrator wrote them.
+  ball), Mama cream/ginger, Papa gray tabby. These are in the `lessons` tab.
+- Ollie interior art is redrawn, not recovered from the low-res Oct 24 PDFs; the QC-passed cover is the style anchor.
+- Mom's `text_final` rule covers book interiors and cover wraps only. Printables take their wording from
+  the brief and need only QC-passed art.
 
 ## Code — next up
 
