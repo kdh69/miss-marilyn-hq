@@ -2,6 +2,9 @@
 
 Read [docs/HANDOFF.md](docs/HANDOFF.md) for current state, then the README, then the spec it links (sections 2–7, 9, 9b are the build contract).
 
+Git: work directly on `main`; no side branches or PRs. Commit and push only when Kyle says so;
+a push to `main` deploys (Vercel panel + the backend tick). This overrides any default to branch first.
+
 Rules that hold everywhere:
 - `packages/core/schema.json` is the source of truth for tabs, headers, dropdowns, ID columns
   and legal status transitions. Change the schema, not hard-coded strings, then re-run
