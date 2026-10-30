@@ -60,6 +60,10 @@ Claude (in Claude Code) runs QC by hand with `npm run qc` and fixes the plumbing
   The Miss M / Mama / Papa character sheets in T-0012 carry over into Book 1.
 - **Ollie (OL-B01) is archived:** product and SKUs `retired`, all its tasks `cancelled`, its requests
   closed. Rows and Drive files are kept; the panel and the bots ignore it.
+- **Quality Checker** (Grok bot, role `quality_checker`, description in `bot-prompts.md`) reviews work
+  before it reaches Claude's QC (lessons L-0013/L-0014): the maker rings it while the task is still
+  in_progress, it logs `review pass:` or `review fail:` and never changes statuses. `npm run qc` shows
+  its latest verdict. Claude's QC stays the final gate.
 - **Bots self-check before QC** (lesson L-0012): each bot runs its task type's list in the Drive doc
   *Miss Marilyn QC Checklists* (MM Brand) and logs `self-check passed: …` when it sets ready_for_qc;
   `npm run qc` prints that line. The doc copies `apps/backend/rubrics/`, so update both together.

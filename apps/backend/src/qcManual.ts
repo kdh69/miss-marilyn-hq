@@ -29,6 +29,8 @@ async function list(core: Core) {
     console.log(`  goes to Clara on pass: ${type?.needs_mom === "TRUE" ? "yes" : "no"}`);
     const sent = [...core.rows("log")].reverse().find((l) => l.task_id === t.task_id && l.to_status === "ready_for_qc");
     console.log(`  bot's self-check: ${/self-check/i.test(sent?.message ?? "") ? sent!.message : "(none logged; L-0012 asks for one)"}`);
+    const review = [...core.rows("log")].reverse().find((l) => l.task_id === t.task_id && l.actor === "quality_checker");
+    console.log(`  Quality Checker:  ${review ? review.message : "(no review logged; L-0013 asks for one)"}`);
     console.log(`  brief   ${t.brief.replace(/\n/g, "\n          ")}`);
     for (const id of t.output_asset_ids.split(",").map((s) => s.trim()).filter(Boolean)) {
       const a = assets.get(id);

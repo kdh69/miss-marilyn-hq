@@ -2,7 +2,7 @@
 
 export const WHO: Record<string, string> = {
   mom: "Clara", kyle: "Kyle", orchestrator: "Team", story_producer: "Story writer", illustrator: "Artist",
-  builder: "Layout", publisher: "Publisher", growth: "Marketing", scout: "Scout", backend: "System",
+  builder: "Layout", publisher: "Publisher", growth: "Marketing", scout: "Scout", quality_checker: "Quality Checker", backend: "System",
 };
 
 export const KIND: Record<string, string> = { note: "Note", change: "Change", idea: "Idea", question: "Question", rule: "House rule" };
