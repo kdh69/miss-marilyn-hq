@@ -29,8 +29,8 @@ body {
 }
 
 /* Phone tab bar sits above the home indicator. */
-.tabbar { padding-bottom: max(10px, env(safe-area-inset-bottom)); background: rgb(255 255 255 / 0.88); }
-.topbar { background: rgb(255 255 255 / 0.85); }
+.tabbar { padding-bottom: max(10px, env(safe-area-inset-bottom)); background: rgb(255 255 255 / 0.96); }
+.topbar { background: rgb(255 255 255 / 0.96); }
 :root { --topbar-h: 61px; }
 
 /* 16px+ inputs so iOS doesn't zoom on focus. Utilities still win (layered). */
