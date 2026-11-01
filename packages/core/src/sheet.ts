@@ -18,20 +18,38 @@ export function googleAuth() {
 type RetryErr = { config: { method?: string; retryConfig?: { currentRetryAttempt?: number } }; response?: { status?: number } };
 
 /**
- * Sheets allows ~60 reads and ~60 writes a minute. A 429 means the request was refused, so it is
- * safe to resend even an append; back off for up to about a minute (0.1 s doubling to ~30 s).
- * Server errors and dropped connections are retried only for reads and in-place updates.
+ * Sheets allows 60 reads and 60 writes a minute per user, and refused calls seem to count too, so
+ * `pace` keeps each process under that and this retry is only the backstop. A 429 means the
+ * request was refused, so it is safe to resend even an append: back off 0.1 s doubling, capped
+ * at 30 s, for up to ~3 minutes. Server errors and dropped connections are retried only for
+ * reads and in-place updates.
  */
 const RETRY = {
-  retry: 7,
+  retry: 10,
+  maxRetryDelay: 30_000,
   shouldRetry: (err: RetryErr) => {
     const attempt = err.config.retryConfig?.currentRetryAttempt ?? 0;
     const status = err.response?.status ?? 0;
-    if (status === 429) return attempt < 7;
+    if (status === 429) return attempt < 10;
     const idempotent = ["GET", "PUT"].includes((err.config.method ?? "GET").toUpperCase());
     return idempotent && (status >= 500 || !err.response) && attempt < 3;
   },
 };
+
+/** Calls per minute one process allows itself, per kind (Sheets' limit is 60; leave room for the panel). */
+const PER_MINUTE = Number(process.env.SHEETS_CALLS_PER_MINUTE) || 50;
+const recent: Record<"read" | "write", number[]> = { read: [], write: [] };
+
+/** Waits, if needed, so this process stays under PER_MINUTE reads (or writes) in any 60 s. */
+async function pace(kind: "read" | "write") {
+  const q = recent[kind];
+  for (;;) {
+    const now = Date.now();
+    while (q.length && now - q[0] >= 60_000) q.shift();
+    if (q.length < PER_MINUTE) return void q.push(now);
+    await new Promise((r) => setTimeout(r, 60_000 - (now - q[0]) + 50));
+  }
+}
 
 export function sheetsClient(): sheets_v4.Sheets {
   return google.sheets({ version: "v4", auth: googleAuth(), retryConfig: RETRY });
@@ -64,6 +82,7 @@ export class Core {
   static async load(tabs = schema.tabs.map((t) => t.name)): Promise<Core> {
     const api = sheetsClient();
     const id = sheetId();
+    await pace("read");
     const res = await api.spreadsheets.values.batchGet({
       spreadsheetId: id,
       ranges: tabs,
@@ -88,9 +107,11 @@ export class Core {
    * Re-reads the tab first so indexes are current; deletes bottom-up.
    */
   async deleteWhere(tab: string, match: (r: Row) => boolean): Promise<number> {
+    await pace("read");
     const meta = await this.api.spreadsheets.get({ spreadsheetId: this.id, fields: "sheets(properties(sheetId,title))" });
     const gid = meta.data.sheets?.find((s) => s.properties?.title === tab)?.properties?.sheetId;
     if (gid === undefined || gid === null) throw new Error(`no tab ${tab}`);
+    await pace("read");
     const res = await this.api.spreadsheets.values.get({ spreadsheetId: this.id, range: tab });
     const [headers = [], ...body] = (res.data.values ?? []) as string[][];
     const idx = body
@@ -99,6 +120,7 @@ export class Core {
       .map(({ i }) => i + 1) // +1 for the header row (0-based grid index)
       .sort((a, b) => b - a);
     if (!idx.length) return 0;
+    await pace("write");
     await this.api.spreadsheets.batchUpdate({
       spreadsheetId: this.id,
       requestBody: { requests: idx.map((i) => ({ deleteDimension: { range: { sheetId: gid, dimension: "ROWS", startIndex: i, endIndex: i + 1 } } })) },
@@ -114,6 +136,7 @@ export class Core {
   async append(tab: string, rows: Partial<Row>[]): Promise<void> {
     if (!rows.length) return;
     const headers = headersOf(tabDef(tab));
+    await pace("write");
     await this.api.spreadsheets.values.append({
       spreadsheetId: this.id,
       range: tab,
@@ -137,6 +160,7 @@ export class Core {
     if (idx < 0) throw new Error(`${tab}: no row ${id}`);
     const rowNum = idx + 2;
     const width = colLetter(snap.headers.length - 1);
+    await pace("read");
     const live = await this.api.spreadsheets.values.get({ spreadsheetId: this.id, range: `${tab}!A${rowNum}:${width}${rowNum}` });
     const liveRow: Row = Object.fromEntries(snap.headers.map((h, j) => [h, (live.data.values?.[0]?.[j] as string) ?? ""]));
     if (liveRow[def.id] !== id) return false; // row moved (someone sorted/deleted)
@@ -147,6 +171,7 @@ export class Core {
       next.updated_at = nowIso();
       next.updated_by = actor;
     }
+    await pace("write");
     await this.api.spreadsheets.values.update({
       spreadsheetId: this.id,
       range: `${tab}!A${rowNum}:${width}${rowNum}`,
