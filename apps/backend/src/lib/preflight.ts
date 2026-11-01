@@ -17,6 +17,17 @@ const KIND: Record<string, "interior" | "cover"> = { interior_layout: "interior"
 
 export const needsPreflight = (taskType: string) => taskType in KIND;
 
+/** Where preflight gets a PDF's bytes: Drive by default; `npm run sim` swaps in its own files. */
+export type PdfSource = (asset: Row) => Promise<Buffer>;
+const fromDrive: PdfSource = async (a) => {
+  const id = a.file_url.match(/[-\w]{25,}/)?.[0];
+  if (!id) throw new Error("file_url isn't a Drive link");
+  const bin = await driveReader().files.get({ fileId: id, alt: "media" }, { responseType: "arraybuffer" });
+  return Buffer.from(bin.data as ArrayBuffer);
+};
+let pdfSource: PdfSource = fromDrive;
+export const usePdfSource = (source: PdfSource = fromDrive) => { pdfSource = source; };
+
 export async function preflight(core: Core, task: Row, assets: Row[]): Promise<string[]> {
   const kind = KIND[task.task_type];
   if (!kind) return [];
@@ -34,11 +45,15 @@ export async function preflight(core: Core, task: Row, assets: Row[]): Promise<s
   const failures: string[] = [];
   try {
     for (const a of pdfs) {
-      const id = a.file_url.match(/[-\w]{25,}/)?.[0];
-      if (!id) { failures.push(`${a.asset_id}: file_url isn't a Drive link`); continue; }
+      let bytes: Buffer;
+      try {
+        bytes = await pdfSource(a);
+      } catch (e) {
+        failures.push(`${a.asset_id}: ${(e as Error).message}`);
+        continue;
+      }
       const file = join(dir, `${a.asset_id}.pdf`);
-      const bin = await driveReader().files.get({ fileId: id, alt: "media" }, { responseType: "arraybuffer" });
-      await writeFile(file, Buffer.from(bin.data as ArrayBuffer));
+      await writeFile(file, bytes);
       const args = ["-I", SCRIPT, kind, file, ...(kind === "cover" ? ["--pages", pages] : [])];
       const { stdout } = await run(python, args, { maxBuffer: 4_000_000 }).catch((e) => ({ stdout: e.stdout as string }));
       const result = JSON.parse(stdout || '{"ok":false,"failures":["preflight crashed"]}');

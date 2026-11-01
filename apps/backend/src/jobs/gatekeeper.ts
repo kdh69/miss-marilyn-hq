@@ -36,12 +36,13 @@ export async function spendGuard(core: Core): Promise<{ halted: boolean; qcBudge
  * Spec §6 integrity check: the last to_status in `log` is the task's last legal
  * status. Illegal jumps are reverted; legal changes with no log row get one.
  */
-export async function integrityCheck(core: Core): Promise<void> {
+export async function integrityCheck(core: Core, only?: (task: Row) => boolean): Promise<void> {
   const lastLogged = new Map<string, string>();
   for (const l of core.rows("log")) if (l.task_id && l.to_status) lastLogged.set(l.task_id, l.to_status);
   const needsQc = new Map(core.rows("task_types").map((t) => [t.task_type, t.needs_qc === "TRUE"]));
 
   for (const task of core.rows("tasks")) {
+    if (only && !only(task)) continue;
     const prev = lastLogged.get(task.task_id);
     const cur = task.status;
     if (!cur || prev === cur) continue;

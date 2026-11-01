@@ -4,6 +4,7 @@ import { savePageText } from "@/app/actions";
 import { MessageBox } from "./MessageBox";
 import { MessageItem } from "./Messages";
 import { btn } from "./ui";
+import { hasWords } from "@/lib/labels";
 
 type Page = Record<string, string>;
 type Req = Record<string, string>;
@@ -18,7 +19,8 @@ export function BookWorkspace({ productId, pages, requests, viewer, canEdit, tec
 }) {
   const [i, setI] = useState(() => Math.max(0, pages.findIndex((p) => p.page_number === startPage)));
   const page = pages[i];
-  const yours = pages.filter(isHers).length;
+  const wordy = pages.filter(hasWords);
+  const yours = wordy.filter(isHers).length;
   const stripRef = useRef<HTMLDivElement>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
   const go = (d: number) => setI((x) => Math.min(pages.length - 1, Math.max(0, x + d)));
@@ -46,7 +48,7 @@ export function BookWorkspace({ productId, pages, requests, viewer, canEdit, tec
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-[var(--quiet)]">{yours} of {pages.length} pages in your words<span className="hidden md:inline"> · ← → to turn pages</span></p>
+        <p className="text-sm text-[var(--quiet)]">{yours} of {wordy.length} pages with words in your words<span className="hidden md:inline"> · ← → to turn pages</span></p>
         <div className="flex items-center gap-1">
           <button onClick={() => go(-1)} disabled={i === 0} aria-label="Previous page" className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-lg disabled:opacity-30">‹</button>
           <span className="min-w-[88px] text-center text-sm font-semibold">Page {page.page_number} of {pages.length}</span>

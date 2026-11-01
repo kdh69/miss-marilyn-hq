@@ -15,8 +15,26 @@ export function googleAuth() {
   return new google.auth.GoogleAuth({ credentials: creds, scopes: SCOPES });
 }
 
+type RetryErr = { config: { method?: string; retryConfig?: { currentRetryAttempt?: number } }; response?: { status?: number } };
+
+/**
+ * Sheets allows ~60 reads and ~60 writes a minute. A 429 means the request was refused, so it is
+ * safe to resend even an append; back off for up to about a minute (0.1 s doubling to ~30 s).
+ * Server errors and dropped connections are retried only for reads and in-place updates.
+ */
+const RETRY = {
+  retry: 7,
+  shouldRetry: (err: RetryErr) => {
+    const attempt = err.config.retryConfig?.currentRetryAttempt ?? 0;
+    const status = err.response?.status ?? 0;
+    if (status === 429) return attempt < 7;
+    const idempotent = ["GET", "PUT"].includes((err.config.method ?? "GET").toUpperCase());
+    return idempotent && (status >= 500 || !err.response) && attempt < 3;
+  },
+};
+
 export function sheetsClient(): sheets_v4.Sheets {
-  return google.sheets({ version: "v4", auth: googleAuth() });
+  return google.sheets({ version: "v4", auth: googleAuth(), retryConfig: RETRY });
 }
 
 export function sheetId(): string {

@@ -1,5 +1,8 @@
 /** Plain-English words for Sheet codes. Safe for client components (no server imports). */
 
+/** Pages Clara makes hers: every page with words. A picture-only page has nothing to rewrite. */
+export const hasWords = (p: Record<string, string>) => !!(p.text_final || p.text_draft || "").trim();
+
 export const WHO: Record<string, string> = {
   mom: "Clara", kyle: "Kyle", orchestrator: "Team", story_producer: "Story writer", illustrator: "Artist",
   builder: "Layout", publisher: "Publisher", growth: "Marketing", scout: "Scout", quality_checker: "Quality Checker", backend: "System",

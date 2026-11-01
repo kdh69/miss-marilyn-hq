@@ -5,7 +5,7 @@ import { PageTabs } from "@/components/PageTabs";
 import { StepShell, pickBook } from "@/components/StepShell";
 import { Card, Empty, Pill } from "@/components/ui";
 import { bookPages, driveId, getSnapshot, latestAsset, pageApprovals, stepAsk, stepTask } from "@/lib/data";
-import { STAGE_TRACK, TASK_STATUS, TASK_TYPE, bookNumber } from "@/lib/labels";
+import { STAGE_TRACK, TASK_STATUS, TASK_TYPE, bookNumber, hasWords } from "@/lib/labels";
 import { canSee, viewer } from "@/lib/viewer";
 
 /**
@@ -27,7 +27,8 @@ export default async function Building({ searchParams }: { searchParams: Promise
   const layout = stepTask(s, id, "build");
   const cover = latestAsset(s, id, ["cover_art"]);
   const notes = s.requests.filter((r) => r.product_id === id && r.page_number);
-  const hers = pages.filter((p) => p.text_final).length;
+  const wordy = pages.filter(hasWords);
+  const hers = wordy.filter((p) => p.text_final).length;
   const drawn = pages.filter((p) => p.art_id).length;
   const files = [
     { label: "Inside of the book (PDF)", a: latestAsset(s, id, ["interior_pdf"]) },
@@ -47,7 +48,7 @@ export default async function Building({ searchParams }: { searchParams: Promise
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wide text-orange-700">{bookNumber(product) || id}</p>
             <h2 className="text-xl font-semibold">{product?.title}</h2>
-            <p className="text-sm text-[var(--quiet)]">{hers} of {pages.length} pages in your words · {drawn} of {pages.length} drawn</p>
+            <p className="text-sm text-[var(--quiet)]">{hers} of {wordy.length} pages with words in your words · {drawn} of {pages.length} drawn</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">

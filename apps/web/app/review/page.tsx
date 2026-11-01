@@ -6,7 +6,7 @@ import { Approval } from "@/components/NeedsYou";
 import { StepShell, pickBook } from "@/components/StepShell";
 import { Card, Pill } from "@/components/ui";
 import { bookPages, driveId, getSnapshot, latestAsset, pageApprovals, stepAsk, stepTask } from "@/lib/data";
-import { bookNumber } from "@/lib/labels";
+import { bookNumber, hasWords } from "@/lib/labels";
 import { canSee, viewer } from "@/lib/viewer";
 
 /**
@@ -23,7 +23,8 @@ export default async function Review({ searchParams }: { searchParams: Promise<{
   const product = s.products.find((p) => p.product_id === id);
   const pages = bookPages(s, id);
   const n = pages.length;
-  const hers = pages.filter((p) => p.text_final).length;
+  const wordy = pages.filter(hasWords);
+  const hers = wordy.filter((p) => p.text_final).length;
   const pics = Object.keys(pageApprovals(s, id, "picture")).length;
   const laid = Object.keys(pageApprovals(s, id, "layout")).length;
   const layoutOk = stepTask(s, id, "build")?.status === "done";
@@ -31,7 +32,7 @@ export default async function Review({ searchParams }: { searchParams: Promise<{
   const ask = stepAsk(s, id, "review");
   const published = stepTask(s, id, "review")?.status === "done";
   const checks = [
-    { ok: n > 0 && hers === n, text: hers === n && n ? `All ${n} pages are in your words` : `${hers} of ${n} pages in your words — the rest won't print`, href: `/script?book=${id}`, step: "Script" },
+    { ok: wordy.length > 0 && hers === wordy.length, text: hers === wordy.length && hers ? `All ${hers} pages with words are in your words` : `${hers} of ${wordy.length} pages in your words — the rest won't print`, href: `/script?book=${id}`, step: "Script" },
     { ok: n > 0 && pics === n, text: `${pics} of ${n} pictures approved`, href: `/art?book=${id}`, step: "Illustrations" },
     { ok: n > 0 && laid === n, text: `${laid} of ${n} finished pages approved`, href: `/build?book=${id}`, step: "Building" },
     { ok: layoutOk, text: layoutOk ? "Layout and cover approved" : "Layout and cover not approved yet", href: `/build?book=${id}`, step: "Building" },

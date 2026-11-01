@@ -1,7 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { Core, type Row } from "@mm/core";
-import { STAGE_TRACK, TASK_STATUS, TASK_TYPE, stageOfType } from "./labels";
+import { STAGE_TRACK, TASK_STATUS, TASK_TYPE, hasWords, stageOfType } from "./labels";
 import { sample } from "./sample";
 
 const TABS = ["tasks", "assets", "products", "skus", "listings", "content", "mom_queue", "pages", "requests", "research", "accounts", "costs", "transactions", "log", "config"] as const;
@@ -38,7 +38,7 @@ export function bookProgress(s: Snapshot, productId: string) {
 export function bookStage(s: Snapshot, productId: string) {
   const product = s.products.find((p) => p.product_id === productId);
   const tasks = s.tasks.filter((t) => t.product_id === productId && t.status !== "cancelled");
-  const pages = s.pages.filter((p) => p.product_id === productId);
+  const pages = s.pages.filter((p) => p.product_id === productId && hasWords(p));
   const yours = pages.filter((p) => p.text_final).length;
   const stageOf = (type: string) => STAGE_TRACK.findIndex((st) => st.types.includes(type));
   // Only work that belongs to a step moves a book along (a photo request, say, doesn't).
@@ -189,7 +189,7 @@ export function upNext(s: Snapshot) {
     const id = p.product_id;
     const st = bookStage(s, id);
     const pages = s.pages.filter((x) => x.product_id === id).sort((a, b) => Number(a.page_number) - Number(b.page_number));
-    const draftOnly = pages.find((x) => !x.text_final);
+    const draftOnly = pages.find((x) => hasWords(x) && !x.text_final);
     const ask = (key: string) => stepAsk(s, id, key);
     const at = (key: string) => `${STAGE_TRACK.find((x) => x.key === key)!.href}?book=${id}`;
     let line: { step: string; text: string; href: string; mine: boolean };

@@ -8,14 +8,14 @@ on:
       job:
         description: "What to run"
         type: choice
-        options: [tick, doctor, dryrun, qc, task]
+        options: [tick, doctor, dryrun, qc, task, sim]
         default: tick
       task_id:
         description: "qc / task: the task ID, e.g. T-0038"
         type: string
         default: ""
       value:
-        description: "qc: pass or fail · task: the new status"
+        description: "qc: pass or fail · task: the new status · sim: blank, --keep or --clean"
         type: string
         default: ""
       text:
@@ -30,7 +30,7 @@ concurrency:
 jobs:
   tick:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15   # a tick takes ~30 s; the sim paces itself to Sheets' 60 calls/min
     env:
       GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
       MM_CORE_SHEET_ID: ${{ secrets.MM_CORE_SHEET_ID }}
@@ -72,5 +72,6 @@ jobs:
             tick) npm run backend ;;
             doctor|dryrun) npm run "$JOB" ;;
             qc|task) npm run "$JOB" -- "$TASK_ID" "$VALUE" "$TEXT" ;;
+            sim) npm run sim -- "$VALUE" ;;
             *) echo "unknown job: $JOB"; exit 1 ;;
           esac

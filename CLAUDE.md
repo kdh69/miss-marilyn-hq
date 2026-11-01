@@ -22,7 +22,8 @@ Rules that hold everywhere:
 
 Commands: `npm run check` (typecheck + tests + panel build), `npm run doctor`, `npm run dryrun`,
 `npm run backend` (one tick), `npm run web`, `npm run sheet:setup`, `npm run qc` (manual QC),
-`npm run task -- <id> <status> "<why>"` (a status change as Kyle, with its log row).
+`npm run task -- <id> <status> "<why>"` (a status change as Kyle, with its log row),
+`npm run sim` (Book 2 copy through every step after the script; run it after changing the backend flow).
 Scripts load `.env` automatically (Node `--env-file-if-exists`).
 
 - Drive file creation goes through `driveWriter()` (owner token if set, else service account);

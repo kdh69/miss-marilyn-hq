@@ -6,7 +6,7 @@ import { PhotoUpload } from "@/components/PhotoUpload";
 import { Card, Empty, PageHeader, StageTrack, StatRow, btn } from "@/components/ui";
 import { Table } from "@/components/Table";
 import { activeBooks, bookStage, getSnapshot, greeting, lastTick, needsYou, spendToday, todoList, upNext } from "@/lib/data";
-import { WHO, when } from "@/lib/labels";
+import { WHO, hasWords, when } from "@/lib/labels";
 
 const usd = (n: number) => `${n < 0 ? "-" : ""}$${Math.abs(n).toFixed(2)}`;
 
@@ -20,7 +20,7 @@ export default async function Overview() {
   const books = activeBooks(s);
   const inWorks = books.filter((p) => p.status === "in_production").length;
   const next = upNext(s).sort((a, b) => Number(b.mine) - Number(a.mine));
-  const pagesTotal = s.pages.filter((p) => books.some((b) => b.product_id === p.product_id));
+  const pagesTotal = s.pages.filter((p) => books.some((b) => b.product_id === p.product_id) && hasWords(p));
   const pagesYours = pagesTotal.filter((p) => p.text_final).length;
   const sales = s.transactions.reduce((a, t) => a + (Number(t.net_usd) || 0), 0);
   const spend = spendToday(s);

@@ -26,13 +26,17 @@ tests                    schema integrity + status-rule tests
 | --- | --- |
 | `npm run doctor` | Checks every key and connection; prints the fix for anything red |
 | `npm run dryrun` | Pushes a fake task through bot → QC → Clara → done, then cleans up |
+| `npm run sim` | A throwaway copy of Book 2 through every step after the script (art, cover with changes, interior + KDP preflight, cover wrap, KDP packet, Clara's final OK), then cleans up; `-- --keep` leaves it to click through, `-- --clean` removes it |
+| `npm run qc` | Manual QC: lists the queue, or records `-- <task> pass\|fail "<text>"` |
+| `npm run task` | A status change as Kyle with its log row: `-- <task> <status> "<why>"` |
 | `npm run sheet:setup` | Builds or repairs MM Core (18 tabs, dropdowns, locked columns) from the schema |
 | `npm run backend` | One backend tick by hand |
 | `npm run web` | Clara's panel locally (sample data until the Sheet is connected) |
 | `npm run check` | Typecheck + tests + preflight tests + panel build (what CI runs) |
 | `npm run google:authorize` | One-time owner key, only if doctor says uploads need it |
 
-GitHub → Actions → **MM backend tick** → Run workflow can also run `doctor` or `dryrun` in the cloud.
+GitHub → Actions → **MM backend tick** → Run workflow can also run `doctor`, `dryrun`, `sim`, `qc` and `task`
+in the cloud (task_id / value / text fill in the arguments), so QC works from a phone or a cloud session.
 
 ## Google Drive
 

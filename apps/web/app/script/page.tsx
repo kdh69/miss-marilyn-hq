@@ -5,7 +5,7 @@ import { Approval } from "@/components/NeedsYou";
 import { StepShell, pickBook } from "@/components/StepShell";
 import { Card, Empty, Pill } from "@/components/ui";
 import { bookPages, getSnapshot, stepAsk, stepTask } from "@/lib/data";
-import { TASK_STATUS, bookNumber } from "@/lib/labels";
+import { TASK_STATUS, bookNumber, hasWords } from "@/lib/labels";
 import { canSee, viewer } from "@/lib/viewer";
 
 /**
@@ -31,8 +31,9 @@ function ScriptView({ s, id, canWrite }: { s: Awaited<ReturnType<typeof getSnaps
   const notes = s.requests.filter((r) => r.product_id === id && r.page_number);
   const task = stepTask(s, id, "script");
   const ask = stepAsk(s, id, "script");
-  const yours = pages.filter((p) => p.text_final).length;
-  const left = pages.length - yours;
+  const wordy = pages.filter(hasWords);
+  const yours = wordy.filter((p) => p.text_final).length;
+  const left = wordy.length - yours;
   const status = !task ? "The team hasn't started the script yet."
     : task.status === "done" ? "Script approved. The illustrations are next."
     : task.status === "awaiting_mom" ? "The script is ready for you to read and approve."
@@ -47,7 +48,7 @@ function ScriptView({ s, id, canWrite }: { s: Awaited<ReturnType<typeof getSnaps
           <Pill tone={task?.status === "done" ? "good" : task?.status === "awaiting_mom" ? "accent" : "quiet"}>{task?.status === "done" ? "Approved" : task?.status === "awaiting_mom" ? "Ready for you" : "In the works"}</Pill>
           <span className="text-[15px]">{status}</span>
         </div>
-        {pages.length > 0 && <p className="mt-2 text-sm text-[var(--quiet)]">{yours} of {pages.length} pages in your words.{left ? " Only your words get printed, so make each page yours before you approve." : " Every page is yours."}</p>}
+        {pages.length > 0 && <p className="mt-2 text-sm text-[var(--quiet)]">{yours} of {wordy.length} pages with words are in your words.{left ? " Only your words get printed, so make each page yours before you approve." : " Every page is yours."}</p>}
         {ask && (
           <div className="mt-3">
             {left > 0 && <p className="mb-2 rounded-xl bg-orange-500/10 p-3 text-sm text-orange-800">{left} page{left > 1 ? "s are" : " is"} still the draft&apos;s words. Those pages won&apos;t print until you change them.</p>}

@@ -8,7 +8,8 @@
     "doctor": "tsx --env-file-if-exists=../../.env src/doctor.ts",
     "dryrun": "tsx --env-file-if-exists=../../.env src/dryrun.ts",
     "qc": "tsx --env-file-if-exists=../../.env src/qcManual.ts",
-    "task": "tsx --env-file-if-exists=../../.env src/taskStatus.ts"
+    "task": "tsx --env-file-if-exists=../../.env src/taskStatus.ts",
+    "sim": "tsx --env-file-if-exists=../../.env src/sim.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",
