@@ -1,8 +1,12 @@
 # QC rubric — etsy_listing
 
 Compare against the skus row, the printable files the listing sells, and the Scout research rows cited.
+The listing lives in the ETSY listings row this task wrote (listings.task_id); the panel's Launch page
+shows its columns to the owner with copy buttons.
 
 Blocking:
+- No ETSY listings row with this task_id, or status not packet_ready; tags not one per line in keywords;
+  details missing What's included, File formats, Sizes and Who it's for, one "Label: value" per line
 - Title over 140 characters, or stuffed with repeated keywords
 - Not exactly 13 tags, any tag over 20 characters, or duplicate tags
 - Any tag, title or description word that names another brand, book, character or author

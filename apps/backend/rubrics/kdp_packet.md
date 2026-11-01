@@ -2,8 +2,13 @@
 
 Compare against the products row, the assets rows for this book (rights_source of every asset),
 pages.text_final, the final interior and cover files, config, and the Scout research rows cited.
+The packet lives in the KDP listings row this task wrote (listings.task_id); the panel's Launch page
+shows those columns to the owner with copy buttons, so they are what gets pasted into KDP.
 
 Blocking:
+- No KDP listings row with this task_id, or status not packet_ready
+- keywords not one per line, categories not one per line, or details not one "Label: value" per line
+  (Reading age, AI text, AI images, ISBN, Ink and paper, Trim, Bleed, Cover finish, Primary marketplace)
 - Fields missing or out of KDP order: title, subtitle, series, author, description, keywords,
   categories, AI-content answers, ISBN choice, trim, bleed, paper/ink, price, file links
 - Title, subtitle, series or author differs from the cover wrap

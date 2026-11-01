@@ -8,10 +8,10 @@ on:
       job:
         description: "What to run"
         type: choice
-        options: [tick, doctor, dryrun, qc, task, sim]
+        options: [tick, doctor, dryrun, qc, task, sim, lesson, setup]
         default: tick
       task_id:
-        description: "qc / task: the task ID, e.g. T-0038"
+        description: "qc / task: the task ID, e.g. T-0038 · lesson: who it applies to (a role, a task type or all)"
         type: string
         default: ""
       value:
@@ -19,7 +19,7 @@ on:
         type: string
         default: ""
       text:
-        description: "qc: summary for Clara (pass) or what to fix (fail) · task: why. Shows in the public log."
+        description: "qc: summary for Clara (pass) or what to fix (fail) · task: why · lesson: the rule. Shows in the public log."
         type: string
         default: ""
 
@@ -73,5 +73,7 @@ jobs:
             doctor|dryrun) npm run "$JOB" ;;
             qc|task) npm run "$JOB" -- "$TASK_ID" "$VALUE" "$TEXT" ;;
             sim) npm run sim -- "$VALUE" ;;
+            lesson) npm run lesson -- "$TASK_ID" "$TEXT" ;;
+            setup) npm run sheet:setup ;;   # after a schema.json change
             *) echo "unknown job: $JOB"; exit 1 ;;
           esac

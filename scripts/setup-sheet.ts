@@ -1,7 +1,7 @@
 /**
  * Build or repair MM Core from packages/core/schema.json (spec §3–5).
- * Safe to re-run: creates missing tabs, rewrites row 1, seeds only empty tabs,
- * and replaces every dropdown and protected range it owns.
+ * Safe to re-run: creates missing tabs, rewrites row 1, seeds empty tabs (and adds new seed rows
+ * by ID to task_types and config), and replaces every dropdown and protected range it owns.
  *
  * Needs: GOOGLE_SERVICE_ACCOUNT_JSON, MM_CORE_SHEET_ID (and the Sheet shared
  * with the service account as Editor).  Run: npm run sheet:setup
@@ -14,6 +14,10 @@ const spreadsheetId = sheetId();
 const serviceEmail = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON!).client_email as string;
 const PROTECT_TAG = "mm-core";
 const DEPTH = 5000;
+
+/** Seeded tabs that get new seed rows added by ID after their first seeding. */
+const GROWS = ["task_types", "config"];
+const cells = (row: (string | number | boolean)[]) => row.map((v) => (typeof v === "boolean" ? (v ? "TRUE" : "FALSE") : v));
 
 const ORANGE = { red: 1, green: 0.945, blue: 0.902 };
 const PURPLE = { red: 0.929, green: 0.914, blue: 0.996 };
@@ -50,7 +54,14 @@ async function main() {
       const grid = Array.from({ length: longest }, (_, r) => LIST_NAMES.map((n) => schema.lists[n][r] ?? ""));
       valueData.push({ range: `lists!A2`, values: grid }); // lists always mirrors schema
     } else if (t.seed && !hasData) {
-      valueData.push({ range: `${t.name}!A2`, values: t.seed.map((row) => row.map((v) => (typeof v === "boolean" ? (v ? "TRUE" : "FALSE") : v))) });
+      valueData.push({ range: `${t.name}!A2`, values: t.seed.map(cells) });
+    } else if (t.seed && t.id && GROWS.includes(t.name)) {
+      // Reference tabs gain new rows (a new task type, a new config key) without touching existing ones.
+      const rows = current.data.valueRanges?.[i]?.values ?? [];
+      const col = headers.indexOf(t.id);
+      const have = new Set(rows.slice(1).map((r) => String(r[col] ?? "")));
+      const missing = t.seed.filter((r) => !have.has(String(r[col])));
+      if (missing.length) valueData.push({ range: `${t.name}!A${rows.length + 1}`, values: missing.map(cells) });
     }
   });
   await api.spreadsheets.values.batchUpdate({ spreadsheetId, requestBody: { valueInputOption: "RAW", data: valueData } });

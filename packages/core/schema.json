@@ -223,7 +223,15 @@
         "sku",
         "channel",
         "status",
+        "task_id",
         "title",
+        "subtitle",
+        "series",
+        "author",
+        "description",
+        "keywords",
+        "categories",
+        "details",
         "price",
         "packet_url",
         "created_at",
@@ -255,8 +263,10 @@
         "scheduled_for",
         "hook",
         "body",
+        "hashtags",
         "asset_ids",
         "link_url",
+        "notes",
         "status",
         "created_at",
         "updated_at",
@@ -270,6 +280,31 @@
         "updated_by": "role"
       },
       "backendOnlyFrom": "posted_url"
+    },
+    {
+      "name": "plans",
+      "group": "work",
+      "id": "plan_id",
+      "headers": [
+        "plan_id",
+        "product_id",
+        "task_id",
+        "section",
+        "channel",
+        "title",
+        "detail",
+        "sort",
+        "status",
+        "created_at",
+        "updated_at",
+        "updated_by"
+      ],
+      "dropdowns": {
+        "section": "plan_section",
+        "channel": "channel",
+        "status": "plan_status",
+        "updated_by": "role"
+      }
     },
     {
       "name": "mom_queue",
@@ -945,6 +980,11 @@
           "weekly copy of MM Core"
         ],
         [
+          "social_autopilot",
+          "ON",
+          "ON: the backend asks the Orchestrator for a marketing plan when a book reaches Building, and for the next week of posts whenever fewer than 7 days are queued. OFF to stop."
+        ],
+        [
           "digest_day",
           "Sun",
           "day Clara's summary email goes out (New York time, after 5pm)"
@@ -1077,6 +1117,14 @@
           "lead_magnet"
         ],
         [
+          "marketing_plan",
+          "growth",
+          true,
+          true,
+          "approve",
+          "marketing_plan"
+        ],
+        [
           "photo_request",
           "mom",
           false,
@@ -1149,6 +1197,7 @@
       "social_batch",
       "email",
       "lead_magnet",
+      "marketing_plan",
       "photo_request",
       "dryrun"
     ],
@@ -1238,9 +1287,24 @@
       "posted",
       "killed"
     ],
+    "plan_section": [
+      "goal",
+      "audience",
+      "pillar",
+      "platform",
+      "launch",
+      "hashtags",
+      "kpi"
+    ],
+    "plan_status": [
+      "draft",
+      "approved",
+      "retired"
+    ],
     "content_type": [
       "pin",
       "reel",
+      "carousel",
       "short",
       "post",
       "story",
