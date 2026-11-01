@@ -1,4 +1,4 @@
-# Handoff — where things stand (2026-10-30, late night)
+# Handoff — where things stand (2026-11-01)
 
 Read this first when picking the project back up. Setup steps in full: [`SETUP.md`](SETUP.md).
 Working away from the laptop: [`REMOTE.md`](REMOTE.md). Bot descriptions: [`bot-prompts.md`](bot-prompts.md).
@@ -30,22 +30,28 @@ Grok bots ──write──▶ MM Core Sheet ◀──read/write── Backend (
    Full book review). The next backend tick (:07 and :37) applies it: Approve → `approved` → `done`;
    Changes → `changes_requested` with her note; Reject → `cancelled`. Each change gets a log row.
 
-## The board (2026-10-30, ~03:40 UTC)
+## The board (2026-11-01, ~05:45 UTC)
 
 - **Book 1 = MM-B02 "Miss Marilyn Makes a Friend"**: Clara's playground story, `in_production`, P1,
   `series_no` 1. Kyle's brief with her story is request `Q-20261030020904-01` (in progress, on T-0023).
   - **T-0023 book plan** (Orchestrator): in progress, due 11-10.
-  - **T-0024 story**: passed Claude's QC on attempt 2 (24 pages, 284 words, 49-word max spread,
-    refrain "Hello first!", Achoo echo with Gussie). Now `awaiting_mom`: on her Script step to read and
-    rewrite in her own words (`mom_queue` M-T-0024-1).
-  - **T-0025 character sheets** (Illustrator): in the Quality Checker loop. Claude failed round 1 (Miss M's
-    markings changed between views, no Mama/Papa expressions, lineup scale, 2-step sneeze); the Quality
-    Checker has failed two rounds since with precise fixes. Gussie, Mama and Papa pass; Miss M's marking
-    map, the lineup and the colour Doc are still being fixed. **Page art and the cover wait for T-0025.**
+  - **T-0038 story v2** (Kyle's rewrite brief: warmer, no "Hello first!" refrain): passed Claude's QC
+    11-01 (about 270 words, story text on 15 pages, max spread 49, Achoo x3 with Gussie's echo, proud ending).
+    `awaiting_mom` on her Script step (M-T-0038-1). p14 sets at 6 lines (style guide max 5): keep it short
+    when she writes her words.
+  - **T-0024 story v1**: `cancelled` 11-01, superseded by T-0038; its card M-T-0024-1 is closed.
+  - **T-0025 character sheets**: done (passed on attempt 3).
+  - **T-0039 full-book draft pictures**: done 11-01. All 24 pages are in `pages.art_asset_id`, so Clara sees
+    pictures on the Books page; dummy PDF A-T0039-51. On-model and close to final. Minor: p16 has no tickle
+    face before p17's ACHOO, p24 doodle in the outer 4%, p10 ink speckle.
+  - **T-0026–T-0037 final page art**: `blocked` "waiting on Clara's approval of T-0024". Kyle decided 11-01 to
+    start them now from the T-0039 drafts; the Orchestrator has to be told (see Kyle — outstanding).
+  - Not created yet: cover art, interior layout, cover wrap, KDP packet.
   - Gussie is a dog, drawn from his photos: assets P-20261030-001/002 (MM Brand → photos → inbox → Gussie).
     Zoey isn't in this book.
 - **Book 2 = MM-B01 "Flies to See Her Grandparents"**: `paused`, `series_no` 2. Every open task is
   `blocked` with "Book paused"; QC skips paused books. Its 32-page draft gets cut to 24 when it resumes.
+  `npm run sim` uses a throwaway copy of it to test the whole flow after the script (see Code).
 - **Ollie (OL-B01)**: archived. Product and SKUs `retired`, every task `cancelled`, requests closed.
   Rows and Drive files are kept; the panel and the bots ignore it.
 - **Open question for Mom:** the author name (request R-0003). It only blocks the KDP packet.
@@ -96,19 +102,23 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 
 ## Kyle — outstanding, in order
 
-1. **QC when work comes back:** ask Claude to "run QC" (or "status" to read the board). Next up: T-0025
-   once the Quality Checker passes it.
-2. **Orchestrator sweeps:** ask Grok whether the Orchestrator can sweep on a schedule (9am and 6pm New
+1. **Tell the Orchestrator (Grok) the 11-01 decisions**: start T-0026–T-0037 now from the T-0039 drafts,
+   and create the rest of Book 1's chain (cover art, interior layout, cover wrap, KDP packet). The message
+   to paste is in the 2026-11-01 decision below. Then `@Orchestrator sweep`.
+2. **QC when work comes back:** ask Claude to "run QC" (or "status" to read the board), from the laptop
+   or any cloud session: without Sheet keys Claude reads the Sheet through the Drive connector and records
+   verdicts through Actions (MM backend tick → job `qc` / `task`).
+3. **Orchestrator sweeps:** ask Grok whether the Orchestrator can sweep on a schedule (9am and 6pm New
    York). Until then, send `@Orchestrator sweep` after Mom answers things.
-3. **Uploads:** Google Cloud → OAuth consent screen → **Publish app**, then `npm run google:authorize`
+4. **Uploads:** Google Cloud → OAuth consent screen → **Publish app**, then `npm run google:authorize`
    and sign in as the owner of *Miss Marilyn Business*. Save `GOOGLE_OWNER_REFRESH_TOKEN` to `.env`,
    GitHub secrets and Vercel, then redeploy. Until then drop photos in Drive (MM Brand → photos → inbox)
    and ask Claude to register them as `assets`.
-4. **Zoey's photos** (for later books): upload to MM Brand → photos → inbox → Zoey.
-5. Rename the Grok room from "Coloring Books For Kids" to "Miss Marilyn HQ". Send Scout the Book 1
+5. **Zoey's photos** (for later books): upload to MM Brand → photos → inbox → Zoey.
+6. Rename the Grok room from "Coloring Books For Kids" to "Miss Marilyn HQ". Send Scout the Book 1
    research topic (comparable friendship / playground picture books).
-6. Delete the service account key file from Downloads (its copies live in `.env` and the secrets).
-7. **Later:** Resend + a verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); a password manager
+7. Delete the service account key file from Downloads (its copies live in `.env` and the secrets).
+8. **Later:** Resend + a verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); a password manager
    (Bitwarden's free plan covers two people); `ANTHROPIC_API_KEY` for automatic QC.
 
 ## Mom — outstanding
@@ -122,6 +132,18 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 - **Business setup:** LLC + EIN, business bank account and card, brand domain.
 
 ## Decisions
+
+- **2026-11-01:** T-0038 (story v2) replaces T-0024. Final page art starts now from the T-0039 drafts instead
+  of waiting for Clara's script approval; a page whose story beat she changes gets redrawn. Message for the
+  Orchestrator: *"Book 1, Kyle 11-01: T-0038 passed QC and is on Clara's Script step; T-0024 is cancelled
+  (superseded); T-0039 is done. Start the final page art now: move T-0026–T-0037 to todo and add to each
+  brief: start from the T-0039 draft for these pages (pages.art_asset_id), keep the composition, re-check
+  the T-0025 rules and the full spec, and fix p16 (Gussie's tickle face before p17's ACHOO), the p24 doodle
+  in the outer 4% and the p10 ink speckle. Also create the rest of the chain with full briefs: art_cover
+  (Illustrator), interior_layout (Builder; prints pages.text_final only, so it starts when Clara approves
+  the script), cover_wrap (Builder, 24 pages) and kdp_packet (Publisher; author name still open, R-0003).
+  Tell Clara (R-0004) the new version is ready on her Script step. Log rows are append-only: never edit
+  or overwrite an existing log row."*
 
 - **2026-10-30:** Ollie archived. Clara's playground story is Book 1 (MM-B02); the flying book is Book 2
   (MM-B01), paused. Product IDs don't change; `series_no` is the book number.
@@ -138,6 +160,9 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 
 ## Code — next up
 
+- **`npm run sim`** takes a copy of Book 2 through every step after the script with the real backend jobs
+  and cleans up (Actions job `sim`; `--keep` to click through it in the panel, `--clean` to remove).
+  Run it after any change to the backend flow. It doesn't cover the bots or Drive uploads.
 - Verify the panel on a phone with real data, signed in as each role. First real saves to try: a
   page's words (Script), a picture approval (Illustrations), a page approval (Building).
 - Book progress counts tasks per product, so a book with few tasks can look further along than it is.
@@ -150,6 +175,8 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 - **Public repo:** keeps GitHub Actions free, but GitHub pauses scheduled workflows after 60 days with
   no commits, and the Sheet ID is visible in `.env.example`, so keep the Sheet's General access on
   **Restricted**. Never commit `.env`, emails other than commit metadata, or the family password.
+- **A bot overwrote a log row** on 10-31 (the Quality Checker's 03:00 fail on T-0039 became the Illustrator's
+  self-check, row A181). The log must be append-only; the 11-01 Orchestrator message says so.
 - **Bot log rows can be wrong** (made-up from-states and timestamps before L-0015). Trust the task row's
   `status` over the log when they disagree.
 - **`.vercelignore`** keeps `.env` and key files out of `vercel deploy` uploads.
