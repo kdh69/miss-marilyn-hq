@@ -310,7 +310,7 @@ async function main(dir: string) {
     plan_id: `MP-${BOOK}-${pad(i + 1)}`, product_id: BOOK, task_id: plan, section, channel, title, detail, sort: String(i + 1), status: "draft",
     created_at: nowIso(), updated_at: nowIso(), updated_by: "growth",
   })));
-  await handIn(plan, "growth", await addAssets(plan, "growth", [{ asset_type: "listing_copy", file_url: "sim:plan", file_name: "sim marketing plan" }]));
+  await handIn(plan, "growth", []); // a plan's output is its plans rows, no files
   t = await qc(plan, "Sim: here's the marketing plan.");
   must("plan QC pass → Clara's approval card", t.status === "awaiting_mom", t.status);
   t = await clara(plan, "Approve");

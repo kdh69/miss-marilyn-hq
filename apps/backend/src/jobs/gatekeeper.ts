@@ -96,8 +96,11 @@ export async function qcGate(core: Core, qcBudgetLeft: boolean, onlyTaskId?: str
     // Completeness gate — no Claude spend, doesn't count as an attempt.
     const ids = task.output_asset_ids.split(",").map((s) => s.trim()).filter(Boolean);
     const missing = ids.filter((id) => !assets.get(id)?.file_url);
-    if (!ids.length || missing.length) {
-      await finish(core, task, "qc_fail", { qc_result: "fail", qc_notes: `incomplete handoff: ${ids.length ? `no file_url on ${missing.join(",")}` : "output_asset_ids is empty"}` });
+    // A marketing plan's output is its plans rows, not files.
+    const planRows = task.task_type === "marketing_plan" ? core.rows("plans").filter((p) => p.task_id === task.task_id).length : 0;
+    if (missing.length || (!ids.length && !planRows)) {
+      const why = missing.length ? `no file_url on ${missing.join(",")}` : task.task_type === "marketing_plan" ? "no plans rows with this task_id" : "output_asset_ids is empty";
+      await finish(core, task, "qc_fail", { qc_result: "fail", qc_notes: `incomplete handoff: ${why}` });
       continue;
     }
 
@@ -116,8 +119,10 @@ export async function qcGate(core: Core, qcBudgetLeft: boolean, onlyTaskId?: str
       const toMom = type?.needs_mom === "TRUE";
       await finish(core, task, toMom ? "awaiting_mom" : "done", patch);
       if (toMom) {
-        // Story drafts are rewritten page by page in the panel's book workspace.
-        const preview = type!.mom_item_type === "rewrite" ? `/books/${task.product_id}` : (assets.get(ids[0])?.file_url ?? "");
+        // Her card opens where the work is: the book workspace for a script, Launch or Social for marketing.
+        const page: Record<string, string> = { marketing_plan: "/launch?book=", social_batch: "/social?book=" };
+        const preview = type!.mom_item_type === "rewrite" ? `/books/${task.product_id}`
+          : page[task.task_type] ? `${page[task.task_type]}${task.product_id}` : (assets.get(ids[0])?.file_url ?? "");
         // This round's notes: `task` is the pre-QC snapshot and still holds the last fail's notes.
         await pushToMom(core, { ...task, ...patch }, type!.mom_item_type, result.summaryForMom, preview);
       }
