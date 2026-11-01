@@ -163,6 +163,8 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 - **`npm run sim`** takes a copy of Book 2 through every step after the script with the real backend jobs
   and cleans up (Actions job `sim`; `--keep` to click through it in the panel, `--clean` to remove).
   Run it after any change to the backend flow. It doesn't cover the bots or Drive uploads.
+  First live run 2026-11-01 06:06 UTC: all checks green in ~4 min (Core paces itself to 50 Sheets
+  calls a minute), 183 SIM rows removed.
 - Verify the panel on a phone with real data, signed in as each role. First real saves to try: a
   page's words (Script), a picture approval (Illustrations), a page approval (Building).
 - Book progress counts tasks per product, so a book with few tasks can look further along than it is.
