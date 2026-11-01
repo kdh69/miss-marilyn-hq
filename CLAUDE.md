@@ -23,13 +23,16 @@ Rules that hold everywhere:
 Commands: `npm run check` (typecheck + tests + panel build), `npm run doctor`, `npm run dryrun`,
 `npm run backend` (one tick), `npm run web`, `npm run sheet:setup`, `npm run qc` (manual QC),
 `npm run task -- <id> <status> "<why>"` (a status change as Kyle, with its log row),
-`npm run sim` (Book 2 copy through every step after the script; run it after changing the backend flow).
+`npm run sim` (Book 2 copy through every step after the script; run it after changing the backend flow),
+`npm run lesson -- <applies_to> "<rule>"` (a standing rule the bots read every run).
 Scripts load `.env` automatically (Node `--env-file-if-exists`).
 
 - Drive file creation goes through `driveWriter()` (owner token if set, else service account);
   reads go through `driveReader()`. See `packages/core/src/drive.ts` for why.
 - Backend steps are isolated in `apps/backend/src/run.ts`; add new jobs with `step(...)`.
-- New tab or column: edit `schema.json`, run `npm test` (integrity tests), then `sheet:setup`.
+- New tab or column: edit `schema.json`, run `npm test` (integrity tests), then `sheet:setup`. Setup
+  rewrites row 1, so add columns at the end of a tab that has data. Push the schema and run setup
+  (Actions job `setup`) before pushing code that reads a new tab: `Core.load` fails on a missing tab.
 
 QC is manual while there's no `ANTHROPIC_API_KEY`: when asked to run QC, `npm run qc` lists the
 queue; read each task's rubric and files, then record `npm run qc -- <task_id> pass|fail "<text>"`.

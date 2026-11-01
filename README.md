@@ -29,13 +29,15 @@ tests                    schema integrity + status-rule tests
 | `npm run sim` | A throwaway copy of Book 2 through every step after the script (art, cover with changes, interior + KDP preflight, cover wrap, KDP packet, Clara's final OK), then cleans up; `-- --keep` leaves it to click through, `-- --clean` removes it |
 | `npm run qc` | Manual QC: lists the queue, or records `-- <task> pass\|fail "<text>"` |
 | `npm run task` | A status change as Kyle with its log row: `-- <task> <status> "<why>"` |
+| `npm run lesson` | A standing rule for the bots: `-- <role \| task_type \| all> "<rule>"` |
 | `npm run sheet:setup` | Builds or repairs MM Core (18 tabs, dropdowns, locked columns) from the schema |
 | `npm run backend` | One backend tick by hand |
 | `npm run web` | Clara's panel locally (sample data until the Sheet is connected) |
 | `npm run check` | Typecheck + tests + preflight tests + panel build (what CI runs) |
 | `npm run google:authorize` | One-time owner key, only if doctor says uploads need it |
 
-GitHub → Actions → **MM backend tick** → Run workflow can also run `doctor`, `dryrun`, `sim`, `qc` and `task`
+GitHub → Actions → **MM backend tick** → Run workflow can also run `doctor`, `dryrun`, `sim`, `qc`, `task`,
+`lesson` and `setup` (`sheet:setup`)
 in the cloud (task_id / value / text fill in the arguments), so QC works from a phone or a cloud session.
 
 ## Google Drive
@@ -47,7 +49,7 @@ Folder IDs live in the Sheet's `config` tab.
 ## How Clara works in the panel
 
 Clara's tabs follow how a book gets made: **Overview → Ideas → Script → Illustrations → Building →
-Full book review** (bottom bar on a phone, sidebar on desktop). All books, Progress, To-do &
+Full book review**, then **Social** (bottom bar on a phone, sidebar on desktop); **Launch** is step 6. All books, Progress, To-do &
 accounts and Money are under More. Kyle has his own tabs (Overview, Books, Progress, Inbox,
 System, Money) and can switch to Clara's view; family sees Overview, Books and Progress, read-only.
 Details: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md).
@@ -61,6 +63,12 @@ Details: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md).
 - **Building:** words and pictures together, the print files; approve the layout.
 - **Full book review:** a checklist from every step (each gap links back to its step), the book to
   read from the cover, then the final OK. Nothing publishes without it.
+- **Launch:** after the final OK, each store listing (Amazon KDP, Etsy) field by field with Copy
+  buttons, the print files, where and how to post it step by step, and *It's live* with the link.
+  Then the book's marketing plan and this week's posts.
+- **Social:** today's posts ready to paste (picture, caption, hashtags, link, tips), how to post on
+  Instagram, Facebook, Pinterest and TikTok, *Posted*, the week ahead, approvals and each book's
+  marketing plan. The Marketer bot writes them a week at a time; Clara posts by hand.
 - Every step page ends with *Back* and *Next step* for the same book.
 - Money for Clara shows sales only; costs are Kyle's. If the bots are paused, a banner says so.
 
@@ -70,8 +78,11 @@ Details: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md).
 2. **Integrity check** — illegal status jumps reverted and logged; missing log rows backfilled.
 3. **QC gate** — completeness → KDP preflight (PDFs) → Claude with the task's rubric → pass/fail/escalate.
 4. **Clara sync** — her answers applied; rewrites recorded as a human asset; photo requests queued.
-5. **Messages** — rules → lessons. **Etsy publish** (stub until API access).
-6. **Alerts** (one email per tick), **Sunday digest** to Clara, **weekly backup** of MM Core (keeps 8).
+5. **Marketing** — her approvals reach listings, posts and plans; her *Posted* / *It's live* marks
+   are recorded; autopilot asks the Orchestrator for a marketing plan at Building and for the next
+   week of posts when fewer than 7 days are queued (`config!social_autopilot`).
+6. **Messages** — rules → lessons. **Etsy publish** (stub until API access).
+7. **Alerts** (one email per tick), **Sunday digest** to Clara, **weekly backup** of MM Core (keeps 8).
 
 Each step is isolated: one failure is emailed and the rest still run; the Actions run goes red.
 

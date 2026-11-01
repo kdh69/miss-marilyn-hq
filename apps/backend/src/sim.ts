@@ -6,7 +6,9 @@
  *                  cover → Clara asks for changes → redo → QC → she approves
  *   Building: a broken interior PDF that KDP preflight must catch → fixed PDF → Clara OKs each
  *             layout and the Building card; cover wrap through preflight
- *   Full book review: KDP packet → the review checklist → Clara's final OK
+ *   Full book review: KDP packet (its listings row) → the review checklist → Clara's final OK
+ *   Launch: listing approved → Clara marks it live; autopilot asks for a marketing plan → plan
+ *           approved → autopilot asks for a week of posts → posts approved → Clara marks one posted
  * Every status, log row and card is checked, then everything it made is deleted.
  * Book 2 itself is only read. PDFs are made locally (preflight/sample_pdfs.py) and fed to the
  * real preflight; pictures reuse existing Drive files so the panel can show them with --keep.
@@ -23,6 +25,7 @@ import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { Core, nowIso, type Row } from "@mm/core";
 import { integrityCheck, qcGate } from "./jobs/gatekeeper";
+import { marketing } from "./jobs/marketing";
 import { momSync } from "./jobs/momSync";
 import { usePdfSource } from "./lib/preflight";
 import { python } from "./lib/python";
@@ -115,6 +118,15 @@ async function clara(id: string, answer: "Approve" | "Changes" | "Done", note = 
   await (await load(["mom_queue"])).update("mom_queue", card!.item_id, { answer, mom_note: note, answered_at: nowIso() }, "mom");
   await momSync(await load());
   return taskRow(id);
+}
+
+/** Clara's "it's posted" / "it's live" from the Social and Launch pages, as the panel writes it. */
+async function mark(what: "Posted" | "Live", id: string, link: string) {
+  const now = nowIso();
+  await (await load(["requests"])).append("requests", [{
+    request_id: `Q-${BOOK}-${what[0]}-${id.slice(-3)}`, created_at: now, from: "mom", to: "orchestrator", product_id: BOOK,
+    kind: "note", body: `${what} ${id} ${link}`, status: "done", updated_at: now, updated_by: "mom",
+  }]);
 }
 
 /** Clara's "looks good" on each page's picture or finished layout, as approvePage writes it. */
@@ -250,6 +262,16 @@ async function main(dir: string) {
 
   console.log("\n4. Full book review: KDP packet → checklist → Clara's final OK");
   const packet = await newTask("kdp_packet", "publisher", "KDP listing packet");
+  // The Lister writes every KDP field into the listings row; the Launch page shows them with copy buttons.
+  const LISTING = `L-${BOOK}-KDP`;
+  await (await load(["listings"])).append("listings", [{
+    listing_id: LISTING, sku: SKU, channel: "KDP", status: "packet_ready", task_id: packet, title: `SIM — ${book2!.title}`,
+    subtitle: book2!.subtitle, series: "The Adventures of Miss Marilyn", author: "Sim Author", description: "A sim description for parents.",
+    keywords: ["cat picture book", "grandparents book", "first flight", "toddler bedtime", "rescue cat", "ages 2-6", "family love"].join("\n"),
+    categories: ["Children's Books > Animals > Cats", "Children's Books > Family Life > Grandparents"].join("\n"),
+    details: ["Reading age: 2-6", "AI text: No (owner's own words)", "AI images: Yes", "Ink and paper: Premium color, white", "Trim: 8.5 x 8.5 in", "Bleed: Yes"].join("\n"),
+    price: "10.99", packet_url: drive(b2("listing_copy")[0]), created_at: nowIso(), updated_at: nowIso(), updated_by: "publisher",
+  }]);
   await handIn(packet, "publisher", await addAssets(packet, "publisher", [{ asset_type: "listing_copy", file_url: drive(b2("listing_copy")[0]) || "sim:packet", file_name: "sim KDP packet" }]));
   t = await qc(packet, "Sim: everything is ready to publish on KDP.");
   must("packet QC pass → the final OK card", t.status === "awaiting_mom" && (await openCard(packet))?.item_type === "kdp_publish", t.status);
@@ -264,7 +286,69 @@ async function main(dir: string) {
   t = await clara(packet, "Approve");
   check("final OK → packet done (Clara then publishes on KDP by hand)", t.status === "done", t.status);
 
-  console.log("\n5. The record");
+  console.log("\n5. Launch: the listing goes live, the marketing plan, a week of posts");
+  const tick = async () => { await momSync(await load()); await marketing(await load(), (p) => p.product_id === BOOK); };
+  const listing = async () => (await load(["listings"])).rows("listings").find((l) => l.listing_id === LISTING)!;
+  const asks = async (prefix: string) => (await load(["requests"])).rows("requests").filter((r) => r.product_id === BOOK && r.body.startsWith(prefix));
+  await tick();
+  check("her final OK approves the KDP listing", (await listing()).status === "approved", (await listing()).status);
+  const plansAsked = await asks("Marketing plan:");
+  check("autopilot asks the Orchestrator for a marketing plan (book reached Building)", plansAsked.length === 1, plansAsked[0]?.body.slice(0, 60));
+  await tick();
+  check("…only once while that ask is open", (await asks("Marketing plan:")).length === 1);
+  await mark("Live", LISTING, "https://www.amazon.com/dp/SIMTEST");
+  await tick();
+  const live = await listing();
+  check("Clara's 'it's live' mark → listing live with its Amazon link", live.status === "live" && live.live_url.includes("amazon.com"), `${live.status} ${live.live_url}`);
+
+  const plan = await newTask("marketing_plan", "growth", "marketing plan");
+  const planRows = [["goal", "", "Launch week", "Get the first 20 copies to families who love cats"], ["audience", "", "Parents and grandparents", "Of 2-6 year olds; cat lovers"],
+    ["pillar", "", "The real Miss Marilyn", "Her sneezes and naps"], ["platform", "INSTAGRAM", "Instagram", "4 a week: reels, carousels"], ["platform", "PINTEREST", "Pinterest", "1 pin a day"],
+    ["platform", "FACEBOOK", "Facebook", "3 a week"], ["platform", "TIKTOK", "TikTok", "3 a week"], ["launch", "", "Launch week", "Daily posts, cover reveal"],
+    ["hashtags", "INSTAGRAM", "Instagram tags", "#catsofinstagram #picturebooks"], ["kpi", "", "Saves and link clicks", "Per week"]];
+  await (await load(["plans"])).append("plans", planRows.map(([section, channel, title, detail], i) => ({
+    plan_id: `MP-${BOOK}-${pad(i + 1)}`, product_id: BOOK, task_id: plan, section, channel, title, detail, sort: String(i + 1), status: "draft",
+    created_at: nowIso(), updated_at: nowIso(), updated_by: "growth",
+  })));
+  await handIn(plan, "growth", await addAssets(plan, "growth", [{ asset_type: "listing_copy", file_url: "sim:plan", file_name: "sim marketing plan" }]));
+  t = await qc(plan, "Sim: here's the marketing plan.");
+  must("plan QC pass → Clara's approval card", t.status === "awaiting_mom", t.status);
+  t = await clara(plan, "Approve");
+  await tick();
+  const planNow = (await load(["plans"])).rows("plans").filter((p) => p.task_id === plan);
+  check("her Approve → plan done and every plan row approved", t.status === "done" && planNow.every((p) => p.status === "approved"), `${t.status}, ${planNow.map((p) => p.status).join(" ")}`);
+  const postsAsked = await asks("Social idea:");
+  check("autopilot asks for the first week of posts once the plan is approved", postsAsked.length === 1, postsAsked[0]?.body.slice(0, 80));
+
+  const batch = await newTask("social_batch", "growth", "week 1 posts");
+  const channels = ["INSTAGRAM", "PINTEREST", "FACEBOOK", "TIKTOK"];
+  const types: Record<string, string> = { INSTAGRAM: "reel", PINTEREST: "pin", FACEBOOK: "post", TIKTOK: "short" };
+  const day0 = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const POSTS = Array.from({ length: 7 }, (_, i) => `C-${BOOK}-${pad(i + 1)}`);
+  await (await load(["content"])).append("content", POSTS.map((content_id, i) => ({
+    content_id, product_id: BOOK, task_id: batch, channel: channels[i % 4], content_type: types[channels[i % 4]],
+    scheduled_for: new Date(Date.parse(`${day0}T12:00:00Z`) + i * 864e5).toISOString().slice(0, 10), hook: `Sim hook ${i + 1}`, body: "Sim caption.",
+    hashtags: "#catsofinstagram #picturebooks", asset_ids: artIds[i], link_url: `https://example.com/?utm_source=${channels[i % 4].toLowerCase()}&utm_medium=social&utm_campaign=${BOOK}`,
+    notes: "Sim tip", status: "draft", created_at: nowIso(), updated_at: nowIso(), updated_by: "growth",
+  })));
+  await handIn(batch, "growth", POSTS.map((_, i) => artIds[i]));
+  t = await qc(batch, "Sim: a week of posts.");
+  must("posts QC pass → Clara's approval card", t.status === "awaiting_mom", t.status);
+  t = await clara(batch, "Approve");
+  await tick();
+  const posts = (await load(["content"])).rows("content").filter((c) => c.task_id === batch);
+  check("her Approve → all 7 posts approved, ready on the Social page", posts.length === 7 && posts.every((c) => c.status === "approved"), posts.map((c) => c.status).join(" "));
+  // The Orchestrator closes its asks when the work lands.
+  core = await load(["requests"]);
+  for (const r of [...plansAsked, ...postsAsked]) await core.update("requests", r.request_id, { status: "done" }, "orchestrator");
+  await tick();
+  check("a full week queued → autopilot doesn't ask again", (await asks("Social idea:")).length === 1);
+  await mark("Posted", POSTS[0], "https://www.instagram.com/p/SIMTEST");
+  await tick();
+  const first = (await load(["content"])).rows("content").find((c) => c.content_id === POSTS[0])!;
+  check("Clara's 'posted' mark → post posted with its link", first.status === "posted" && first.posted_url.includes("instagram.com"), `${first.status} ${first.posted_url}`);
+
+  console.log("\n6. The record");
   core = await load();
   const mine = core.rows("tasks").filter(ours);
   check("every SIM task finished", mine.every((x) => x.status === "done"), mine.map((x) => `${x.task_type}:${x.status}`).join(" "));
@@ -288,6 +372,9 @@ async function cleanup(match: (v?: string) => boolean) {
   n += await core.deleteWhere("requests", (r) => match(r.product_id));
   n += await core.deleteWhere("lessons", (r) => match(r.evidence_task_id));
   n += await core.deleteWhere("pages", (r) => match(r.product_id));
+  n += await core.deleteWhere("listings", (r) => match(r.listing_id) || match(r.sku));
+  n += await core.deleteWhere("plans", (r) => match(r.product_id));
+  n += await core.deleteWhere("content", (r) => match(r.product_id));
   n += await core.deleteWhere("skus", (r) => match(r.product_id));
   n += await core.deleteWhere("products", (r) => match(r.product_id));
   console.log(`  removed ${n} SIM rows`);

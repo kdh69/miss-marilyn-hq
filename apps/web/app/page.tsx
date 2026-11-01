@@ -5,8 +5,8 @@ import { NeedsYou } from "@/components/NeedsYou";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { Card, Empty, PageHeader, StageTrack, StatRow, btn } from "@/components/ui";
 import { Table } from "@/components/Table";
-import { activeBooks, bookStage, getSnapshot, greeting, lastTick, needsYou, spendToday, todoList, upNext } from "@/lib/data";
-import { WHO, hasWords, when } from "@/lib/labels";
+import { activeBooks, bookStage, getSnapshot, greeting, lastTick, marks, needsYou, nyDay, postsBetween, spendToday, todoList, upNext } from "@/lib/data";
+import { CHANNEL, WHO, hasWords, when } from "@/lib/labels";
 
 const usd = (n: number) => `${n < 0 ? "-" : ""}$${Math.abs(n).toFixed(2)}`;
 
@@ -18,6 +18,8 @@ export default async function Overview() {
   const items = needsYou(s, v.view);
   const titles = Object.fromEntries(s.products.map((p) => [p.product_id, p.title]));
   const books = activeBooks(s);
+  const posted = marks(s);
+  const toPost = postsBetween(s, nyDay(), nyDay()).filter((c) => ["approved", "scheduled"].includes(c.status) && !posted.has(c.content_id));
   const inWorks = books.filter((p) => p.status === "in_production").length;
   const next = upNext(s).sort((a, b) => Number(b.mine) - Number(a.mine));
   const pagesTotal = s.pages.filter((p) => books.some((b) => b.product_id === p.product_id) && hasWords(p));
@@ -79,6 +81,17 @@ export default async function Overview() {
                 ))}
               </ul>
             </Card>
+          )}
+
+          {toPost.length > 0 && (
+            <Link href="/social" className="glass flex items-center gap-3 rounded-3xl p-4">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-lg" aria-hidden>📣</span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-semibold">{toPost.length} post{toPost.length > 1 ? "s" : ""} to share today</span>
+                <span className="block truncate text-xs text-[var(--quiet)]">{[...new Set(toPost.map((c) => CHANNEL[c.channel] ?? c.channel))].join(" · ")} · ready to paste</span>
+              </span>
+              <span className="text-[var(--quiet)]">›</span>
+            </Link>
           )}
 
           {items.length ? <NeedsYou items={items} viewer={v.view} titles={titles} /> : (

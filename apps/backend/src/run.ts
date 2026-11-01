@@ -1,6 +1,6 @@
 /**
  * One scheduled tick (GitHub Actions, every 30 min). Order matters:
- * spend guard → integrity → QC (with KDP preflight) → Clara's answers → messages
+ * spend guard → integrity → QC (with KDP preflight) → Clara's answers → marketing → messages
  * → publishing → housekeeping. Each job is isolated: one failure is reported and
  * the rest still run. The process exits non-zero if anything failed, so the
  * Actions run shows red and GitHub emails you.
@@ -9,6 +9,7 @@ import { Core } from "@mm/core";
 import { integrityCheck, qcGate, spendGuard } from "./jobs/gatekeeper";
 import { momSync, processRequests } from "./jobs/momSync";
 import { etsyPublish } from "./jobs/etsyPublish";
+import { marketing } from "./jobs/marketing";
 import { messageAlerts, weeklyBackup, weeklyDigest } from "./jobs/housekeeping";
 import { flushKyle, notifyKyle } from "./lib/notify";
 
@@ -38,6 +39,7 @@ async function main() {
   else {
     await step("QC gate", () => qcGate(core, qcBudgetLeft));
     await step("Clara sync", () => momSync(core));
+    await step("marketing", () => marketing(core));
     await step("messages", () => processRequests(core));
     await step("Etsy publish", () => etsyPublish(core));
   }

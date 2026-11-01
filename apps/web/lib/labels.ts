@@ -23,6 +23,7 @@ export const TASK_TYPE: Record<string, string> = {
   book_plan: "Book plan", story_draft: "Story", art_page: "Page art", art_cover: "Cover art", interior_layout: "Inside layout",
   cover_wrap: "Cover layout", printable_set: "Printables", kdp_packet: "Amazon listing", etsy_listing: "Etsy listing",
   social_batch: "Social posts", email: "Email", lead_magnet: "Freebie", photo_request: "Photos of Miss M", dryrun: "Test run",
+  marketing_plan: "Marketing plan",
 };
 
 export const PRODUCT_STATUS: Record<string, string> = { concept: "Idea", in_production: "In the works", paused: "On pause", live: "On sale", retired: "Retired" };
@@ -38,7 +39,7 @@ export const CHANNEL: Record<string, string> = {
 
 /**
  * How a book gets made, as Clara works it: Idea → Script → Illustrations → Building → Full book
- * review. Each step owns some task types and has its own page in her panel.
+ * review → Launch. Each step owns some task types and has its own page in her panel.
  */
 export const STAGE_TRACK: { key: string; label: string; short: string; href: string; types: string[]; blurb: string }[] = [
   { key: "idea", label: "Idea", short: "Idea", href: "/ideas", types: ["book_plan"], blurb: "Jot it down; the team turns it into a plan." },
@@ -46,7 +47,16 @@ export const STAGE_TRACK: { key: string; label: string; short: string; href: str
   { key: "art", label: "Illustrations", short: "Art", href: "/art", types: ["art_page", "art_cover"], blurb: "The approved script gets its pictures. Look them over and approve the cover." },
   { key: "build", label: "Building", short: "Build", href: "/build", types: ["interior_layout", "cover_wrap", "printable_set"], blurb: "Words and pictures are put together into the printed book and its cover." },
   { key: "review", label: "Full book review", short: "Review", href: "/review", types: ["kdp_packet", "etsy_listing"], blurb: "Read the finished book start to finish, then give the final OK." },
+  { key: "launch", label: "Launch", short: "Launch", href: "/launch", types: ["marketing_plan", "social_batch"], blurb: "Put the book up for sale with the copy ready to paste, and get its marketing plan going." },
 ];
+
+/** The marketing plan's sections (plans.section), in the order the panel shows them. */
+export const PLAN_SECTION: [key: string, label: string][] = [
+  ["goal", "Goals"], ["audience", "Who it's for"], ["pillar", "What we post about"], ["platform", "Each platform"],
+  ["launch", "Launch timeline"], ["hashtags", "Hashtags"], ["kpi", "How we'll know it's working"],
+];
+export const CONTENT_TYPE: Record<string, string> = { pin: "Pin", reel: "Reel", carousel: "Carousel", short: "Short video", post: "Post", story: "Story", email: "Email", lead_magnet: "Freebie" };
+export const LISTING_STATUS: Record<string, string> = { draft: "Being written", packet_ready: "Waiting for a check", approved: "Ready to post", publishing: "Publishing", live: "Live", paused: "Paused", error: "Problem", retired: "Retired" };
 export const stageOfType = (type = "") => STAGE_TRACK.find((st) => st.types.includes(type));
 
 export const when = (iso: string) => (iso ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "");

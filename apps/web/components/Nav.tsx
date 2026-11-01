@@ -6,8 +6,8 @@ type Tab = { href: string; label: string; long?: string; icon: keyof typeof ICON
 
 /**
  * Each view's tabs. Clara's follow how a book gets made: Overview, Ideas, Script, Illustrations,
- * Building, Full book review. Everything else sits under More (sidebar on desktop, the avatar sheet
- * on a phone).
+ * Building, Full book review, then Social for the daily posts. Launch (step 6) and everything else
+ * sit under More (sidebar on desktop, the avatar sheet on a phone).
  */
 export type View = "mom" | "kyle" | "family";
 export const TABS: Record<View, Tab[]> = {
@@ -18,6 +18,7 @@ export const TABS: Record<View, Tab[]> = {
     { href: "/art", label: "Art", long: "Illustrations", icon: "art" },
     { href: "/build", label: "Build", long: "Building", icon: "build" },
     { href: "/review", label: "Review", long: "Full book review", icon: "review" },
+    { href: "/social", label: "Social", icon: "megaphone" },
   ],
   kyle: [
     { href: "/", label: "Overview", icon: "home" },
@@ -26,6 +27,7 @@ export const TABS: Record<View, Tab[]> = {
     { href: "/inbox", label: "Inbox", icon: "inbox" },
     { href: "/system", label: "System", icon: "gear" },
     { href: "/money", label: "Money", icon: "coin" },
+    { href: "/social", label: "Social", icon: "megaphone" },
   ],
   family: [
     { href: "/", label: "Overview", icon: "home" },
@@ -36,6 +38,7 @@ export const TABS: Record<View, Tab[]> = {
 
 export const MORE: Record<View, Tab[]> = {
   mom: [
+    { href: "/launch", label: "Launch & listings", icon: "rocket" },
     { href: "/books", label: "All books", icon: "book" },
     { href: "/progress", label: "Progress", icon: "track" },
     { href: "/todo", label: "To-do & accounts", icon: "check" },
@@ -47,6 +50,7 @@ export const MORE: Record<View, Tab[]> = {
     { href: "/art", label: "Illustrations", icon: "art" },
     { href: "/build", label: "Building", icon: "build" },
     { href: "/review", label: "Full book review", icon: "review" },
+    { href: "/launch", label: "Launch & listings", icon: "rocket" },
   ],
   family: [],
 };
@@ -61,6 +65,8 @@ const ICON = {
   track: "M3 17h4l3-8 4 12 3-6h4",
   bulb: "M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z",
   check: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11",
+  megaphone: "M3 11v2a1 1 0 0 0 1 1h2l6 4V6L6 10H4a1 1 0 0 0-1 1zM16 9a3.5 3.5 0 0 1 0 6M19 6a7.5 7.5 0 0 1 0 12",
+  rocket: "M5 15c-1.5 1.5-2 5-2 5s3.5-.5 5-2M9 13l-2-2c1-4 4.5-8 11-8 0 6.5-4 10-8 11zM15 9h.01",
   coin: "M12 2v20M17 6.5c0-1.9-2.2-3-5-3s-5 1.1-5 3 2.2 3 5 3 5 1.1 5 3-2.2 3-5 3-5-1.1-5-3",
   inbox: "M22 12h-6l-2 3h-4l-2-3H2M5 4h14l3 8v8H2v-8l3-8z",
   gear: "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z",

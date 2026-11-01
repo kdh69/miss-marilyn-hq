@@ -89,6 +89,58 @@ export async function approvePage(productId: string, pageNumber: string, what: "
   }
 }
 
+/**
+ * Clara posted something (Social) or put a book up for sale (Launch). Recorded as a done note in
+ * `requests` ("Posted C-0012 <link>", "Live L-0003 <link>"); the panel shows it at once and the
+ * backend marks the content or listings row on its next tick (those columns are backend-only).
+ */
+export async function markDone(what: "Posted" | "Live", id: string, productId: string, link = ""): Promise<Result> {
+  const who = await editor();
+  if (!who) return NOT_SIGNED_IN;
+  const url = link.trim();
+  if (!/^[\w-]+$/.test(id)) return { ok: false, error: "That item isn't in the Sheet." };
+  if (url && !/^https?:\/\/\S+$/.test(url)) return { ok: false, error: "That doesn't look like a link. Use the app's Share → Copy link." };
+  if (what === "Live" && !url) return { ok: false, error: "Paste the store link first, so the family can find it." };
+  try {
+    const core = await Core.load(["requests"]);
+    const now = nowIso();
+    await core.append("requests", [{
+      request_id: `Q-${stamp()}-${Math.floor(Math.random() * 90 + 10)}`, created_at: now, from: who.role, to: "orchestrator",
+      product_id: productId, kind: "note", body: `${what} ${id}${url ? ` ${url}` : ""}`, status: "done", updated_at: now, updated_by: who.role,
+    }]);
+    refresh();
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Couldn't reach the Sheet — try again in a minute." };
+  }
+}
+
+/** "Make the next week's posts" / "Write a marketing plan": an ask to the Orchestrator, once per book at a time. */
+export async function askMarketing(productId: string, what: "plan" | "posts"): Promise<Result & { note?: string }> {
+  const who = await editor();
+  if (!who) return NOT_SIGNED_IN;
+  const prefix = what === "plan" ? "Marketing plan:" : "Social idea:";
+  try {
+    const core = await Core.load(["requests", "products"]);
+    const book = core.rows("products").find((p) => p.product_id === productId);
+    if (!book) return { ok: false, error: "That book isn't in the Sheet." };
+    const open = core.rows("requests").some((r) => r.product_id === productId && r.to === "orchestrator" && r.body.startsWith(prefix) && !["done", "wont_do"].includes(r.status));
+    if (open) return { ok: true, note: "Already asked — the team is on it." };
+    const now = nowIso();
+    const body = what === "plan"
+      ? `Marketing plan: ${book.title} (${productId}), asked for from the panel. Create a marketing_plan task for Marketer (rubric marketing_plan).`
+      : `Social idea: the next week of posts for ${book.title} (${productId}), asked for from the panel, following its approved marketing plan. One social_batch task for Marketer.`;
+    await core.append("requests", [{
+      request_id: `Q-${stamp()}-${Math.floor(Math.random() * 90 + 10)}`, created_at: now, from: who.role, to: "orchestrator",
+      product_id: productId, kind: "idea", body, status: "new", updated_at: now, updated_by: who.role,
+    }]);
+    refresh();
+    return { ok: true, note: "Asked — the team picks it up on their next run." };
+  } catch {
+    return { ok: false, error: "Couldn't reach the Sheet — try again in a minute." };
+  }
+}
+
 /** Clara's own words for a page. Stored apart from the AI draft, so the human rewrite is on record. */
 export async function savePageText(pageId: string, text: string): Promise<Result> {
   const who = await editor();

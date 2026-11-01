@@ -133,6 +133,12 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 
 ## Decisions
 
+- **2026-11-01 (later):** listing and marketing join the flow. The Grok bots write everything (Lister:
+  every store field in the listings row; Marketer: a marketing plan per book in the `plans` tab, then a
+  week of posts at a time in `content`); Clara posts by hand from the panel. Platforms: Instagram,
+  Facebook, Pinterest, TikTok; the plan sets the pace (about 15 minutes a day for Clara). The backend's
+  autopilot asks for the plan at Building and for the next week of posts (`config!social_autopilot`).
+
 - **2026-11-01:** T-0038 (story v2) replaces T-0024. Final page art starts now from the T-0039 drafts instead
   of waiting for Clara's script approval; a page whose story beat she changes gets redrawn. Message for the
   Orchestrator: *"Book 1, Kyle 11-01: T-0038 passed QC and is on Clara's Script step; T-0024 is cancelled
@@ -160,9 +166,15 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 
 ## Code — next up
 
+- **Launch (step 6) and Social** are built: `/launch` shows each listing field by field with Copy
+  buttons, the files, how to post and *It's live*; `/social` shows today's posts ready to paste, how to
+  post on each platform, *Posted*, the week ahead, approvals and the marketing plan. Marks are `requests`
+  notes ("Posted C-0012 <link>", "Live <listing_id> <link>"); the backend's marketing job applies them.
+  Bot rules for it: lessons L-0017–L-0020 (Orchestrator, Lister, marketing_plan, social_batch).
 - **`npm run sim`** takes a copy of Book 2 through every step after the script with the real backend jobs
   and cleans up (Actions job `sim`; `--keep` to click through it in the panel, `--clean` to remove).
-  Run it after any change to the backend flow. It doesn't cover the bots or Drive uploads.
+  Run it after any change to the backend flow. It doesn't cover the bots or Drive uploads. Since
+  11-01 it continues past the final OK: listing live, marketing plan, a week of posts, one posted.
   First live run 2026-11-01 06:06 UTC: all checks green in ~4 min (Core paces itself to 50 Sheets
   calls a minute), 183 SIM rows removed.
 - Verify the panel on a phone with real data, signed in as each role. First real saves to try: a

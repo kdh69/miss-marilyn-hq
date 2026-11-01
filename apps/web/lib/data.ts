@@ -1,10 +1,10 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { Core, type Row } from "@mm/core";
-import { STAGE_TRACK, TASK_STATUS, TASK_TYPE, hasWords, stageOfType } from "./labels";
+import { CHANNEL, CONTENT_TYPE, STAGE_TRACK, TASK_STATUS, TASK_TYPE, hasWords, stageOfType } from "./labels";
 import { sample } from "./sample";
 
-const TABS = ["tasks", "assets", "products", "skus", "listings", "content", "mom_queue", "pages", "requests", "research", "accounts", "costs", "transactions", "log", "config"] as const;
+const TABS = ["tasks", "assets", "products", "skus", "listings", "content", "plans", "mom_queue", "pages", "requests", "research", "accounts", "costs", "transactions", "log", "config"] as const;
 type Tab = (typeof TABS)[number];
 export type Snapshot = Record<Tab, Row[]> & { _sample?: boolean };
 
@@ -20,6 +20,8 @@ export const getSnapshot = unstable_cache(
 );
 
 const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+/** Today in New York (YYYY-MM-DD), the day posts are scheduled by; `plus` days ahead. */
+export const nyDay = (plus = 0) => new Date(Date.now() + plus * 864e5).toLocaleDateString("en-CA", { timeZone: "America/New_York" });
 
 export const STAGES = ["story_draft", "art_page", "art_cover", "interior_layout", "cover_wrap", "kdp_packet"];
 
@@ -103,9 +105,9 @@ export function todoList(s: Snapshot, view: string | null): TodoItem[] {
   for (const a of s.accounts.filter((a) => ["todo", "in_progress", "waiting"].includes(a.status) && a.owner.toLowerCase().includes(mine) && a.phase === "now")) {
     items.push({ id: a.account_id, when: "", what: `Set up ${a.service}`, where: "Accounts", href: view === "mom" ? "/todo#accounts" : "/system#accounts", finish: { kind: "account", id: a.account_id } });
   }
-  const weekEnd = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
-  for (const c of s.content.filter((c) => ["approved", "scheduled"].includes(c.status) && c.scheduled_for && c.scheduled_for.slice(0, 10) <= weekEnd)) {
-    items.push({ id: c.content_id, when: c.scheduled_for.slice(0, 10), what: `Post goes out: ${c.hook || c.content_type}`, where: c.channel, href: "/todo" });
+  const posted = marks(s);
+  for (const c of postsBetween(s, nyDay(), nyDay(6)).filter((c) => ["approved", "scheduled"].includes(c.status) && !posted.has(c.content_id))) {
+    items.push({ id: c.content_id, when: c.scheduled_for.slice(0, 10), what: `Post: ${c.hook || CONTENT_TYPE[c.content_type] || c.content_type}`, where: CHANNEL[c.channel] ?? c.channel, href: "/social" });
   }
   return items.sort((a, b) => (a.when || "9999").localeCompare(b.when || "9999"));
 }
@@ -184,6 +186,7 @@ export function upNext(s: Snapshot) {
     const ok = pageApprovals(s, id, what);
     return bookPages(s, id).filter((p) => p.art_id && !ok[p.page_number]).length;
   };
+  const done = marks(s);
   // Paused books don't get an "Up next" line.
   return workingBooks(s).map((p) => {
     const id = p.product_id;
@@ -192,8 +195,11 @@ export function upNext(s: Snapshot) {
     const draftOnly = pages.find((x) => hasWords(x) && !x.text_final);
     const ask = (key: string) => stepAsk(s, id, key);
     const at = (key: string) => `${STAGE_TRACK.find((x) => x.key === key)!.href}?book=${id}`;
+    const toPost = bookListings(s, id).find((l) => l.status === "approved" && !done.has(l.listing_id));
     let line: { step: string; text: string; href: string; mine: boolean };
     if (ask("review")) line = { step: "Review", text: "Read the finished book and give the final OK", href: at("review"), mine: true };
+    else if (ask("launch")) line = { step: "Launch", text: "Approve the marketing plan or the next week's posts", href: at("launch"), mine: true };
+    else if (toPost) line = { step: "Launch", text: `Put it up on ${CHANNEL[toPost.channel] ?? toPost.channel} — the copy is ready to paste`, href: at("launch"), mine: true };
     else if (ask("build")) line = { step: "Build", text: "Look over the layout and approve it", href: at("build"), mine: true };
     else if (ask("art")) line = { step: "Art", text: "Approve the cover", href: at("art"), mine: true };
     else if (ask("script")) line = { step: "Script", text: "Read the script and approve it", href: at("script"), mine: true };
@@ -229,4 +235,55 @@ export function pageApprovals(s: Snapshot, productId: string, what: "picture" | 
     if (!out[r.page_number] || r.created_at > out[r.page_number]) out[r.page_number] = r.created_at;
   }
   return out;
+}
+
+// ---------- Launch and Social ----------
+
+/** The platforms the Social page plans and posts for. */
+export const SOCIAL = ["INSTAGRAM", "FACEBOOK", "PINTEREST", "TIKTOK"];
+
+/** "Posted C-0012 <link>" / "Live L-0003 <link>": the note the panel writes when Clara marks one. */
+const MARK = /^(Posted|Live) (\S+)(?: (\S+))?/;
+
+/** Clara's posted / live marks by content or listing ID, so pages show them before the backend's next tick. */
+export function marks(s: Snapshot) {
+  const out = new Map<string, { link: string; at: string }>();
+  for (const r of s.requests) {
+    const m = r.kind === "note" ? r.body.match(MARK) : null;
+    if (m) out.set(m[2], { link: m[3] ?? "", at: r.created_at });
+  }
+  return out;
+}
+
+/** A book's store listings, Amazon first, leaving out retired ones. */
+export function bookListings(s: Snapshot, productId: string) {
+  const skus = new Set(s.skus.filter((k) => k.product_id === productId).map((k) => k.sku));
+  const rank = (ch: string) => ["KDP", "ETSY"].indexOf(ch) + 1 || 9;
+  return s.listings
+    .filter((l) => (skus.has(l.sku) || l.sku.startsWith(productId)) && l.status !== "retired" && !SOCIAL.includes(l.channel))
+    .sort((a, b) => rank(a.channel) - rank(b.channel));
+}
+
+/** A book's marketing plan: the approved rows, else the newest draft, in the Marketer's order. */
+export function bookPlan(s: Snapshot, productId: string) {
+  const rows = s.plans.filter((p) => p.product_id === productId && p.status !== "retired");
+  const approved = rows.filter((p) => p.status === "approved");
+  const latest = rows[rows.length - 1]?.task_id;
+  const pick = approved.length ? approved : rows.filter((p) => p.task_id === latest);
+  return { approved: approved.length > 0, rows: [...pick].sort((a, b) => (Number(a.sort) || 0) - (Number(b.sort) || 0)) };
+}
+
+/** Social posts scheduled from `from` to `to` (New York days, inclusive), not killed, in posting order. */
+export function postsBetween(s: Snapshot, from: string, to: string, productId?: string) {
+  return s.content
+    .filter((c) => SOCIAL.includes(c.channel) && c.status !== "killed" && (!productId || c.product_id === productId))
+    .filter((c) => c.scheduled_for.slice(0, 10) >= from && c.scheduled_for.slice(0, 10) <= to)
+    .sort((a, b) => a.scheduled_for.localeCompare(b.scheduled_for) || SOCIAL.indexOf(a.channel) - SOCIAL.indexOf(b.channel));
+}
+
+/** The picture or video a post uses: its first asset that has a Drive file. */
+export function postMedia(s: Snapshot, c: Row) {
+  const ids = (c.asset_ids ?? "").split(",").map((x) => x.trim()).filter(Boolean);
+  const a = ids.map((id) => s.assets.find((x) => x.asset_id === id)).find((x) => x?.file_url);
+  return a ? { id: driveId(a.file_url), video: a.asset_type === "social_video" || /\.(mp4|mov)$/i.test(a.file_name), name: a.file_name || a.asset_id } : undefined;
 }
