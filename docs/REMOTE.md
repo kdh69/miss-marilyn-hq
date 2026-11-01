@@ -16,6 +16,7 @@ Three ways to work, from most to least capable:
 | Talk to Grok bots, paste descriptions | ✅ | | |
 | Look at or edit the Sheet and Drive | ✅ | | |
 | Run the backend (`doctor`, `dryrun`, a tick) | ✅ GitHub → Actions → Run workflow | | |
+| Record a QC verdict, or change a task's status as Kyle | ✅ Actions → MM backend tick → job `qc` or `task` | ✅ Claude triggers the same workflow | |
 | Change GitHub secrets / Vercel env vars | ✅ their web dashboards | | |
 | Redeploy the panel as it is | ✅ Vercel dashboard → Redeploy | | |
 | Change code, run typecheck and tests, push, open a PR | | ✅ | |

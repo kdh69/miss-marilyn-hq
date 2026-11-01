@@ -8,8 +8,20 @@ on:
       job:
         description: "What to run"
         type: choice
-        options: [tick, doctor, dryrun]
+        options: [tick, doctor, dryrun, qc, task]
         default: tick
+      task_id:
+        description: "qc / task: the task ID, e.g. T-0038"
+        type: string
+        default: ""
+      value:
+        description: "qc: pass or fail · task: the new status"
+        type: string
+        default: ""
+      text:
+        description: "qc: summary for Clara (pass) or what to fix (fail) · task: why. Shows in the public log."
+        type: string
+        default: ""
 
 concurrency:
   group: mm-backend
@@ -50,4 +62,15 @@ jobs:
       - if: steps.gate.outputs.skip != 'true'
         run: pip install -r apps/backend/preflight/requirements.txt
       - if: steps.gate.outputs.skip != 'true'
-        run: npm run ${{ github.event.inputs.job == 'doctor' && 'doctor' || github.event.inputs.job == 'dryrun' && 'dryrun' || 'backend' }}
+        env:   # inputs go through env, never pasted into the script
+          JOB: ${{ github.event.inputs.job || 'tick' }}
+          TASK_ID: ${{ github.event.inputs.task_id }}
+          VALUE: ${{ github.event.inputs.value }}
+          TEXT: ${{ github.event.inputs.text }}
+        run: |
+          case "$JOB" in
+            tick) npm run backend ;;
+            doctor|dryrun) npm run "$JOB" ;;
+            qc|task) npm run "$JOB" -- "$TASK_ID" "$VALUE" "$TEXT" ;;
+            *) echo "unknown job: $JOB"; exit 1 ;;
+          esac

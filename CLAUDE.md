@@ -21,7 +21,8 @@ Rules that hold everywhere:
 - Times: ISO 8601 UTC in cells; the daily spend cap resets on the New York day.
 
 Commands: `npm run check` (typecheck + tests + panel build), `npm run doctor`, `npm run dryrun`,
-`npm run backend` (one tick), `npm run web`, `npm run sheet:setup`, `npm run qc` (manual QC).
+`npm run backend` (one tick), `npm run web`, `npm run sheet:setup`, `npm run qc` (manual QC),
+`npm run task -- <id> <status> "<why>"` (a status change as Kyle, with its log row).
 Scripts load `.env` automatically (Node `--env-file-if-exists`).
 
 - Drive file creation goes through `driveWriter()` (owner token if set, else service account);
@@ -31,6 +32,8 @@ Scripts load `.env` automatically (Node `--env-file-if-exists`).
 
 QC is manual while there's no `ANTHROPIC_API_KEY`: when asked to run QC, `npm run qc` lists the
 queue; read each task's rubric and files, then record `npm run qc -- <task_id> pass|fail "<text>"`.
+From a cloud session without Sheet keys, read the Sheet through the Google Drive connector and
+write through Actions: MM backend tick, job `qc` (or `task`) with task_id / value / text.
 
 Panel roles: kyle (everything), mom (no costs: Money shows sales only), family (read-only, Google
 `:family` or the `FAMILY_PASSWORD`). Every panel write goes through `editor()` in `apps/web/auth.ts`;

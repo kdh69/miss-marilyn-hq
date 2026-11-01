@@ -22,7 +22,7 @@ export async function pushToMom(core: Core, task: Row, itemType: string, summary
     item_type: itemType,
     summary: summary || `${PLAIN[itemType] ?? "Review"}: ${task.title}`,
     preview_url: previewUrl,
-    qc_summary: task.qc_notes ?? "",
+    qc_summary: /^(manual QC: )?ok$/.test(task.qc_notes ?? "") ? "" : task.qc_notes ?? "",
     requested_at: nowIso(),
   }]);
 }
@@ -41,13 +41,15 @@ export async function momSync(core: Core): Promise<void> {
 
   // Pull answered, unprocessed items.
   for (const item of core.rows("mom_queue")) {
-    if (!item.answer || item.processed_at) continue;
-    if (item.answer === "Changes" && !item.mom_note.trim()) continue; // wait for her note
+    if (item.processed_at) continue;
     const task = core.rows("tasks").find((t) => t.task_id === item.task_id);
+    // Task no longer waiting on her (answered, or Kyle cancelled/superseded it): close the card.
     if (!task || task.status !== "awaiting_mom") {
       await core.update("mom_queue", item.item_id, { processed_at: nowIso() });
       continue;
     }
+    if (!item.answer) continue;
+    if (item.answer === "Changes" && !item.mom_note.trim()) continue; // wait for her note
 
     let to: string;
     switch (item.answer) {
