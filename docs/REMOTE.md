@@ -44,7 +44,7 @@ Three ways to work, from most to least capable:
     create each file through the Google Drive connector and register it with `npm run bot -- <role> asset`.
   - `FAL_KEY`: pictures (`npm run bot -- illustrator image`). fal's hosts aren't on the default
     network list (blocked from a cloud session on 2026-11-11): add `queue.fal.run`, `fal.run`,
-    `rest.alpha.fal.ai`, `fal.media` and `v3.fal.media` to the environment's allowed hosts.
+    `rest.fal.ai`, `fal.media`, `v3.fal.media` and `v3b.fal.media` to the environment's allowed hosts.
   Use an environment of its own for this repo, so the key isn't in the sessions of other projects.
   Google's APIs (`sheets.googleapis.com`, `www.googleapis.com`, `oauth2.googleapis.com`) answered from
   the default trusted network on 2026-11-11; a custom allowlist has to include them.

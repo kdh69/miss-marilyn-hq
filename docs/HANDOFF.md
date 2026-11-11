@@ -1,7 +1,8 @@
 # Handoff — where things stand (2026-11-11)
 
 Read this first when picking the project back up. Setup steps in full: [`SETUP.md`](SETUP.md).
-Working away from the laptop: [`REMOTE.md`](REMOTE.md). The team: [`TEAM.md`](TEAM.md). What we know:
+Working away from the laptop: [`REMOTE.md`](REMOTE.md). The team: [`TEAM.md`](TEAM.md). The plan:
+[`ROADMAP.md`](ROADMAP.md) (parity with the Grok team, recreatable, best in class). What we know:
 [`knowledge/`](knowledge/README.md) and [`playbook.md`](playbook.md).
 
 **2026-11-11: the team moved from Grok to Claude.** Grok is no longer used and its chat history is

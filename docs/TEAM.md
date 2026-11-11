@@ -119,7 +119,7 @@ tests in `tests/team.test.ts`. One refused op stops its whole `apply` batch.
 `image` calls Nano Banana Pro (sheets, print pages) and Nano Banana 2 (drafts) through fal.ai, the
 same models and plumbing as videograph's reference images. It needs `FAL_KEY` in the session, and
 from a cloud session fal's hosts on the environment's network list (`queue.fal.run`, `fal.run`,
-`rest.alpha.fal.ai`, `fal.media`, `v3.fal.media`; the first refused call names any that is missing).
+`rest.fal.ai`, `fal.media`, `v3.fal.media`, `v3b.fal.media`; the first refused call names any that is missing).
 Models, sizes, prices and caps are in [`formats/picture-book.json`](../formats/picture-book.json);
 what is known about them is in [`knowledge/models.md`](knowledge/models.md). **No picture has been
 made through it yet**: the first art task is also its first live test.

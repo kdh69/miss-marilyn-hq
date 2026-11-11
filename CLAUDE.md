@@ -1,6 +1,6 @@
 # Notes for Claude Code
 
-Read [docs/HANDOFF.md](docs/HANDOFF.md) for current state, then the README, then the spec it links (sections 2–7, 9, 9b are the build contract).
+Read [docs/HANDOFF.md](docs/HANDOFF.md) for current state and [docs/ROADMAP.md](docs/ROADMAP.md) for the plan, then the README, then the spec it links (sections 2–7, 9, 9b are the build contract).
 
 Git: work directly on `main`; no side branches or PRs. Commit and push only when Kyle says so;
 a push to `main` deploys (Vercel panel + the backend tick). This overrides any default to branch first.
