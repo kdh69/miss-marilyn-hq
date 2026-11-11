@@ -5,6 +5,11 @@ day is [`HANDOFF.md`](HANDOFF.md); how the team works is [`TEAM.md`](TEAM.md).
 
 **Spending rule:** every item that costs money needs Kyle's yes and a stated cap first.
 
+**Specs:** the next eight pieces of work are written up one per file in [`specs/`](specs/README.md),
+ready to hand to a session: hardening, the first live run, the panel starting the backend, backup and
+the rebuild drill, the character library, shared generation code, the Miss Marilyn channel in
+videograph, and the bridge between the two repos.
+
 ## The goal
 
 1. **The full thing we had.** Every role, rule and habit of the Grok team, working on Claude.
@@ -97,6 +102,7 @@ rebuildable from `schema.json`, CI on every push, every knowledge claim dated an
 | L3 | First pictures, cap $3: tests B1 and B3 on two pages | The contact sheet shows Grok-made drafts next to the new ones, and Kyle says keep or change |
 | L4 | The owner token for uploads | `upload` works without the Drive connector |
 | L5 | Scheduled sweeps, 9am and 6pm New York | Two days of unattended sweeps with a clean report |
+| L6 | The panel starts a backend tick when Clara answers (a `workflow_dispatch` call from the panel's save action; needs a GitHub token in Vercel) | Her Approve shows as applied within a few minutes. Measured 11-08 to 11-11: GitHub ran the "every 30 minutes" schedule 12 times in three days |
 
 ### Phase 2: recreatable (R1 to R8, R2 first)
 

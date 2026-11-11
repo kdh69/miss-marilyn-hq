@@ -2,7 +2,8 @@
 
 Read this first when picking the project back up. Setup steps in full: [`SETUP.md`](SETUP.md).
 Working away from the laptop: [`REMOTE.md`](REMOTE.md). The team: [`TEAM.md`](TEAM.md). The plan:
-[`ROADMAP.md`](ROADMAP.md) (parity with the Grok team, recreatable, best in class). What we know:
+[`ROADMAP.md`](ROADMAP.md) (parity with the Grok team, recreatable, best in class), with the next work
+specced one session each in [`specs/`](specs/README.md): start with S1, then S2. What we know:
 [`knowledge/`](knowledge/README.md) and [`playbook.md`](playbook.md).
 
 **2026-11-11: the team moved from Grok to Claude.** Grok is no longer used and its chat history is
@@ -249,6 +250,11 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 - **Money tab imports:** KDP royalty report + Etsy sales CSV → `transactions`.
 
 ## Things to know
+
+- **The backend tick doesn't run every 30 minutes.** It is scheduled for :07 and :37, but GitHub ran it
+  12 times between 11-08 and 11-11, 4 to 10 hours apart (scheduled workflows are best-effort). So
+  Clara's answers can take hours to apply. Until that is fixed (roadmap L6: the panel starts a tick
+  when she answers), run one by hand after she approves: Actions → MM backend tick → Run workflow.
 
 - **Public repo:** keeps GitHub Actions free, but GitHub pauses scheduled workflows after 60 days with
   no commits, and the Sheet ID is visible in `.env.example`, so keep the Sheet's General access on

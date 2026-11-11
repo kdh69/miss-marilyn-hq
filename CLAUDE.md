@@ -1,12 +1,13 @@
 # Notes for Claude Code
 
-Read [docs/HANDOFF.md](docs/HANDOFF.md) for current state and [docs/ROADMAP.md](docs/ROADMAP.md) for the plan, then the README, then the spec it links (sections 2–7, 9, 9b are the build contract).
+Read [docs/HANDOFF.md](docs/HANDOFF.md) for current state and [docs/ROADMAP.md](docs/ROADMAP.md) for the plan
+(the build queue is [docs/specs/](docs/specs/README.md), one spec per session), then the README, then the spec it links (sections 2–7, 9, 9b are the build contract).
 
 Git: work directly on `main`; no side branches or PRs. Commit and push only when Kyle says so;
 a push to `main` deploys (Vercel panel + the backend tick). This overrides any default to branch first.
 
 The team: the makers are Claude agents in `.claude/agents/` (orchestrator, producer, illustrator,
-builder, lister, marketer, quality-checker, scout, plus qc); [docs/TEAM.md](docs/TEAM.md) has their house
+builder, lister, marketer, quality-checker, scout, plus qc and critic); [docs/TEAM.md](docs/TEAM.md) has their house
 rules. `/sweep` runs a round: you dispatch the agents, they do the work. They reach the Sheet and Drive
 only through `npm run bot -- <role> <command>` (`apps/backend/src/bot.ts`), and what each role may write
 is `apps/backend/src/lib/team.ts` (tests: `tests/team.test.ts`). Change a role by editing its agent
