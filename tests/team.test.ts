@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Row } from "../packages/core/src/sheet";
-import { latestReview, mintAssetId, planMove, planOps, planReview, type Board } from "../apps/backend/src/lib/team";
+import { isPagePicture, latestReview, mintAssetId, planMove, planOps, planReview, type Board } from "../apps/backend/src/lib/team";
 
 const NOW = "2026-11-11T15:00:00Z";
 const task = (over: Partial<Row>): Row => ({
@@ -154,5 +154,15 @@ describe("Quality Checker reviews", () => {
     expect(latestReview(b, "T-0026")).toMatchObject({ pass: false, fails: 1 });
     expect(() => planReview(board(), "T-0026", "pass", "fine")).toThrow(/todo; reviews happen while it's in_progress/);
     expect(() => planReview(b, "T-0026", "maybe", "hm")).toThrow(/pass or fail/);
+  });
+});
+
+describe("isPagePicture", () => {
+  it("only the colour page art becomes the page's picture, never its ink layer", () => {
+    expect(isPagePicture("illustrator", "page_art", { page: "3" }, "page_p3_a1.png")).toBe(true);
+    expect(isPagePicture("illustrator", "page_art", { page: "3", version: "ink" }, "x.png")).toBe(false);
+    expect(isPagePicture("illustrator", "page_art", { page: "3" }, "page_p3_a1_ink.png")).toBe(false);
+    expect(isPagePicture("illustrator", "page_art", {}, "x.png")).toBe(false);
+    expect(isPagePicture("builder", "page_art", { page: "3" }, "x.png")).toBe(false);
   });
 });

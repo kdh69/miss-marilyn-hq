@@ -41,7 +41,7 @@ import { checkArt, contactSheet, fitToPage, format, generateImage, practiceImage
 import { python } from "./lib/python";
 import { rubricPath } from "./lib/qc";
 import {
-  BOT_ROLES, MAX_IN_PROGRESS, idList, isBotRole, isTeamRole, latestReview, mintAssetId, mintCostId, parkedProducts, planMove, planOps, planReview,
+  BOT_ROLES, MAX_IN_PROGRESS, idList, isBotRole, isPagePicture, isTeamRole, latestReview, mintAssetId, mintCostId, parkedProducts, planMove, planOps, planReview,
   type BotRole, type Move, type Op, type TeamRole,
 } from "./lib/team";
 
@@ -332,7 +332,7 @@ async function register(core: Core, role: BotRole, task: Row, assetType: string,
   const linked = await core.update("tasks", task.task_id, { output_asset_ids: ids }, role);
   console.log(`${asset_id}  ${assetType}${opts.page ? ` p${opts.page}` : ""}  ${file.url}`);
   if (!linked) console.log(`  ! ${task.task_id} changed under us: output_asset_ids not updated; run the command again without re-uploading (use \`asset\` with the URL above)`);
-  if (role === "illustrator" && assetType === "page_art" && opts.page) {
+  if (isPagePicture(role, assetType, opts, file.name)) {
     const page = core.rows("pages").find((p) => p.product_id === task.product_id && Number(p.page_number) === Number(opts.page));
     if (page && (await core.update("pages", page.page_id, { art_asset_id: asset_id }, role))) console.log(`  ${page.page_id}.art_asset_id = ${asset_id}`);
     else console.log(`  ! no pages row for ${task.product_id} p${opts.page} (or it changed): set art_asset_id with apply`);

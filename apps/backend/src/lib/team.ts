@@ -345,3 +345,9 @@ export function planReview(board: Board, taskId: string, verdict: string, notes:
   const fails = (latestReview(board, taskId)?.fails ?? 0) + (verdict === "fail" ? 1 : 0);
   return { status: task.status, message: `review ${verdict}: ${notes.trim()}`, fails };
 }
+
+/** Whether an upload becomes the page's picture (pages.art_asset_id): the colour page art only, never its ink line layer. */
+export function isPagePicture(role: string, assetType: string, opts: Record<string, string>, fileName = ""): boolean {
+  if (role !== "illustrator" || assetType !== "page_art" || !opts.page) return false;
+  return !/ink|lines?$/i.test(opts.version ?? "") && !/[_-]ink\b/i.test(fileName);
+}
