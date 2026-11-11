@@ -27,7 +27,7 @@ publishes from either without Clara's Approve in the panel.
 
 | # | Spec | Repo | Needs first | Needs from Kyle | Spends |
 |---|---|---|---|---|---|
-| S1 | [Hardening before the first live sweep](S1-hardening.md) | HQ | | | $0 |
+| S1 | [Hardening before the first live sweep](S1-hardening.md), with the [review's findings](S1-review-findings.md) | HQ | | How picture budgets work (finding F6) | $0 |
 | S2 | [First live run](S2-first-live-run.md) | HQ | S1 | Sheet key in the cloud environment; fal key; a yes on $3 | up to $3 |
 | S3 | [The panel starts the backend tick](S3-panel-starts-tick.md) | HQ | | A GitHub token in Vercel | $0 |
 | S4 | [Nightly backup and the rebuild drill](S4-backup-and-rebuild.md) | HQ | S2 (keys proven) | A private GitHub repo and a deploy key; a scratch Sheet | $0 |

@@ -52,7 +52,16 @@ spec puts a copy somewhere else every night and proves it can be turned back int
    each goes (GitHub, Vercel, the cloud environment); Vercel project; the team on Claude Code, and
    on another agent via `npm run team:export`. End with what a restore does not bring back (Drive
    files, Google sharing, protected ranges' editors).
-7. `restore` details to settle while drilling: seeded tabs (`config`, `task_types`, `accounts`) get
+7. **`restore` and the integrity check (review finding F4).** Today `--into-live` rewrites task
+   statuses and leaves the live log alone, so the next backend tick reverts every rolled-back
+   status; and a fresh restore that fails partway through the log can't be resumed cleanly. Fix
+   both: restore the log first and in chunks that can be resumed (compare by `ts`, `actor`,
+   `task_id`, `message`; append only what's missing); with `--into-live`, write one log row per
+   task whose status the restore changed (actor `kyle`, message "restored from backup <date>"), so
+   the last logged status matches the row; and set `system_status` to HALT for the length of a
+   restore so no tick or agent writes in the middle of it. Test: restore into a Sheet that has
+   moved on, run `integrityCheck`, and nothing is reverted.
+8. `restore` details to settle while drilling: seeded tabs (`config`, `task_types`, `accounts`) get
    the backup's values; the Drive folder IDs in `config` point at the old folders, so print a
    reminder to review them; `lists` is rebuilt from the schema and never restored.
 

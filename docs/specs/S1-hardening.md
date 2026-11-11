@@ -5,8 +5,10 @@
 ## Why
 
 `npm run bot` has only run against an in-memory Sheet. Several agents use it at once, each a
-separate process with its own snapshot of MM Core. Three things break under that, and they are
-cheaper to fix now than to clean out of the live Sheet later.
+separate process with its own snapshot of MM Core. An independent review on 2026-11-11 confirmed
+two high and six medium defects, most of them from that fact; they are cheaper to fix now than to
+clean out of the live Sheet later. The review is [`S1-review-findings.md`](S1-review-findings.md):
+read it first. Sections 1 and 2 below are its two high findings in detail; section 4 is the rest.
 
 ## Read first
 
@@ -25,8 +27,8 @@ appending at the same moment get the same ID.
 |---|---|---|
 | `costs` | any maker, in parallel | `C-<yyyymmddHHMMSS>-<4 random base36 chars>`. Update `mintCostId` and the `cost` and `image` commands. Nothing reads the old `C-####` shape (check with grep before changing) |
 | `content` | several Marketers in parallel, one per task | `C-<task id without the dash>-<nn>`, counted within the task: `C-T0043-01`. The panel's "Posted <id> <link>" mark takes any ID (`MARK` in `jobs/marketing.ts`) |
-| `assets` | already per task (`A-T0026-01`) | none |
-| `tasks`, `requests`, `products`, `skus` | the Orchestrator only | none in code; add the rule to `.claude/skills/sweep/SKILL.md`: one Orchestrator runs at a time, never beside another |
+| `assets` | per task (`A-T0026-01`), but two uploads to one task in parallel collide | keep the shape; after the append, re-read `assets` and, if the ID appears twice, rewrite this row's ID to the next free one before linking it to the task. Simpler alternative if that proves fiddly: `A-<task>-<HHMMSS><2 random chars>` |
+| `tasks`, `requests`, `products`, `skus` | the Orchestrator only, but a scheduled sweep and a manual one can overlap | a sweep lock: `/sweep` step 1 writes `config!sweep_started_at` (new config seed row) and refuses to start when one began under 90 minutes ago and hasn't cleared it; the last step clears it. `npm run bot -- kyle board` shows it. Also the rule in the skill: one Orchestrator at a time |
 | `lessons` | the Orchestrator and the critic | none in code; the sweep already runs the critic last, alone |
 | `research` | Scout, alone | none |
 
@@ -49,6 +51,10 @@ Do what videograph's ledger does:
 5. **Settle:** on success, drop `· reserved` from the note. On failure, set `amount_usd` to 0 and
    end the note `· failed, not billed` (fal doesn't bill failed jobs).
 
+On a timeout or a failed download, cancel the fal job if it is still running, keep the row at
+full price and end its note `· unconfirmed (request <id>)`: assume it was billed. Write the
+picture to disk before any further Sheet call.
+
 Attempts count rows for that task and subject whose note doesn't end in `released` or
 `failed, not billed`. Guard against a loop of failures: refuse when a subject has 6 rows of any
 kind. Put the pure parts (what counts as an attempt, the re-check) in `lib/gates.ts` with tests;
@@ -62,13 +68,18 @@ HALT while a call is in flight and released or failed rows count as 0. No backen
 In `.claude/skills/sweep/SKILL.md`, step 2 and step 8: say that the Orchestrator runs alone (no
 maker running, no second Orchestrator), because it is the only minter of task and request IDs.
 
-### 4. Findings from the 2026-11-11 code review
+### 4. The rest of the review
 
-An independent review of the same files ran on 2026-11-11. Its confirmed findings are listed in
-[`S1-review-findings.md`](S1-review-findings.md) when that file exists; fix each one marked high
-or medium with a test, and say in the session report which you fixed and which you judged not a
-defect and why. If the file doesn't exist, run `/code-review` on the files under "Read first" and
-treat its confirmed findings the same way.
+Fix every finding in [`S1-review-findings.md`](S1-review-findings.md) marked **S1**, each with a
+test that fails before the fix: F2's timeout and download paths, F3 (subject normalising, the file
+name, the cap edge), F5, F7, F8, F9, F10, F11 and F12. Reproduce a finding before fixing it; if one
+doesn't reproduce, say so in the report and leave the code alone.
+
+**Kyle decides (F6), before the session or at its start:** how picture budgets work. Recommended:
+a per-picture budget (`perImageCapUsd` in `formats/picture-book.json`, 2.5 × the kind's price)
+times the pictures a task covers, in place of the flat $6 a task; attempts counted per round
+(since the task last went `in_progress`) with a lifetime limit of 6 a picture; the daily cap
+unchanged. Without this, a QC fail on a page that used its three attempts can't be fixed.
 
 ### 5. Kyle's settings file
 
