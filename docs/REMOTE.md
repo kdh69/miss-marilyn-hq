@@ -6,14 +6,14 @@ Three ways to work, from most to least capable:
    laptop on, awake and the Claude app open. Everything below works, because it *is* the laptop.
 2. **A cloud Claude Code session** (claude.ai/code): Claude works on a fresh copy of the GitHub repo
    in Anthropic's cloud. It has no `.env`, no Vercel login and no browser of yours.
-3. **Just your phone:** the web dashboards (panel, Grok, Google, GitHub, Vercel).
+3. **Just your phone:** the web dashboards (panel, Claude, Google, GitHub, Vercel).
 
 ## What works where
 
 | Task | Phone only | Cloud Claude session | Needs the laptop |
 |---|---|---|---|
-| Use the panel, approve, message the bots | ✅ | | |
-| Talk to Grok bots, paste descriptions | ✅ | | |
+| Use the panel, approve, message the team | ✅ | | |
+| Run the team (`/sweep`, "ask Scout…", "run QC") | ✅ start a cloud session from the Claude app | ⚠️ only with Sheet keys set up (below) | ✅ |
 | Look at or edit the Sheet and Drive | ✅ | | |
 | Run the backend (`doctor`, `dryrun`, a tick) | ✅ GitHub → Actions → Run workflow | | |
 | Record a QC verdict, or change a task's status as Kyle | ✅ Actions → MM backend tick → job `qc` or `task` | ✅ Claude triggers the same workflow | |
@@ -33,10 +33,24 @@ Three ways to work, from most to least capable:
   `dryrun` from the GitHub app (Actions → MM backend tick → Run workflow).
 - **GitHub Actions minutes are free** because the repo is public. Scheduled runs pause after 60 days
   with no commits; any commit restarts them.
-- **For QC from a cloud session**, add `GOOGLE_SERVICE_ACCOUNT_JSON` and `MM_CORE_SHEET_ID` as secret
-  environment variables in that cloud environment's settings, and make sure its network access allows
-  Google's APIs (`googleapis.com`, `oauth2.googleapis.com`). Then "run QC" works the same as on the laptop.
-  Without them, a cloud session can change code but can't read or write the Sheet.
+- **For the team and QC from a cloud session**, the session's cloud environment needs the Sheet keys.
+  In Claude Code on the web: the environment menu → the environment this repo uses → Edit →
+  environment variables:
+  - `GOOGLE_SERVICE_ACCOUNT_JSON` (the whole key JSON on one line) and `MM_CORE_SHEET_ID`: reads and
+    writes of MM Core, reading Drive files. With these, `/sweep`, "run QC" and "status" work the same
+    as on the laptop.
+  - `GOOGLE_OWNER_REFRESH_TOKEN`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`: uploads to Drive as the folder
+    owner (`npm run google:authorize` on the laptop makes the token). Without them a maker has to
+    create each file through the Google Drive connector and register it with `npm run bot -- <role> asset`.
+  - `FAL_KEY`: pictures (`npm run bot -- illustrator image`). fal's hosts aren't on the default
+    network list (blocked from a cloud session on 2026-11-11): add `queue.fal.run`, `fal.run`,
+    `rest.alpha.fal.ai`, `fal.media` and `v3.fal.media` to the environment's allowed hosts.
+  Use an environment of its own for this repo, so the key isn't in the sessions of other projects.
+  Google's APIs (`sheets.googleapis.com`, `www.googleapis.com`, `oauth2.googleapis.com`) answered from
+  the default trusted network on 2026-11-11; a custom allowlist has to include them.
+  Without the keys, a cloud session can change code but can't read or write the Sheet.
+- **A setup script** for that environment saves a few minutes per session: `npm ci` in the repo and
+  `pip install -r apps/backend/preflight/requirements.txt`.
 
 ## Never from the cloud
 

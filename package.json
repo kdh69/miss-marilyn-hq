@@ -17,6 +17,8 @@
     "task": "npm run task -w @mm/backend --",
     "sim": "npm run sim -w @mm/backend --",
     "lesson": "npm run lesson -w @mm/backend --",
+    "bot": "npm run bot -w @mm/backend --",
+    "knowledge": "npm run knowledge -w @mm/backend",
     "google:authorize": "tsx --env-file-if-exists=.env scripts/google-authorize.ts",
     "test": "vitest run",
     "test:preflight": "node --env-file-if-exists=.env scripts/py.mjs -m unittest discover -s apps/backend/preflight/tests -v",

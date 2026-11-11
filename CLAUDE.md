@@ -5,6 +5,28 @@ Read [docs/HANDOFF.md](docs/HANDOFF.md) for current state, then the README, then
 Git: work directly on `main`; no side branches or PRs. Commit and push only when Kyle says so;
 a push to `main` deploys (Vercel panel + the backend tick). This overrides any default to branch first.
 
+The team: the makers are Claude agents in `.claude/agents/` (orchestrator, producer, illustrator,
+builder, lister, marketer, quality-checker, scout, plus qc); [docs/TEAM.md](docs/TEAM.md) has their house
+rules. `/sweep` runs a round: you dispatch the agents, they do the work. They reach the Sheet and Drive
+only through `npm run bot -- <role> <command>` (`apps/backend/src/bot.ts`), and what each role may write
+is `apps/backend/src/lib/team.ts` (tests: `tests/team.test.ts`). Change a role by editing its agent
+file; change a rule for all of them with a lesson. Agents never edit, commit or push the repo.
+
+Pictures are paid: only through `npm run bot -- <role> image` (fal.ai, `apps/backend/src/lib/image.ts`),
+which passes the budget gate in `lib/gates.ts` first. Models, sizes, prices and caps live in
+`formats/picture-book.json`. Never spend without a stated cap and Kyle's yes.
+
+Where knowledge goes (the videograph pattern):
+- `lessons` tab: short rules every brief prints (`npm run lesson`; the `critic` agent adds them after a sweep).
+- [docs/knowledge/](docs/knowledge/README.md): best practice per topic, every claim labelled proven /
+  videograph / official / unproven and dated; agents read their files before a task; `npm run knowledge`
+  checks the format and lists claims older than 60 days.
+- [docs/playbook.md](docs/playbook.md): measured costs, timings and costly mistakes. Read it before planning.
+
+After every real sweep: report what moved, what it cost and what failed; put measured numbers in the
+playbook and the evidence in the knowledge files the critic names; and where code could have
+prevented a mistake, fix it there with a test instead of only writing it down.
+
 Rules that hold everywhere:
 - `packages/core/schema.json` is the source of truth for tabs, headers, dropdowns, ID columns
   and legal status transitions. Change the schema, not hard-coded strings, then re-run
@@ -24,7 +46,8 @@ Commands: `npm run check` (typecheck + tests + panel build), `npm run doctor`, `
 `npm run backend` (one tick), `npm run web`, `npm run sheet:setup`, `npm run qc` (manual QC),
 `npm run task -- <id> <status> "<why>"` (a status change as Kyle, with its log row),
 `npm run sim` (Book 2 copy through every step after the script; run it after changing the backend flow),
-`npm run lesson -- <applies_to> "<rule>"` (a standing rule the bots read every run).
+`npm run lesson -- <applies_to> "<rule>"` (a standing rule the team reads every run),
+`npm run bot -- kyle board` (the board as text; the other `bot` commands are the team's).
 Scripts load `.env` automatically (Node `--env-file-if-exists`).
 
 - Drive file creation goes through `driveWriter()` (owner token if set, else service account);
@@ -44,5 +67,5 @@ Panel roles: kyle (everything), mom (no costs: Money shows sales only), family (
 what each view shows is `viewer()` in `apps/web/lib/viewer.ts` (Kyle can switch to Clara's view).
 Away from the laptop: see [docs/REMOTE.md](docs/REMOTE.md).
 
-Next up: Etsy publish once API access lands;
+Next up: the first live picture (`FAL_KEY`; `image` is untested against fal from this repo); Etsy publish once API access lands;
 KDP report + Etsy sales import for the Money tab; register photos dropped straight into Drive.

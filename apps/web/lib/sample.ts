@@ -50,7 +50,7 @@ export function sample(): Snapshot {
     }
   }
   const costs: Row[] = [
-    { cost_id: "C-today-1", date: day(), category: "ai_credits", vendor: "Grok", amount_usd: "5.10", estimated: "TRUE", role: "illustrator" },
+    { cost_id: "C-today-1", date: day(), category: "ai_credits", vendor: "Image API", amount_usd: "5.10", estimated: "TRUE", role: "illustrator" },
     { cost_id: "C-today-2", date: day(), category: "qc_api", vendor: "Anthropic", amount_usd: "1.30", estimated: "FALSE", role: "backend" },
     { cost_id: "C-s1", date: day(-62), category: "software", vendor: "Canva", amount_usd: "14.99", product_id: "" },
     { cost_id: "C-s2", date: day(-31), category: "software", vendor: "Canva", amount_usd: "14.99", product_id: "" },
@@ -60,7 +60,7 @@ export function sample(): Snapshot {
     { cost_id: "C-p1", date: day(-9), category: "print_proof", vendor: "Amazon KDP", amount_usd: "6.48", product_id: "OL-B01" },
   ] as Row[];
   for (let d = 70; d >= 1; d--) {
-    if (r() < 0.55) costs.push({ cost_id: `C-ai-${d}`, date: day(-d), category: "ai_credits", vendor: "Grok", amount_usd: (1 + r() * 6).toFixed(2), estimated: "TRUE", product_id: r() < 0.6 ? "OL-B01" : "MM-B01" } as Row);
+    if (r() < 0.55) costs.push({ cost_id: `C-ai-${d}`, date: day(-d), category: "ai_credits", vendor: "Image API", amount_usd: (1 + r() * 6).toFixed(2), estimated: "TRUE", product_id: r() < 0.6 ? "OL-B01" : "MM-B01" } as Row);
   }
 
   return {
@@ -160,7 +160,7 @@ export function sample(): Snapshot {
     accounts: rows([
       { account_id: "A01", service: "Business Gmail", owner: "Clara", purpose: "owns every store and social account", phase: "now", status: "todo", two_factor: "TRUE" },
       { account_id: "A02", service: "Password manager", owner: "Clara", purpose: "shared vault with Kyle", phase: "now", status: "todo", two_factor: "TRUE" },
-      { account_id: "A03", service: "Bot Gmail", owner: "Kyle", purpose: "Grok's Drive and Sheet access only", phase: "now", status: "in_progress", two_factor: "TRUE" },
+      { account_id: "A03", service: "Claude", owner: "Kyle", purpose: "the team: role agents in Claude Code sessions, plus QC", phase: "now", status: "in_progress", two_factor: "TRUE" },
       { account_id: "A04", service: "GitHub", owner: "Kyle", purpose: "repo, scheduled backend, secrets", phase: "now", status: "done", two_factor: "TRUE" },
       { account_id: "A05", service: "Google Cloud", owner: "Clara", purpose: "Sheet and Drive keys for the backend", phase: "now", status: "todo", two_factor: "TRUE" },
       { account_id: "A06", service: "Vercel", owner: "Kyle", purpose: "hosts this panel", phase: "now", status: "todo", two_factor: "TRUE" },

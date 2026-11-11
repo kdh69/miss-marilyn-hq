@@ -467,11 +467,11 @@
           "Bot Gmail",
           "Kyle",
           "",
-          "Grok's Google connection; shared only on MM Core + MM Work",
+          "was Grok's Google connection; not needed since the team moved to Claude (2026-11-11)",
           "now",
-          "todo",
+          "not_needed",
           true,
-          "Grok bots",
+          "—",
           "",
           "",
           ""
@@ -562,10 +562,10 @@
         ],
         [
           "A09",
-          "Grok",
+          "Claude",
           "Kyle",
           "",
-          "the 6 bots + Scout",
+          "the team: 8 role agents in Claude Code sessions, plus QC",
           "now",
           "done",
           true,
@@ -887,7 +887,7 @@
         [
           "daily_bot_cap_usd",
           15,
-          "Grok credit cap"
+          "daily cap on the team's paid calls (image generation); Claude itself runs on Kyle's subscription"
         ],
         [
           "daily_qc_cap_usd",

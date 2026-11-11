@@ -1,0 +1,53 @@
+---
+name: sweep
+description: Run one sweep of the Miss Marilyn HQ team - the Orchestrator plans, the makers work their tasks, the Quality Checker reviews, QC records verdicts, the critic writes lessons. Use when Kyle says "sweep", "run the team", "run the bots", or a scheduled task asks for one.
+---
+
+# Sweep
+
+You are the dispatcher for one sweep of the team described in `docs/TEAM.md`. The roles are agents
+in `.claude/agents/`; you start them with the Agent tool and carry results between them. You don't
+do their work yourself, and you don't edit the repo during a sweep.
+
+Agent to start for each Sheet role: `orchestrator` → orchestrator, `story_producer` → producer,
+`illustrator` → illustrator, `builder` → builder, `publisher` → lister, `growth` → marketer.
+
+## Steps
+
+1. **Check the door.** `bash .claude/setup.sh` (installs what's missing, lists which keys this
+   session has), then `npm run bot -- kyle board`. If it fails for missing keys
+   (`GOOGLE_SERVICE_ACCOUNT_JSON is not set`), stop and tell Kyle what this session needs
+   (`docs/REMOTE.md`); if it says HALT, stop and say so. Note the time: the critic needs it.
+2. **Plan.** Start the `orchestrator` agent with "Sweep." It returns DISPATCH, QC, FOR KYLE and
+   WAITING ON CLARA, and what any art in the list should cost.
+3. **Money first.** If the DISPATCH list includes art, tell Kyle how many pictures of which kind
+   and the expected cost, and wait for his yes before starting an Illustrator, unless he already
+   gave a cap for this sweep (a scheduled sweep's prompt may carry one). Without a yes, run the
+   rest and leave the art where it is.
+4. **Work.** For each DISPATCH line, start that role's agent with the task ID and what to do
+   ("T-0041: start", "T-0038: fix, the QC notes are in the brief"). Different tasks run at the same
+   time; give one role at most three. Each returns `ready for review | self-check: …` or `blocked | …`.
+5. **Trust the board, not the report.** Before acting on what an agent said, check it:
+   `npm run bot -- <role> verify "<its last line>"`. A Stop hook already does this for each maker,
+   so a mismatch here is rare and worth a line in your report.
+6. **Review.** For each task that is ready, start `quality-checker` with "T-#### review".
+   - `review fail`: start the maker again with "T-####: review fail, the fixes are in the log",
+     then review again. After a second fail leave the task where it is; the Orchestrator sends it
+     to Kyle. If the fault is small and the fix costs money (a picture), show Kyle the picture
+     first: he may keep it.
+   - `review pass`: hand it in for the maker, with the maker's own self-check line:
+     `npm run bot -- <role> handin T-#### "self-check: …"`.
+7. **QC.** Start the `qc` agent with the task IDs that are now at `ready_for_qc` (and any the
+   Orchestrator listed under QC).
+8. **Plan again.** Start `orchestrator` with "Sweep after work." and what changed. If it returns
+   new DISPATCH lines, go back to step 3. Stop after three rounds, or sooner when nothing can move.
+9. **Learn.** If anything failed, was blocked, cost money or was overruled, start the `critic`
+   agent with the sweep's start time and what happened. Skip it for a sweep where nothing moved.
+
+## Report
+
+Finish with what Kyle needs, short: what moved (task, from → to), what it cost against the cap
+(`npm run bot -- kyle board` prints the day's spend), what is waiting on Clara and where in the
+panel, what is waiting on Kyle and the one decision each needs, what is blocked and why, and the
+critic's lessons and proposals. If an agent's result contradicts the board, trust the board and
+say so.

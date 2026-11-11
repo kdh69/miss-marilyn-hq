@@ -100,7 +100,7 @@ async function main() {
 
   section("Bot account sharing");
   const bot = core.config("bot_account_email");
-  if (!bot) warn("bot_account_email is empty in config", "add the bot Gmail so this check can confirm it's shared");
+  if (!bot) console.log("  · no bot Gmail in config (not needed: the Claude team works through the service account)");
   else {
     for (const [label, id, want] of [["MM Core", sheetId(), "writer"], ["MM Work", core.config("drive_work_folder_id"), "writer"], ["MM Brand", core.config("drive_brand_folder_id"), "reader"]] as const) {
       try {
@@ -114,6 +114,10 @@ async function main() {
       }
     }
   }
+
+  section("Pictures");
+  if (has("FAL_KEY")) ok("FAL_KEY is set (the image model behind npm run bot image)");
+  else console.log("  · no FAL_KEY: the team can't make pictures here (docs/TEAM.md, Pictures)");
 
   section("Claude QC");
   if (!has("ANTHROPIC_API_KEY")) console.log("  · manual QC (no ANTHROPIC_API_KEY): tasks wait at ready_for_qc for npm run qc");

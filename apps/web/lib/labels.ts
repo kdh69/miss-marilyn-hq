@@ -67,7 +67,7 @@ const ACCOUNT_URLS: [match: string, url: string][] = [
   ["github", "https://github.com"],
   ["google cloud", "https://console.cloud.google.com"],
   ["anthropic", "https://console.anthropic.com"],
-  ["grok", "https://grok.com"],
+  ["claude", "https://claude.ai/code"],
   ["vercel", "https://vercel.com/dashboard"],
   ["resend", "https://resend.com"],
   ["amazon kdp", "https://kdp.amazon.com"],

@@ -1,20 +1,26 @@
 # Miss Marilyn HQ
 
 Systems for Clara's publishing + merch business. **MM Core** (a Google Sheet) holds all state;
-Grok bots and Claude QC write into it; a backend runs every 30 minutes on GitHub Actions; Clara
-works from her own panel (Next.js on Vercel).
+the team (Claude agents, one per role) and Claude QC write into it; a backend runs every 30 minutes
+on GitHub Actions; Clara works from her own panel (Next.js on Vercel).
 
 - Design: [Phase 1 Build Spec](https://claude.ai/artifact/SK5iZFL8TkRLKDzAwv5ihP) · panel redesign: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md)
 - **Picking this up? Start with [`docs/HANDOFF.md`](docs/HANDOFF.md)** — what is done and what is outstanding.
 - Setup, in order: [`docs/SETUP.md`](docs/SETUP.md) · live checklist: [Launch Checklist](https://claude.ai/artifact/FzUU8wZjrWifR9sv6Ejrpy)
-- Accounts: [`docs/ACCOUNTS.md`](docs/ACCOUNTS.md) · bot prompts: [`docs/bot-prompts.md`](docs/bot-prompts.md)
+- Accounts: [`docs/ACCOUNTS.md`](docs/ACCOUNTS.md) · the team: [`docs/TEAM.md`](docs/TEAM.md), one agent per role in [`.claude/agents/`](.claude/agents/)
 - Brand drafts for MM Brand: [`docs/brand/`](docs/brand/)
 
 ```
 packages/core            schema.json (tabs, columns, dropdowns, status rules) + Sheet/Drive clients
 apps/backend             the 30-min tick: gatekeeper, Clara sync, messages, Etsy, alerts, digest, backup
 apps/backend/preflight   KDP PDF checker (Python, PyMuPDF) + tests
-apps/backend/rubrics     Claude QC rubric per task type
+apps/backend/src/bot.ts  the team's door to the Sheet and Drive (npm run bot), rules in lib/team.ts
+apps/backend/src/lib     team.ts (who may write what), gates.ts (budget gate, report check), image.ts (fal.ai pictures, print checks)
+apps/backend/rubrics     Claude QC rubric per task type (also each maker's self-check list)
+formats                  picture-book.json: page size, image models, prices, caps
+docs/knowledge           what is known, labelled and dated; docs/playbook.md: costs and mistakes
+.claude/agents           the team: orchestrator, producer, illustrator, builder, lister, marketer,
+                         quality-checker, scout, qc, critic · .claude/skills/sweep runs a round of them
 apps/web                 the panel: Overview, Books, Progress, Ideas, To-do, Money (Clara) · Overview, Books, Progress, Inbox, System, Money (Kyle)
 scripts                  sheet:setup, google:authorize
 tests                    schema integrity + status-rule tests
@@ -29,7 +35,9 @@ tests                    schema integrity + status-rule tests
 | `npm run sim` | A throwaway copy of Book 2 through every step after the script (art, cover with changes, interior + KDP preflight, cover wrap, KDP packet, Clara's final OK), then cleans up; `-- --keep` leaves it to click through, `-- --clean` removes it |
 | `npm run qc` | Manual QC: lists the queue, or records `-- <task> pass\|fail "<text>"` |
 | `npm run task` | A status change as Kyle with its log row: `-- <task> <status> "<why>"` |
-| `npm run lesson` | A standing rule for the bots: `-- <role \| task_type \| all> "<rule>"` |
+| `npm run lesson` | A standing rule for the team: `-- <role \| task_type \| all> "<rule>"` |
+| `npm run bot` | What the team's agents use: `-- <role> board \| brief <task> \| start \| handin \| apply \| upload …` ([`docs/TEAM.md`](docs/TEAM.md)); `-- kyle board` is the quickest status |
+| `npm run knowledge` | Checks `docs/knowledge/` and lists claims not re-checked in 60 days |
 | `npm run sheet:setup` | Builds or repairs MM Core (18 tabs, dropdowns, locked columns) from the schema |
 | `npm run backend` | One backend tick by hand |
 | `npm run web` | Clara's panel locally (sample data until the Sheet is connected) |
@@ -68,7 +76,7 @@ Details: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md).
   Then the book's marketing plan and this week's posts.
 - **Social:** today's posts ready to paste (picture, caption, hashtags, link, tips), how to post on
   Instagram, Facebook, Pinterest and TikTok, *Posted*, the week ahead, approvals and each book's
-  marketing plan. The Marketer bot writes them a week at a time; Clara posts by hand.
+  marketing plan. The Marketer writes them a week at a time; Clara posts by hand.
 - Every step page ends with *Back* and *Next step* for the same book.
 - Money for Clara shows sales only; costs are Kyle's. If the bots are paused, a banner says so.
 
@@ -89,11 +97,12 @@ Each step is isolated: one failure is emailed and the rest still run; the Action
 ## Security
 
 - Keys only in GitHub secrets, Vercel env and local `.env` (gitignored; CI runs gitleaks).
-- The bot Gmail never owns or signs into any store, social, bank or registrar account.
+- The team never signs into any store, social, bank or registrar account, and writes the Sheet
+  only through `npm run bot`, which checks each role's rights (`apps/backend/src/lib/team.ts`).
 - The panel signs in only the emails in `PANEL_USERS`; without sign-in it's read-only.
 - The panel writes only Clara's answers, messages, page text, photos and (Kyle) pause/accounts —
   never `tasks`. Nothing publishes or spends without Clara's Approve.
-- Protected ranges keep bots out of backend-only columns; the integrity check catches the rest.
+- `npm run bot` keeps the team out of backend-only columns; the integrity check catches the rest.
 
 ## Status
 
@@ -107,4 +116,6 @@ Each step is isolated: one failure is emailed and the rest still run; the Action
 | Etsy publish | stub until Etsy API approval (packet fallback) |
 | Photo registration from Drive inbox (bot-side uploads) | uploads via panel are registered; manual Drive drops aren't yet |
 | KDP / Etsy sales import (Money tab) | after launch |
-| Bot API fallback | only if the Grok row test fails |
+| The team on Claude: agents, `/sweep`, `npm run bot` with role rules | built 2026-11-11; not yet run against the live Sheet (cloud sessions need the keys) |
+| Pictures: `image` (fal.ai, Nano Banana Pro / 2), budget gate, print checks, contact sheet | built from videograph's adapter 2026-11-11; no live call yet (needs `FAL_KEY`) |
+| Stop-hook report gate, critic, knowledge library, playbook | built 2026-11-11 |

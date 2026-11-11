@@ -1,12 +1,27 @@
-# Handoff — where things stand (2026-11-01)
+# Handoff — where things stand (2026-11-11)
 
 Read this first when picking the project back up. Setup steps in full: [`SETUP.md`](SETUP.md).
-Working away from the laptop: [`REMOTE.md`](REMOTE.md). Bot descriptions: [`bot-prompts.md`](bot-prompts.md).
+Working away from the laptop: [`REMOTE.md`](REMOTE.md). The team: [`TEAM.md`](TEAM.md). What we know:
+[`knowledge/`](knowledge/README.md) and [`playbook.md`](playbook.md).
+
+**2026-11-11: the team moved from Grok to Claude.** Grok is no longer used and its chat history is
+gone. MM Core is intact (read 11-11); the Drive files weren't checked one by one. The eight roles are now Claude agents in `.claude/agents/`, run by `/sweep` in a Claude Code
+session, and they write the Sheet through `npm run bot`, which enforces what each role may do. Built
+and unit-tested; **not yet run against the live Sheet**, because cloud sessions don't have the keys
+yet (Kyle — outstanding, 1).
+
+**The same day the team took videograph's method** (Kyle's video repo): pictures come from fal.ai
+(Nano Banana Pro and 2, with reference images) through `npm run bot -- illustrator image`, behind a
+budget gate; art goes sheets → drafts → finals; files are checked for print specs before any review;
+a Stop hook checks each agent's report against the Sheet; a critic writes lessons after each sweep;
+and `docs/knowledge/` holds what is known, labelled and dated. The picture path is ported from code
+that works in videograph but **has not made a picture here yet**: it needs `FAL_KEY` (2).
 
 ## How it fits together
 
 ```
-Grok bots ──write──▶ MM Core Sheet ◀──read/write── Backend (GitHub Actions, every 30 min)
+The team ──npm run bot──▶ MM Core Sheet ◀──read/write── Backend (GitHub Actions, every 30 min)
+(Claude agents, /sweep)
                           │
                           ▼ re-read every 60 s
             missmarilyn.vercel.app  (Kyle, Mom, family)
@@ -16,21 +31,33 @@ Grok bots ──write──▶ MM Core Sheet ◀──read/write── Backend (
 
 ### How work moves now
 
-1. **Orchestrator** turns a request into tasks and rings the owner. Bots act only when rung or swept;
-   send `@Orchestrator sweep` after anything changes (nothing schedules sweeps yet).
-2. **The maker** works the task, then runs its **self-check** (lesson L-0012) against its task type's
-   list in the Drive doc *Miss Marilyn QC Checklists* (MM Brand).
-3. **Quality Checker** (Grok bot, role `quality_checker`) reviews while the task is still `in_progress`
+A sweep is `/sweep` in a Claude Code session; the session dispatches the agents ([`TEAM.md`](TEAM.md)).
+Nothing happens between sweeps except the backend tick. "Ring" in the older lessons now means "the
+dispatcher starts that agent".
+
+1. **Orchestrator** turns requests into tasks with full briefs, sends failed work back to `todo`,
+   creates the next task in each book's chain and returns the list of tasks to dispatch.
+2. **The maker** reads its knowledge files, works the task, uploads its files (print files are
+   checked on upload), then runs its **self-check** (lesson L-0012) against its task type's list in
+   `apps/backend/rubrics/`. Art goes in stages: character sheets, drafts of every page, then finals.
+3. **Quality Checker** (role `quality_checker`) reviews while the task is still `in_progress`
    (L-0013): it logs `review pass:` or `review fail:` with numbered fixes and never changes statuses.
-   The maker fixes and re-rings until it passes, then sets `ready_for_qc`. The Orchestrator re-rings
-   missed reviews and sends a task to Kyle after two Quality Checker fails (L-0014).
-4. **Claude's QC** is the final gate: ask Claude to "run QC". `npm run qc` lists the queue with each
-   bot's self-check line and the Quality Checker's latest verdict; Claude records pass or fail.
-5. **Mom** approves in the panel, in the step the work belongs to (Script, Illustrations, Building,
+   `npm run bot -- <role> handin` refuses until the latest review of that round is a pass. After two
+   fails the Orchestrator sends the task to Kyle (L-0014).
+4. **Claude's QC** is the final gate, the last step of a sweep (the `qc` agent) or on its own: ask
+   Claude to "run QC". `npm run qc` lists the queue with each maker's self-check line and the Quality
+   Checker's latest verdict; Claude records pass or fail.
+5. **The critic** ends a sweep: what failed, what it cost, what Kyle or Clara overruled → lessons,
+   plus proposed entries for `docs/knowledge/` and the playbook.
+6. **Mom** approves in the panel, in the step the work belongs to (Script, Illustrations, Building,
    Full book review). The next backend tick (:07 and :37) applies it: Approve → `approved` → `done`;
    Changes → `changes_requested` with her note; Reject → `cancelled`. Each change gets a log row.
 
 ## The board (2026-11-01, ~05:45 UTC)
+
+Not re-read in full on 11-11. The `tasks` tab still ends at T-0039 (40 rows), so the 11-01 message
+to the Orchestrator was never carried out: T-0026–T-0037 are still blocked and the rest of Book 1's
+chain doesn't exist. `npm run bot -- kyle board` prints the current board once a session has the keys.
 
 - **Book 1 = MM-B02 "Miss Marilyn Makes a Friend"**: Clara's playground story, `in_production`, P1,
   `series_no` 1. Kyle's brief with her story is request `Q-20261030020904-01` (in progress, on T-0023).
@@ -58,8 +85,8 @@ Grok bots ──write──▶ MM Core Sheet ◀──read/write── Backend (
 
 ## Rules the bots follow (all in the `lessons` tab)
 
-Every bot reads `lessons` and the MM Brand docs at the start of each run, so **rule changes go in
-`lessons`, not in Grok descriptions**. Active: L-0001–L-0007 (Miss M art: red string, beauty mark,
+Every brief (`npm run bot -- <role> brief <task>`) prints the active lessons that apply, so **rule
+changes go in `lessons`** (`npm run lesson`), not in the agent files. Active: L-0001–L-0007 (Miss M art: red string, beauty mark,
 no humans, watercolor and ink, Mama cream/ginger, Papa gray tabby, ink layers), plus:
 
 | Lesson | Rule |
@@ -74,9 +101,10 @@ no humans, watercolor and ink, Mama cream/ginger, Papa gray tabby, ink layers), 
 | L-0015 | Log only real changes, with the real from_status and time |
 | L-0016 | Fix every QC item in the task that failed; no follow-up tasks for leftover fixes |
 
-**MM Brand (Drive) holds the bots' reference docs:** *Miss Marilyn Series Bible*, *Miss Marilyn Style
-Guide* and *Miss Marilyn QC Checklists*, all Google Docs. They're copies of `docs/brand/series-bible.md`,
-`docs/brand/style-guide.md` and `apps/backend/rubrics/`, so **update the repo file and the Doc together**.
+**The team reads its reference docs from the repo:** `docs/brand/series-bible.md`,
+`docs/brand/style-guide.md` and the checklists in `apps/backend/rubrics/`. MM Brand (Drive) holds copies
+for Clara (*Miss Marilyn Series Bible*, *Style Guide*, *QC Checklists*), so **update the repo file
+first, then the Doc**.
 Both Miss Marilyn products link the bible in `products.bible_url`.
 
 ## Setup state
@@ -91,9 +119,11 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
   Editors on the whole folder; the bot Gmail is Editor on MM Core + MM Work and Viewer on MM Brand.
 - **Accounts:** A01 Business Gmail is `in_progress` (Clara is setting it up; its address is in the
   accounts tab). It owns the stores and socials; register every later account with it.
-- **Grok:** 7 production bots + Scout + **Quality Checker**. Quality Checker's description and the
-  Orchestrator's one-line Quality Checker addition are pasted. Other bots still carry older descriptions
-  (two series, 32 pages); the lessons override them. Re-paste from `bot-prompts.md` only if a bot slips.
+- **The team:** ten agents in `.claude/agents/` (the eight roles plus `qc` and `critic`), the `/sweep`
+  skill, and `npm run bot` with the role rules in `apps/backend/src/lib/team.ts` and the budget and
+  report gates in `lib/gates.ts`. Book specs, image models, prices and caps: `formats/picture-book.json`. The descriptions are current
+  (one series, 24 pages), so the lessons no longer have to override them. Grok is gone: the bot Gmail
+  (A02) isn't needed, and its Editor access to MM Core and MM Work can be removed.
 - **QC is manual** (no `ANTHROPIC_API_KEY`). Automatic QC is built: adding the key as a GitHub secret
   (`gh secret set ANTHROPIC_API_KEY --repo kdh69/miss-marilyn-hq`) turns it on, capped at
   `daily_qc_cap_usd` ($5/day). Kyle chose the Quality Checker bot first.
@@ -102,24 +132,33 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 
 ## Kyle — outstanding, in order
 
-1. **Tell the Orchestrator (Grok) the 11-01 decisions**: start T-0026–T-0037 now from the T-0039 drafts,
-   and create the rest of Book 1's chain (cover art, interior layout, cover wrap, KDP packet). The message
-   to paste is in the 2026-11-01 decision below. Then `@Orchestrator sweep`.
-2. **QC when work comes back:** ask Claude to "run QC" (or "status" to read the board), from the laptop
-   or any cloud session: without Sheet keys Claude reads the Sheet through the Drive connector and records
-   verdicts through Actions (MM backend tick → job `qc` / `task`).
-3. **Orchestrator sweeps:** ask Grok whether the Orchestrator can sweep on a schedule (9am and 6pm New
-   York). Until then, send `@Orchestrator sweep` after Mom answers things.
-4. **Uploads:** Google Cloud → OAuth consent screen → **Publish app**, then `npm run google:authorize`
+1. **Give cloud sessions the Sheet keys**, so the team can run from anywhere: in the cloud environment
+   this repo uses, add `GOOGLE_SERVICE_ACCOUNT_JSON` and `MM_CORE_SHEET_ID` as environment variables
+   ([`REMOTE.md`](REMOTE.md)). On the laptop the team already works: `.env` has them. Then the first
+   check is `npm run bot -- kyle board`, and the first sweep is `/sweep`.
+2. **Connect the image model:** put the fal.ai key videograph uses in `.env` and in the cloud
+   environment as `FAL_KEY` (and allow fal's hosts there; `TEAM.md`, Pictures). Final page art
+   (T-0026–T-0037) and the cover wait on this. The first art task is the first live test of `image`:
+   run it with a small cap and look at what comes back. Planning prices: draft $0.08, sheet $0.15,
+   print page $0.30, so Book 1's 24 finals are about $7 if each lands first time. Check fal's
+   dashboard after it; the costs rows are estimates.
+3. **Uploads:** Google Cloud → OAuth consent screen → **Publish app**, then `npm run google:authorize`
    and sign in as the owner of *Miss Marilyn Business*. Save `GOOGLE_OWNER_REFRESH_TOKEN` to `.env`,
-   GitHub secrets and Vercel, then redeploy. Until then drop photos in Drive (MM Brand → photos → inbox)
-   and ask Claude to register them as `assets`.
-5. **Zoey's photos** (for later books): upload to MM Brand → photos → inbox → Zoey.
-6. Rename the Grok room from "Coloring Books For Kids" to "Miss Marilyn HQ". Send Scout the Book 1
-   research topic (comparable friendship / playground picture books).
-7. Delete the service account key file from Downloads (its copies live in `.env` and the secrets).
-8. **Later:** Resend + a verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); a password manager
-   (Bitwarden's free plan covers two people); `ANTHROPIC_API_KEY` for automatic QC.
+   GitHub secrets, Vercel and the cloud environment (with `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`).
+   The team's `upload` needs it: every hand-in is a file in Drive. Until then a maker creates each file
+   through the Google Drive connector and registers it (`npm run bot -- <role> asset`).
+4. **Give the Orchestrator the 11-01 decisions** (the message is in the 2026-11-01 decision below): put
+   it in the panel's Inbox box (*Instruction for the bots…*) or say it to the session before `/sweep`.
+   Its art part waits on 2; the rest of Book 1's chain can be created now.
+5. **Schedule the sweep** once 1 is done and this work is on `main`: a Claude scheduled task that runs
+   `/sweep` at 9am and 6pm New York. Until then, `/sweep` after Mom answers things.
+6. **Scout:** "ask Scout about comparable friendship / playground picture books" (Book 1's research).
+7. **Zoey's photos** (for later books): upload to MM Brand → photos → inbox → Zoey.
+8. Remove the bot Gmail's access to MM Core and MM Work, and mark A02 `not_needed` and A09 as Claude
+   on the panel's Accounts page (the live tab isn't re-seeded).
+9. Delete the service account key file from Downloads (its copies live in `.env` and the secrets).
+10. **Later:** Resend + a verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); a password manager
+    (Bitwarden's free plan covers two people); `ANTHROPIC_API_KEY` for automatic QC.
 
 ## Mom — outstanding
 
@@ -132,6 +171,16 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 - **Business setup:** LLC + EIN, business bank account and card, brand domain.
 
 ## Decisions
+
+- **2026-11-11 (later):** the team works the way videograph does: a gate before every paid call,
+  cheap stages before expensive ones, checks in code before any review, the Sheet over an agent's
+  word, and a critic plus a dated knowledge library so each sweep leaves the next one better. Images:
+  Nano Banana Pro / 2 through fal.ai, 3 attempts a picture, $6 a task, the existing daily cap.
+- **2026-11-11:** the team runs on Claude. Roles are agents in `.claude/agents/`; a sweep is `/sweep`
+  in a Claude Code session; the Sheet is written only through `npm run bot`, which checks each role's
+  rights, mints IDs, stamps times and writes log rows (so a log row can't be overwritten and a hand-in
+  can't skip the review). Claude runs on Kyle's subscription, so only paid calls (images) get costs
+  rows; `daily_bot_cap_usd` caps those. The Quality Checker review and Claude's QC are both kept.
 
 - **2026-11-01 (later):** listing and marketing join the flow. The Grok bots write everything (Lister:
   every store field in the listings row; Marketer: a marketing plan per book in the `plans` tab, then a
@@ -166,6 +215,10 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 
 ## Code — next up
 
+- **From videograph, not built yet:** a format per product (one `formats/picture-book.json` serves
+  every book for now); a second image vendor as fallback (GPT Image 2 there); sweeps that run in
+  GitHub Actions instead of a Claude session; a project `.claude/settings.json` (Kyle adds it, see
+  `TEAM.md`).
 - **Launch (step 6) and Social** are built: `/launch` shows each listing field by field with Copy
   buttons, the files, how to post and *It's live*; `/social` shows today's posts ready to paste, how to
   post on each platform, *Posted*, the week ahead, approvals and the marketing plan. Marks are `requests`
@@ -189,10 +242,13 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 - **Public repo:** keeps GitHub Actions free, but GitHub pauses scheduled workflows after 60 days with
   no commits, and the Sheet ID is visible in `.env.example`, so keep the Sheet's General access on
   **Restricted**. Never commit `.env`, emails other than commit metadata, or the family password.
-- **A bot overwrote a log row** on 10-31 (the Quality Checker's 03:00 fail on T-0039 became the Illustrator's
-  self-check, row A181). The log must be append-only; the 11-01 Orchestrator message says so.
-- **Bot log rows can be wrong** (made-up from-states and timestamps before L-0015). Trust the task row's
-  `status` over the log when they disagree.
+- **A Grok bot overwrote a log row** on 10-31 (the Quality Checker's 03:00 fail on T-0039 became the
+  Illustrator's self-check, row A181). `npm run bot` only ever appends to the log.
+- **Grok-era log rows can be wrong** (made-up from-states and timestamps before L-0015). Trust the task
+  row's `status` over the log when they disagree. Rows written through `npm run bot` carry the real ones.
+- **Input paths like `/home/box/agent-data/…`** in old briefs pointed into Grok's workspace, which is
+  gone. Only what was uploaded to Drive (an `assets` row with a `file_url`) still exists.
+- **`.mm-work/`** is where agents download and build files; git ignores it and a cloud session loses it.
 - **`.vercelignore`** keeps `.env` and key files out of `vercel deploy` uploads.
 - **Panel roles** come from `PANEL_USERS` (`email:mom`, `email:kyle`, `email:family:Name`) plus the
   family password. Every write in `apps/web/app/actions.ts` goes through `editor()`, which refuses family.

@@ -10,10 +10,13 @@
     "qc": "tsx --env-file-if-exists=../../.env src/qcManual.ts",
     "task": "tsx --env-file-if-exists=../../.env src/taskStatus.ts",
     "sim": "tsx --env-file-if-exists=../../.env src/sim.ts",
-    "lesson": "tsx --env-file-if-exists=../../.env src/lesson.ts"
+    "lesson": "tsx --env-file-if-exists=../../.env src/lesson.ts",
+    "bot": "tsx --env-file-if-exists=../../.env src/bot.ts",
+    "knowledge": "tsx src/knowledge.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",
+    "@fal-ai/client": "^1.10.1",
     "@mm/core": "*",
     "sharp": "^0.35.5"
   }

@@ -1,0 +1,25 @@
+{
+  "id": "picture-book",
+  "name": "8.5 x 8.5 in picture book, 24 pages, KDP paperback, premium colour",
+  "pages": 24,
+  "storySpreads": 10,
+  "textPages": [11, 15],
+  "words": [250, 400],
+  "maxWordsPerSpread": 50,
+  "page": { "widthIn": 8.625, "heightIn": 8.75, "dpi": 300, "widthPx": 2588, "heightPx": 2625, "artSafeIn": 0.375, "textSafeIn": 0.5 },
+  "image": {
+    "$comment": "What `npm run bot -- <role> image` asks for and what it may spend. Prices are fal.ai list prices read 2026-10-18 in the videograph repo; check them on fal's pages before raising a cap.",
+    "kinds": {
+      "sheet": { "model": "pro", "resolution": "2K", "aspect": "3:2", "fitToPage": false },
+      "draft": { "model": "fast", "resolution": "1K", "aspect": "1:1", "fitToPage": false },
+      "page": { "model": "pro", "resolution": "4K", "aspect": "1:1", "fitToPage": true },
+      "cover": { "model": "pro", "resolution": "4K", "aspect": "1:1", "fitToPage": true }
+    },
+    "models": {
+      "pro": { "name": "Nano Banana Pro", "endpoint": "fal-ai/nano-banana-pro", "maxRefs": 5, "usd": { "1K": 0.15, "2K": 0.15, "4K": 0.3 } },
+      "fast": { "name": "Nano Banana 2", "endpoint": "fal-ai/nano-banana-2", "maxRefs": 14, "usd": { "1K": 0.08, "2K": 0.12, "4K": 0.16 } }
+    },
+    "maxAttemptsPerImage": 3,
+    "taskCapUsd": 6
+  }
+}

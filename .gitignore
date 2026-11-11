@@ -6,6 +6,7 @@ node_modules/
 service-account*.json
 __pycache__/
 .venv/
+.mm-work/
 .vercel/
 *.pem
 *-key.json

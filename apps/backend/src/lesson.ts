@@ -2,7 +2,7 @@
  * npm run lesson -- <applies_to> "<rule>"
  * Adds a standing rule from Kyle to the lessons tab. Every bot reads the active lessons for its
  * role, its task type and "all" at the start of every run, so rule changes go here rather than
- * into the Grok descriptions. Re-running with the same rule adds nothing.
+ * into the agent descriptions (.claude/agents/). Re-running with the same rule adds nothing.
  * Away from the laptop: Actions → MM backend tick → job "lesson" (task_id = applies_to, text = rule).
  */
 import { Core, schema } from "@mm/core";
