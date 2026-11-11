@@ -1,6 +1,6 @@
 # Roadmap: the full team back, recreatable, then best in class
 
-Proposed 2026-11-11. It becomes the plan of record when Kyle confirms it. Where things stand day to
+Agreed with Kyle on 2026-11-11: the plan of record. Where things stand day to
 day is [`HANDOFF.md`](HANDOFF.md); how the team works is [`TEAM.md`](TEAM.md).
 
 **Spending rule:** every item that costs money needs Kyle's yes and a stated cap first.
@@ -74,10 +74,10 @@ different image model).
 
 | # | Item | Why | Cost |
 |---|---|---|---|
-| R1 | `AGENTS.md` at the root, and `npm run team:export`: each role's house rules plus description as paste-ready text | The cross-tool entry point, and the old `bot-prompts.md` generated from the agent files. A chat platform (Grok again, ChatGPT, Gemini) or another agent CLI gets the same team | Code |
-| R2 | Nightly export of every MM Core tab to a private GitHub repo as JSON, and `npm run restore` that rebuilds a Sheet from it (`sheet:setup`, then the rows) | The Sheet is the business. A backup that isn't on Google, with a restore that has been run | Code; decision D1 |
+| R1 | **Built 11-11.** `AGENTS.md` at the root, and `npm run team:export`: each role's house rules plus description as plain text | Any agent with a shell in this repo can be a role, with the same rules, because the rules are in `npm run bot`. A chat-only platform can't be given the Sheet safely; it drafts, and its work comes in through an agent that can | Done |
+| R2 | **Half built 11-11:** `npm run backup -- <dir>` and `npm run restore -- <dir>` exist and are unit-tested. Still to do: run both against the real Sheet and a scratch Sheet, then a nightly job that pushes the export to a private GitHub repo | The Sheet is the business. A backup that isn't on Google, with a restore that has been run | Kyle creates the private repo and a deploy key (D1) |
 | R3 | Monthly copy of MM Work and MM Brand to a second place, and a doctor check that every `assets.file_url` still opens | Files outlive one Google account | Storage |
-| R4 | A recipe file beside every picture: prompt, reference asset IDs, model endpoint, size, date, attempt | Any page can be remade, or moved to another model, from its recipe | Code |
+| R4 | **Built 11-11.** `image` writes a recipe beside every picture (prompt, reference asset IDs, model endpoint, size, date, attempt); the Illustrator uploads it and the picture's `prompt_ref` points at it | Any page can be remade, or moved to another model, from its recipe | Done |
 | R5 | A characters library: each recurring character's approved sheet and description by ID, imported into a new book instead of rendered again | Book 2 starts with Miss M at $0, and she stays the same cat | Code; decision D3 |
 | R6 | The shared password manager (still outstanding), and `doctor` listing every key by name and where it must be set | Keys are re-issued from a list, not from memory | Free tier |
 | R7 | A second image vendor behind the same `image` command (videograph's fallback is GPT Image 2) | A model retiring or an account closing doesn't stop a book | About $1 to test |
@@ -92,7 +92,7 @@ rebuildable from `schema.json`, CI on every push, every knowledge claim dated an
 
 | # | Item | Done when |
 |---|---|---|
-| L1 | Keys in the cloud environment: Sheet, `FAL_KEY`, later the owner token | `npm run bot -- kyle board` prints the real board from a cloud session |
+| L1 | Keys in the cloud environment `miss-marilyn-hq` (created 11-11 with the Sheet ID and Google's and fal's hosts): the Sheet key, the fal key, later the owner token | `npm run bot -- kyle board` prints the real board from a cloud session |
 | L2 | First sweep without art: deliver the 11-01 decisions, create the rest of Book 1's chain, draft the KDP packet, Scout's first topic | Each of those roles has taken a task to `ready_for_qc` and through QC |
 | L3 | First pictures, cap $3: tests B1 and B3 on two pages | The contact sheet shows Grok-made drafts next to the new ones, and Kyle says keep or change |
 | L4 | The owner token for uploads | `upload` works without the Drive connector |
@@ -145,8 +145,8 @@ Set the targets after Book 1 gives the baseline.
 
 ## Decisions for Kyle
 
-- **D1** Where the nightly Sheet backup goes. Recommended: a private GitHub repo (this one is public).
-- **D2** Keep both reviews (Quality Checker, then QC) or merge them. Recommended: decide after Book 1's numbers.
-- **D3** Where approved character images live. Recommended: Drive with a manifest in the repo, since this repo is public.
-- **D4** The cap for the first pictures (L3). Recommended: $3.
-- **D5** Whether this repo stays public. Public keeps Actions free; private would let backups, characters and fuller notes live here.
+- **D1** Decided 11-11: the nightly Sheet backup goes to a private GitHub repo. Kyle creates it.
+- **D2** Decided 11-11: keep both reviews (Quality Checker, then QC) until Book 1's numbers are in.
+- **D3** Decided 11-11: approved character images live in Drive, with a manifest in the repo.
+- **D4** Decided 11-11: $3 for the first pictures (L3).
+- **D5** Open: whether this repo stays public. Public keeps Actions free; private would let backups, characters and fuller notes live here.

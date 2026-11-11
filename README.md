@@ -4,6 +4,7 @@ Systems for Clara's publishing + merch business. **MM Core** (a Google Sheet) ho
 the team (Claude agents, one per role) and Claude QC write into it; a backend runs every 30 minutes
 on GitHub Actions; Clara works from her own panel (Next.js on Vercel).
 
+- The plan: [`docs/ROADMAP.md`](docs/ROADMAP.md) · another agent or tool: [`AGENTS.md`](AGENTS.md)
 - Design: [Phase 1 Build Spec](https://claude.ai/artifact/SK5iZFL8TkRLKDzAwv5ihP) · panel redesign: [`docs/PANEL-PLAN.md`](docs/PANEL-PLAN.md)
 - **Picking this up? Start with [`docs/HANDOFF.md`](docs/HANDOFF.md)** — what is done and what is outstanding.
 - Setup, in order: [`docs/SETUP.md`](docs/SETUP.md) · live checklist: [Launch Checklist](https://claude.ai/artifact/FzUU8wZjrWifR9sv6Ejrpy)
@@ -37,6 +38,8 @@ tests                    schema integrity + status-rule tests
 | `npm run task` | A status change as Kyle with its log row: `-- <task> <status> "<why>"` |
 | `npm run lesson` | A standing rule for the team: `-- <role \| task_type \| all> "<rule>"` |
 | `npm run bot` | What the team's agents use: `-- <role> board \| brief <task> \| start \| handin \| apply \| upload …` ([`docs/TEAM.md`](docs/TEAM.md)); `-- kyle board` is the quickest status |
+| `npm run backup` / `restore` | MM Core to JSON files and back: `-- <dir>`; restore fills a fresh Sheet after `sheet:setup` |
+| `npm run team:export` | Each role as plain text, for any agent that isn't Claude Code ([`AGENTS.md`](AGENTS.md)) |
 | `npm run knowledge` | Checks `docs/knowledge/` and lists claims not re-checked in 60 days |
 | `npm run sheet:setup` | Builds or repairs MM Core (18 tabs, dropdowns, locked columns) from the schema |
 | `npm run backend` | One backend tick by hand |

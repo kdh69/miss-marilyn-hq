@@ -41,4 +41,6 @@ confirms it.
 ## Privacy
 
 - Every request sends `X-Fal-Store-IO: 0`, so fal keeps no history of it. [proven, checked 2026-11-11] [image.ts](../../apps/backend/src/lib/image.ts)
-- Reference images are downscaled to 2048 px and sit on fal's CDN at unguessable links that expire after one day. Only Miss M's and Gussie's photos and the team's own art are ever sent; never a photo of a person. [proven, checked 2026-11-11] [image.ts](../../apps/backend/src/lib/image.ts)
+- Reference images are downscaled to 1536 px and sent inside the request as data, so no copy is stored on fal's CDN. Only Miss M's and Gussie's photos and the team's own art are ever sent; never a photo of a person. [proven, checked 2026-11-11] [image.ts](../../apps/backend/src/lib/image.ts)
+- That fal's Nano Banana endpoints accept references as data URIs is from fal's general documentation, not yet seen working from here; the first call with `ref=` settles it. [unproven, checked 2026-11-11]
+- `image` writes a recipe file beside every picture: prompt, reference IDs, endpoint, size, attempt, fal's request ID. [proven, checked 2026-11-11] [bot.ts](../../apps/backend/src/bot.ts)

@@ -133,12 +133,14 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 
 ## Kyle — outstanding, in order
 
-1. **Give cloud sessions the Sheet keys**, so the team can run from anywhere: in the cloud environment
-   this repo uses, add `GOOGLE_SERVICE_ACCOUNT_JSON` and `MM_CORE_SHEET_ID` as environment variables
-   ([`REMOTE.md`](REMOTE.md)). On the laptop the team already works: `.env` has them. Then the first
+1. **Give cloud sessions the Sheet key**, so the team can run from anywhere: in the cloud environment
+   **miss-marilyn-hq** (made 11-11; it has the Sheet ID and the network list), add
+   `GOOGLE_SERVICE_ACCOUNT_JSON` as an environment variable ([`REMOTE.md`](REMOTE.md)), and start this
+   repo's sessions on that environment. On the laptop the team already works: `.env` has them. Then the first
    check is `npm run bot -- kyle board`, and the first sweep is `/sweep`.
-2. **Connect the image model:** put the fal.ai key videograph uses in `.env` and in the cloud
-   environment as `FAL_KEY` (and allow fal's hosts there; `TEAM.md`, Pictures). Final page art
+2. **Connect the image model:** put the fal.ai key videograph uses in `.env` as `FAL_KEY`, and in the
+   cloud environment as a network secret for `queue.fal.run` (`TEAM.md`, Pictures). Kyle approved a
+   $3 cap for the first pictures (roadmap L3). Final page art
    (T-0026–T-0037) and the cover wait on this. The first art task is the first live test of `image`:
    run it with a small cap and look at what comes back. Planning prices: draft $0.08, sheet $0.15,
    print page $0.30, so Book 1's 24 finals are about $7 if each lands first time. Check fal's
@@ -155,10 +157,13 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
    `/sweep` at 9am and 6pm New York. Until then, `/sweep` after Mom answers things.
 6. **Scout:** "ask Scout about comparable friendship / playground picture books" (Book 1's research).
 7. **Zoey's photos** (for later books): upload to MM Brand → photos → inbox → Zoey.
-8. Remove the bot Gmail's access to MM Core and MM Work, and mark A02 `not_needed` and A09 as Claude
+8. **Create a private GitHub repo for the nightly Sheet backup** (roadmap R2) and tell Claude its name;
+   until the owner token is set the weekly Drive backup fails, so the Sheet has no backup at all.
+   On the laptop today: `npm run backup -- ../mm-backup`.
+9. Remove the bot Gmail's access to MM Core and MM Work, and mark A02 `not_needed` and A09 as Claude
    on the panel's Accounts page (the live tab isn't re-seeded).
-9. Delete the service account key file from Downloads (its copies live in `.env` and the secrets).
-10. **Later:** Resend + a verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); a password manager
+10. Delete the service account key file from Downloads (its copies live in `.env` and the secrets).
+11. **Later:** Resend + a verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); a password manager
     (Bitwarden's free plan covers two people); `ANTHROPIC_API_KEY` for automatic QC.
 
 ## Mom — outstanding
@@ -173,6 +178,11 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 
 ## Decisions
 
+- **2026-11-11 (roadmap):** [`ROADMAP.md`](ROADMAP.md) is the plan of record: the full Grok team back,
+  recreatable on other tools, then best in class. Sheet backups go to a private GitHub repo; character
+  images live in Drive with a manifest here; both reviews stay until Book 1's numbers are in. Built
+  the same day: `AGENTS.md`, `npm run team:export`, `npm run backup` / `restore` (not yet run live),
+  a recipe beside every picture. Merged to `main`.
 - **2026-11-11 (later):** the team works the way videograph does: a gate before every paid call,
   cheap stages before expensive ones, checks in code before any review, the Sheet over an agent's
   word, and a critic plus a dated knowledge library so each sweep leaves the next one better. Images:

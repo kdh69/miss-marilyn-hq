@@ -54,14 +54,15 @@ rehearse the steps; placeholders can't be uploaded.
 **Open every picture before the next paid call** and compare it with the sheet and the photos:
 count paws and tails, find the red string and the nose smudge, check there is no text and nothing
 that matters in the outer 4%. If it's wrong, change the prompt with a concrete, physical fix and
-try again. If the command says `FAL_KEY is not set`, or a call fails with `Forbidden`, don't work
+try again. If a call says the image model isn't connected, or fails with `Forbidden`, don't work
 around it: `block` the task with that reason.
 
 ## Uploading
 
-- The prompt first, so the picture can point at it:
-  `npm run bot -- illustrator upload <task> .mm-work/<task>/p05.txt page_plan made_with="Claude Code"`
-- Then the picture, with the `made_with` line the `image` command printed and the prompt's asset
+- The recipe first (`image` writes one beside every picture: prompt, references, model, size), so
+  the picture can point at it and anyone can make it again:
+  `npm run bot -- illustrator upload <task> .mm-work/<task>/page_p5_a1.recipe.json page_plan made_with="Claude Code"`
+- Then the picture, with the `made_with` line the `image` command printed and the recipe's asset
   ID as `prompt_ref`. Page art with `page=N` also lands on that page's row, so Clara sees it.
   Print kinds are checked on upload (size, PNG, RGB); a draft uploads with `draft=1`.
 - Save the ink line layer too when the style guide asks for it.

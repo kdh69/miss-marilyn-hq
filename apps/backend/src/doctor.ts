@@ -117,7 +117,7 @@ async function main() {
 
   section("Pictures");
   if (has("FAL_KEY")) ok("FAL_KEY is set (the image model behind npm run bot image)");
-  else console.log("  · no FAL_KEY: the team can't make pictures here (docs/TEAM.md, Pictures)");
+  else console.log("  · no FAL_KEY here: pictures work only if the cloud environment holds a network secret for queue.fal.run (docs/TEAM.md, Pictures)");
 
   section("Claude QC");
   if (!has("ANTHROPIC_API_KEY")) console.log("  · manual QC (no ANTHROPIC_API_KEY): tasks wait at ready_for_qc for npm run qc");

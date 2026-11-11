@@ -2,9 +2,10 @@
  * Picture generation for the team, ported from the videograph repo's fal adapters (Nano Banana
  * Pro / 2 via fal.ai, with reference images), plus the checks a picture must pass before upload.
  *
- * Privacy, as in videograph: every request sends X-Fal-Store-IO: 0 (fal keeps no history), and
- * reference images go to fal's CDN downscaled, at unguessable links that expire after a day.
- * Failed fal jobs aren't billed. Money is gated by `planImage` (lib/team.ts) before any call.
+ * Privacy: every request sends X-Fal-Store-IO: 0 (fal keeps no history), and reference images
+ * travel inside the request as downscaled JPEG data, so no copy sits on fal's CDN.
+ * The key is FAL_KEY, or a network secret for queue.fal.run that the session's proxy adds to the
+ * request (then no key is in the session at all). Failed fal jobs aren't billed. Money is gated by `planImage` (lib/team.ts) before any call.
  */
 import { fal } from "@fal-ai/client";
 import { readFile } from "node:fs/promises";
@@ -26,21 +27,20 @@ const POLL_MS = 3000;
 const TIMEOUT_MS = 6 * 60_000;
 
 function client() {
-  const key = process.env.FAL_KEY?.trim();
-  if (!key) throw new Error("FAL_KEY is not set: the image model isn't connected in this environment (docs/TEAM.md, Pictures)");
-  fal.config({ credentials: key });
+  // With no FAL_KEY, a placeholder goes out and the session's proxy swaps in the saved secret.
+  fal.config({ credentials: process.env.FAL_KEY?.trim() || "set-by-network-secret" });
   return fal;
 }
 
-/** A reference image for the model: downscaled to 2048 px JPEG, on fal's CDN for one day. */
-async function uploadRef(path: string): Promise<string> {
-  const jpeg = await sharp(await readFile(path)).rotate().resize({ width: 2048, height: 2048, fit: "inside", withoutEnlargement: true }).flatten({ background: "#ffffff" }).jpeg({ quality: 90 }).toBuffer();
-  const file = new File([new Uint8Array(jpeg)], `${basename(path).replace(/\.\w+$/, "")}.jpg`, { type: "image/jpeg" });
-  return client().storage.upload(file, { lifecycle: { expiresIn: "1d" } } as never);
+/** A reference image for the model: a 1536 px JPEG, sent inside the request as a data URI. */
+export async function refDataUri(path: string): Promise<string> {
+  const jpeg = await sharp(await readFile(path)).rotate().resize({ width: 1536, height: 1536, fit: "inside", withoutEnlargement: true }).flatten({ background: "#ffffff" }).jpeg({ quality: 85 }).toBuffer();
+  return `data:image/jpeg;base64,${jpeg.toString("base64")}`;
 }
 
 const hint = (message: string) =>
-  /forbidden/i.test(message) ? `${message}\n  "Forbidden" on a first call usually means the fal account has no credit: stop and tell Kyle, retrying won't help.`
+  /unauthori[sz]ed|authenticat|401|invalid.*key|no user found/i.test(message) ? `${message}\n  The image model isn't connected: set FAL_KEY in this session, or save a network secret for queue.fal.run (header Authorization, prefix Key) in the cloud environment's settings. docs/TEAM.md, Pictures.`
+    : /forbidden/i.test(message) ? `${message}\n  "Forbidden" on a first call usually means the fal account has no credit: stop and tell Kyle, retrying won't help.`
     : /no_media|no image/i.test(message) ? `${message}\n  An empty result can be intermittent or a refusal: one plain retry is worth it before rewording. Failed calls cost $0.`
     : message;
 
@@ -48,7 +48,7 @@ const hint = (message: string) =>
 export async function generateImage(opts: { model: ImageModel; prompt: string; aspect: string; resolution: string; refs: string[] }): Promise<{ png: Buffer; endpoint: string; requestId: string }> {
   const api = client();
   const urls = [];
-  for (const ref of opts.refs.slice(0, opts.model.maxRefs)) urls.push(await uploadRef(ref));
+  for (const ref of opts.refs.slice(0, opts.model.maxRefs)) urls.push(await refDataUri(ref));
   const endpoint = urls.length ? `${opts.model.endpoint}/edit` : opts.model.endpoint;
   const input = { prompt: opts.prompt, num_images: 1, aspect_ratio: opts.aspect, resolution: opts.resolution, output_format: "png", ...(urls.length ? { image_urls: urls } : {}) };
   try {

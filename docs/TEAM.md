@@ -117,9 +117,12 @@ tests in `tests/team.test.ts`. One refused op stops its whole `apply` batch.
 ## Pictures
 
 `image` calls Nano Banana Pro (sheets, print pages) and Nano Banana 2 (drafts) through fal.ai, the
-same models and plumbing as videograph's reference images. It needs `FAL_KEY` in the session, and
-from a cloud session fal's hosts on the environment's network list (`queue.fal.run`, `fal.run`,
-`rest.fal.ai`, `fal.media`, `v3.fal.media`, `v3b.fal.media`; the first refused call names any that is missing).
+same models as videograph's reference images. The key is either `FAL_KEY` in the session (the
+laptop's `.env`), or, in a cloud environment, a network secret for `queue.fal.run` (header
+Authorization, prefix Key), which keeps the key out of the session altogether. Reference images
+travel inside the request, so nothing is left on fal's CDN. Every picture gets a recipe file beside
+it (prompt, references, model, size) so it can be made again. The `miss-marilyn-hq` cloud
+environment already allows fal's hosts.
 Models, sizes, prices and caps are in [`formats/picture-book.json`](../formats/picture-book.json);
 what is known about them is in [`knowledge/models.md`](knowledge/models.md). **No picture has been
 made through it yet**: the first art task is also its first live test.

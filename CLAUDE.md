@@ -47,7 +47,9 @@ Commands: `npm run check` (typecheck + tests + panel build), `npm run doctor`, `
 `npm run task -- <id> <status> "<why>"` (a status change as Kyle, with its log row),
 `npm run sim` (Book 2 copy through every step after the script; run it after changing the backend flow),
 `npm run lesson -- <applies_to> "<rule>"` (a standing rule the team reads every run),
-`npm run bot -- kyle board` (the board as text; the other `bot` commands are the team's).
+`npm run bot -- kyle board` (the board as text; the other `bot` commands are the team's),
+`npm run backup -- <dir>` / `npm run restore -- <dir>` (MM Core to JSON and back; never into this public repo),
+`npm run team:export` (the roles as plain text for another agent; see [AGENTS.md](AGENTS.md)).
 Scripts load `.env` automatically (Node `--env-file-if-exists`).
 
 - Drive file creation goes through `driveWriter()` (owner token if set, else service account);

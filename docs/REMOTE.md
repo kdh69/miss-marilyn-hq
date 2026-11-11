@@ -42,15 +42,16 @@ Three ways to work, from most to least capable:
   - `GOOGLE_OWNER_REFRESH_TOKEN`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`: uploads to Drive as the folder
     owner (`npm run google:authorize` on the laptop makes the token). Without them a maker has to
     create each file through the Google Drive connector and register it with `npm run bot -- <role> asset`.
-  - `FAL_KEY`: pictures (`npm run bot -- illustrator image`). fal's hosts aren't on the default
-    network list (blocked from a cloud session on 2026-11-11): add `queue.fal.run`, `fal.run`,
-    `rest.fal.ai`, `fal.media`, `v3.fal.media` and `v3b.fal.media` to the environment's allowed hosts.
+  - The fal.ai key, for pictures (`npm run bot -- illustrator image`): best as a network secret for
+    `queue.fal.run` (header Authorization, prefix Key), which keeps it out of the session; a `FAL_KEY`
+    variable works too. fal's hosts aren't on the default network list.
+  The environment **miss-marilyn-hq** (made 2026-11-11) already has `MM_CORE_SHEET_ID`, Google's and
+  fal's hosts and a setup script; it still needs the keys above. Start this repo's sessions on it.
   Use an environment of its own for this repo, so the key isn't in the sessions of other projects.
   Google's APIs (`sheets.googleapis.com`, `www.googleapis.com`, `oauth2.googleapis.com`) answered from
   the default trusted network on 2026-11-11; a custom allowlist has to include them.
   Without the keys, a cloud session can change code but can't read or write the Sheet.
-- **A setup script** for that environment saves a few minutes per session: `npm ci` in the repo and
-  `pip install -r apps/backend/preflight/requirements.txt`.
+- **Its setup script** runs `npm ci` and installs PyMuPDF. It hasn't run in a fresh session yet.
 
 ## Never from the cloud
 

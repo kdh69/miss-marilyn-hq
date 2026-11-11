@@ -303,9 +303,16 @@ async function image(core: Core, role: BotRole, task: Row, promptPath: string, o
     }
   }
   await writeFile(out, png);
+  // The recipe: everything needed to make this picture again, or to move it to another model.
+  const recipe = out.replace(/\.png$/, ".recipe.json");
+  await writeFile(recipe, JSON.stringify({
+    task_id: task.task_id, product_id: task.product_id, kind, subject, attempt: plan.attempt, made_at: now,
+    model: plan.model.name, endpoint: made.endpoint, request_id: made.requestId, resolution: plan.resolution, aspect: plan.aspect,
+    fitted_to_page: plan.fitToPage && !warn, usd_estimate: plan.usd, references: idList(opts.ref), prompt,
+  }, null, 2));
   const madeWith = `${plan.model.name} via fal.ai (${made.endpoint})`;
   console.log(`${out.replace(ROOT, "")}  attempt ${plan.attempt} of ${format.image.maxAttemptsPerImage}  $${plan.usd.toFixed(2)} (${cost_id})  ·  ${spendToday(core)}${warn}`);
-  console.log(`Open it and look before anything else. When it's right:\n  npm run bot -- ${role} upload ${task.task_id} ${out.replace(ROOT, "")} <asset_type>${opts.page ? ` page=${opts.page}` : ""} made_with="${madeWith}" prompt_ref=<the prompt's asset id>${plan.fitToPage ? "" : " draft=1"}`);
+  console.log(`Open it and look before anything else. When it's right, upload its recipe, then the picture:\n  npm run bot -- ${role} upload ${task.task_id} ${recipe.replace(ROOT, "")} page_plan made_with="Claude Code"\n  npm run bot -- ${role} upload ${task.task_id} ${out.replace(ROOT, "")} <asset_type>${opts.page ? ` page=${opts.page}` : ""} made_with="${madeWith}" prompt_ref=<the recipe's asset id>${plan.fitToPage ? "" : " draft=1"}`);
 }
 
 /** Appends the assets row, then puts its ID on the task (and on the page, for an Illustrator's page art). */
