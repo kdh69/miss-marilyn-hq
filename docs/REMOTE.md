@@ -13,7 +13,7 @@ Three ways to work, from most to least capable:
 | Task | Phone only | Cloud Claude session | Needs the laptop |
 |---|---|---|---|
 | Use the panel, approve, message the team | ✅ | | |
-| Run the team (`/sweep`, "ask Scout…", "run QC") | ✅ start a cloud session from the Claude app | ⚠️ only with Sheet keys set up (below) | ✅ |
+| Run the team (`/sweep`, "ask Scout…", "run QC") | ✅ start a cloud session from the Claude app | ✅ on the **miss-marilyn-hq** environment | ✅ |
 | Look at or edit the Sheet and Drive | ✅ | | |
 | Run the backend (`doctor`, `dryrun`, a tick) | ✅ GitHub → Actions → Run workflow | | |
 | Record a QC verdict, or change a task's status as Kyle | ✅ Actions → MM backend tick → job `qc` or `task` | ✅ Claude triggers the same workflow | |
@@ -21,7 +21,7 @@ Three ways to work, from most to least capable:
 | Redeploy the panel as it is | ✅ Vercel dashboard → Redeploy | | |
 | Change code, run typecheck and tests, push, open a PR | | ✅ | |
 | Deploy a code change to the panel | ✅ merge the PR in the GitHub app | ✅ push a branch, open a PR, merge to `main` | |
-| Run QC (`npm run qc`), peek at the Sheet, `sheet:setup`, `doctor` locally | | ⚠️ only with Sheet keys set up (below) | ✅ |
+| Run QC (`npm run qc`), peek at the Sheet, `sheet:setup`, `doctor` locally | | ✅ on the **miss-marilyn-hq** environment | ✅ |
 | `npm run google:authorize` (uploads token) | | ❌ | ✅ (the callback is `localhost`) |
 | Anything using `.env` values | | ⚠️ only what you add to the cloud environment | ✅ |
 
@@ -45,8 +45,9 @@ Three ways to work, from most to least capable:
   - The fal.ai key, for pictures (`npm run bot -- illustrator image`): best as a network secret for
     `queue.fal.run` (header Authorization, prefix Key), which keeps it out of the session; a `FAL_KEY`
     variable works too. fal's hosts aren't on the default network list.
-  The environment **miss-marilyn-hq** (made 2026-11-11) already has `MM_CORE_SHEET_ID`, Google's and
-  fal's hosts and a setup script; it still needs the keys above. Start this repo's sessions on it.
+  The environment **miss-marilyn-hq** (made 2026-11-11) has Google's and fal's hosts, a setup script
+  and, since 2026-11-11, every key above except fal's (the board printed from a session there). Start
+  this repo's sessions on it. When a key is added to `.env`, add it here too.
   Use an environment of its own for this repo, so the key isn't in the sessions of other projects.
   Google's APIs (`sheets.googleapis.com`, `www.googleapis.com`, `oauth2.googleapis.com`) answered from
   the default trusted network on 2026-11-11; a custom allowlist has to include them.

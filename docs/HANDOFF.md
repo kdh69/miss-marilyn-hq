@@ -9,8 +9,8 @@ specced one session each in [`specs/`](specs/README.md): start with S1, then S2.
 **2026-11-11: the team moved from Grok to Claude.** Grok is no longer used and its chat history is
 gone. MM Core is intact (read 11-11); the Drive files weren't checked one by one. The eight roles are now Claude agents in `.claude/agents/`, run by `/sweep` in a Claude Code
 session, and they write the Sheet through `npm run bot`, which enforces what each role may do. Built
-and unit-tested; **not yet run against the live Sheet**, because cloud sessions don't have the keys
-yet (Kyle — outstanding, 1).
+and unit-tested. Cloud sessions have the keys since 11-11 (a session on the **miss-marilyn-hq**
+environment printed the board), but **no sweep has run against the live Sheet yet**.
 
 **The same day the team took videograph's method** (Kyle's video repo): pictures come from fal.ai
 (Nano Banana Pro and 2, with reference images) through `npm run bot -- illustrator image`, behind a
@@ -134,11 +134,10 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 
 ## Kyle — outstanding, in order
 
-1. **Give cloud sessions the Sheet key**, so the team can run from anywhere: in the cloud environment
-   **miss-marilyn-hq** (made 11-11; it has the Sheet ID and the network list), add
-   `GOOGLE_SERVICE_ACCOUNT_JSON` as an environment variable ([`REMOTE.md`](REMOTE.md)), and start this
-   repo's sessions on that environment. On the laptop the team already works: `.env` has them. Then the first
-   check is `npm run bot -- kyle board`, and the first sweep is `/sweep`.
+1. ~~Give cloud sessions the Sheet key~~ **Done 11-11.** The cloud environment **miss-marilyn-hq** has
+   `GOOGLE_SERVICE_ACCOUNT_JSON`, `MM_CORE_SHEET_ID`, `GOOGLE_OWNER_REFRESH_TOKEN`, `AUTH_GOOGLE_ID` and
+   `AUTH_GOOGLE_SECRET`; `npm run bot -- kyle board` worked there. Start this repo's sessions on it.
+   Every key added to `.env` later goes there too ([`REMOTE.md`](REMOTE.md)). Next: the first `/sweep`.
 2. **Connect the image model:** put the fal.ai key videograph uses in `.env` as `FAL_KEY`, and in the
    cloud environment as a network secret for `queue.fal.run` (`TEAM.md`, Pictures). Kyle approved a
    $3 cap for the first pictures (roadmap L3). Final page art
