@@ -1,0 +1,3 @@
+# LF everywhere, also on Windows checkouts: the agent files, knowledge library and hooks are
+# parsed line by line (frontmatter, "Last reviewed:" lines).
+* text=auto eol=lf

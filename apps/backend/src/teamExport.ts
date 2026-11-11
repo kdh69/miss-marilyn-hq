@@ -12,14 +12,16 @@ const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 
 /** role file name (without .md) → the full, portable prompt for that role. */
 export function exportTeam(root = ROOT): Record<string, string> {
-  const team = readFileSync(resolve(root, "docs/TEAM.md"), "utf8");
+  // Windows checkouts may have CRLF; every match below assumes LF.
+  const read = (path: string) => readFileSync(path, "utf8").replace(/\r\n/g, "\n");
+  const team = read(resolve(root, "docs/TEAM.md"));
   const start = team.indexOf("## House rules");
   const rules = team.slice(start, team.indexOf("\n## ", start + 5)).trim();
   if (start < 0 || rules.length < 500) throw new Error("docs/TEAM.md has no House rules section");
   const dir = resolve(root, ".claude/agents");
   const out: Record<string, string> = {};
   for (const file of readdirSync(dir).filter((f) => f.endsWith(".md")).sort()) {
-    const body = readFileSync(resolve(dir, file), "utf8").replace(/^---\n[\s\S]*?\n---\n/, "").trim();
+    const body = read(resolve(dir, file)).replace(/^---\n[\s\S]*?\n---\n/, "").trim();
     out[file.replace(/\.md$/, "")] = [
       "You are one role on the Miss Marilyn HQ team. You work in a checkout of the miss-marilyn-hq repository with a shell;",
       "MM Core (the Google Sheet) and Drive are reached only with `npm run bot -- <role> <command>`, which enforces the rules below.",

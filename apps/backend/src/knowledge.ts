@@ -18,7 +18,7 @@ export function checkKnowledge(dir = DIR, today = new Date().toISOString().slice
   const out: Knowledge = { claims: 0, errors: [], stale: [] };
   const age = (date: string) => Math.round((Date.parse(today) - Date.parse(date)) / 864e5);
   for (const name of readdirSync(dir).filter((f) => f.endsWith(".md")).sort()) {
-    const lines = readFileSync(resolve(dir, name), "utf8").split("\n");
+    const lines = readFileSync(resolve(dir, name), "utf8").split(/\r?\n/);
     const bad = (line: number, why: string) => out.errors.push(`${name}:${line + 1} ${why}`);
     if (!lines[0]?.startsWith("# ")) bad(0, "line 1 must be the # title");
     if (!/^Last reviewed: \d{4}-\d{2}-\d{2}$/.test(lines[1] ?? "")) bad(1, "line 2 must be `Last reviewed: YYYY-MM-DD`");
