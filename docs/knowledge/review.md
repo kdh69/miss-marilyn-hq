@@ -12,6 +12,7 @@ For the Quality Checker, Claude's QC, the critic and the dispatcher. The checkli
 - Count words, lines, characters and tags yourself. [proven, checked 2026-11-01] [handoff](../HANDOFF.md)
 - Be strict on Blocking items and on anything a parent, Amazon or Etsy would reject; mention taste, don't fail for it. [proven, checked 2026-11-11] [quality-checker](../../.claude/agents/quality-checker.md)
 - Feedback is what the next attempt is built from: say where, what and how to change it, with the page or asset ID. [videograph, checked 2026-11-06]
+- Measure the outer 4% of a page picture (about 104 px of 2588) before it moves on, instead of judging it by eye: the p3 pass put the tail at about 95% across, which is only just inside. There is no data yet on false passes. [unproven, checked 2026-11-11]
 - Check a report against the board before acting on it: `verify`, or `npm run bot -- kyle board`. [videograph, checked 2026-11-04]
 - When Kyle or Clara overrules a verdict either way, the critic records it as a lesson, so the next review is closer to theirs. [videograph, checked 2026-11-06]
 

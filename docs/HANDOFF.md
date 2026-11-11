@@ -1,4 +1,4 @@
-# Handoff — where things stand (2026-11-11)
+# Handoff — where things stand (2026-11-11, evening)
 
 Read this first when picking the project back up. Setup steps in full: [`SETUP.md`](SETUP.md).
 Working away from the laptop: [`REMOTE.md`](REMOTE.md). The team: [`TEAM.md`](TEAM.md). The plan:
@@ -11,6 +11,12 @@ gone. MM Core is intact (read 11-11); the Drive files weren't checked one by one
 session, and they write the Sheet through `npm run bot`, which enforces what each role may do. Built
 and unit-tested. Cloud sessions have the keys since 11-11 (a session on the **miss-marilyn-hq**
 environment printed the board), but **no sweep has run against the live Sheet yet**.
+
+**First live run, 2026-11-11 evening (this repo's cloud session, keys present):** the board printed, a
+draft and five finals were made through `npm run bot -- illustrator image`, T-0027 (p3) passed both
+reviews and is done. $2.18 of a $3 cap spent (estimates; check fal's dashboard). Paid art is paused
+on purpose: see "Next session starts here" below. What was measured is in [`playbook.md`](playbook.md)
+and [`knowledge/illustration.md`](knowledge/illustration.md); the mistakes are in the playbook table.
 
 **The same day the team took videograph's method** (Kyle's video repo): pictures come from fal.ai
 (Nano Banana Pro and 2, with reference images) through `npm run bot -- illustrator image`, behind a
@@ -55,35 +61,38 @@ dispatcher starts that agent".
    Full book review). The next backend tick (:07 and :37) applies it: Approve → `approved` → `done`;
    Changes → `changes_requested` with her note; Reject → `cancelled`. Each change gets a log row.
 
-## The board (2026-11-01, ~05:45 UTC)
+## The board (2026-11-11, ~22:20 UTC)
 
-Not re-read in full on 11-11. The `tasks` tab still ends at T-0039 (40 rows), so the 11-01 message
-to the Orchestrator was never carried out: T-0026–T-0037 are still blocked and the rest of Book 1's
-chain doesn't exist. `npm run bot -- kyle board` prints the current board once a session has the keys.
+`npm run bot -- kyle board` is the live truth; this is the picture at the end of the first live sweep.
 
-- **Book 1 = MM-B02 "Miss Marilyn Makes a Friend"**: Clara's playground story, `in_production`, P1,
-  `series_no` 1. Kyle's brief with her story is request `Q-20261030020904-01` (in progress, on T-0023).
-  - **T-0023 book plan** (Orchestrator): in progress, due 11-10.
-  - **T-0038 story v2** (Kyle's rewrite brief: warmer, no "Hello first!" refrain): passed Claude's QC
-    11-01 (about 270 words, story text on 15 pages, max spread 49, Achoo x3 with Gussie's echo, proud ending).
-    `awaiting_mom` on her Script step (M-T-0038-1). p14 sets at 6 lines (style guide max 5): keep it short
-    when she writes her words.
-  - **T-0024 story v1**: `cancelled` 11-01, superseded by T-0038; its card M-T-0024-1 is closed.
-  - **T-0025 character sheets**: done (passed on attempt 3).
-  - **T-0039 full-book draft pictures**: done 11-01. All 24 pages are in `pages.art_asset_id`, so Clara sees
-    pictures on the Books page; dummy PDF A-T0039-51. On-model and close to final. Minor: p16 has no tickle
-    face before p17's ACHOO, p24 doodle in the outer 4%, p10 ink speckle.
-  - **T-0026–T-0037 final page art**: `blocked` "waiting on Clara's approval of T-0024". Kyle decided 11-01 to
-    start them now from the T-0039 drafts; the Orchestrator has to be told (see Kyle — outstanding).
-  - Not created yet: cover art, interior layout, cover wrap, KDP packet.
-  - Gussie is a dog, drawn from his photos: assets P-20261030-001/002 (MM Brand → photos → inbox → Gussie).
-    Zoey isn't in this book.
-- **Book 2 = MM-B01 "Flies to See Her Grandparents"**: `paused`, `series_no` 2. Every open task is
-  `blocked` with "Book paused"; QC skips paused books. Its 32-page draft gets cut to 24 when it resumes.
-  `npm run sim` uses a throwaway copy of it to test the whole flow after the script (see Code).
-- **Ollie (OL-B01)**: archived. Product and SKUs `retired`, every task `cancelled`, requests closed.
-  Rows and Drive files are kept; the panel and the bots ignore it.
-- **Open question for Mom:** the author name (request R-0003). It only blocks the KDP packet.
+- **Book 1 = MM-B02 "Miss Marilyn Makes a Friend"**: `in_production`, P1, `series_no` 1.
+  - **T-0023 book plan**: done (the Orchestrator handed it in 11-11; request Q-20261030020904-01 closed).
+  - **T-0038 story v2**: `awaiting_mom` on Clara's Script step (card M-T-0038-1, R-0004 tells her it is ready).
+  - **T-0025 sheets, T-0039 full-book drafts**: done. All 24 pages show a picture on the Books page.
+  - **T-0027 (p3 final)**: done 11-11 (passed Quality Checker and QC; composition held from the draft).
+  - **T-0032 (pp12-13)**: `in_progress`, paused. p13 final A-T0032-04 good. p12 final A-T0032-03 has two faults
+    (tail on the left edge, Gussie sitting); the retry C-0009 repeated both and was not uploaded.
+  - **T-0033 (pp14-15)**: `in_progress`, paused. p14 final A-T0033-02 usable (tail tip about 3.5% from the edge,
+    cream vignette). p15 attempt A-T0033-05 failed (edge contact), not linked; p15 still shows its draft.
+  - **T-0026, T-0028-T-0031**: `todo` but held: Clara's 11-02 picture notes touch them (see Kyle, item 2). Do not start.
+  - **T-0034-T-0037**: `todo`, cleared. T-0034 includes the p16 tickle-face fix.
+  - **T-0040 cover art**: `todo`. **T-0041 interior layout, T-0042 cover wrap, T-0043 KDP packet**: `todo` but
+    "HOLD - DO NOT START" (script not approved, cover art and author name missing). The Orchestrator cannot
+    set `blocked`, so they show in the board's `start:` line: do not dispatch them.
+  - Author name: Clara answered R-0003 "Clarette Kiddle"; `products.author_name` is still empty until Kyle confirms.
+  - Gussie is a dog, drawn from his photos: assets P-20261030-001/002. Zoey isn't in this book.
+- **Book 2 = MM-B01**: `paused`, `series_no` 2. **Ollie (OL-B01)**: archived. (Unchanged.)
+
+## Next session starts here
+
+1. Read the playbook's "Costly mistakes" and `knowledge/illustration.md` first. The method that works: **fix the
+   draft, then make the final.** Finals copy a draft's composition and its faults (edge contact, a sitting Gussie).
+   A redrawn draft is $0.08; a final is $0.30.
+2. Kyle's yes and a new cap are needed before any picture. Plan he approved in principle: redraw the problem drafts
+   (p12, p15, p16/p17, with margins and Gussie standing written in; about $0.32), look at them, then the finals.
+3. Check the five pictures against fal's dashboard ($1.28 for the first five, $2.18 after the 8th, all estimates).
+4. After Clara answers anything, run one backend tick by hand (Actions, MM backend tick); the schedule lags hours.
+
 
 ## Rules the bots follow (all in the `lessons` tab)
 
@@ -138,7 +147,7 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
    `GOOGLE_SERVICE_ACCOUNT_JSON`, `MM_CORE_SHEET_ID`, `GOOGLE_OWNER_REFRESH_TOKEN`, `AUTH_GOOGLE_ID` and
    `AUTH_GOOGLE_SECRET`; `npm run bot -- kyle board` worked there. Start this repo's sessions on it.
    Every key added to `.env` later goes there too ([`REMOTE.md`](REMOTE.md)). Next: the first `/sweep`.
-2. **Connect the image model:** put the fal.ai key videograph uses in `.env` as `FAL_KEY`, and in the
+2. ~~**Connect the image model:**~~ done 11-11, `image` works against fal (playbook). Original note: put the fal.ai key videograph uses in `.env` as `FAL_KEY`, and in the
    cloud environment as a network secret for `queue.fal.run` (`TEAM.md`, Pictures). Kyle approved a
    $3 cap for the first pictures (roadmap L3). Final page art
    (T-0026–T-0037) and the cover wait on this. The first art task is the first live test of `image`:
@@ -150,7 +159,7 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
    GitHub secrets, Vercel and the cloud environment (with `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`).
    The team's `upload` needs it: every hand-in is a file in Drive. Until then a maker creates each file
    through the Google Drive connector and registers it (`npm run bot -- <role> asset`).
-4. **Give the Orchestrator the 11-01 decisions** (the message is in the 2026-11-01 decision below): put
+4. ~~**Give the Orchestrator the 11-01 decisions**~~ done 11-11 (T-0026-T-0037 to todo, T-0040-T-0043 made). Original note: (the message is in the 2026-11-01 decision below): put
    it in the panel's Inbox box (*Instruction for the bots…*) or say it to the session before `/sweep`.
    Its art part waits on 2; the rest of Book 1's chain can be created now.
 5. **Schedule the sweep** once 1 is done and this work is on `main`: a Claude scheduled task that runs
@@ -177,6 +186,11 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 - **Business setup:** LLC + EIN, business bank account and card, brand domain.
 
 ## Decisions
+
+- **2026-11-11 (first live sweep):** Kyle approved $3 for the first pictures; paid art paused at $2.18 because the draft-first
+  method kept edge faults. New rule: fix drafts ($0.08) before finals ($0.30); look at every picture before the next paid
+  call; stop when the same fault comes back twice; makers get a dollar maximum, not "N pictures". The ink-layer overwrite
+  bug was fixed (`isPagePicture`). `missmarilyn.vercel.app` was added to the cloud environment's allowed hosts.
 
 - **2026-11-11 (roadmap):** [`ROADMAP.md`](ROADMAP.md) is the plan of record: the full Grok team back,
   recreatable on other tools, then best in class. Sheet backups go to a private GitHub repo; character
