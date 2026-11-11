@@ -34,6 +34,8 @@ It sits beside the other records and doesn't replace them:
 | [story.md](story.md) | The page plan, word counts, writing for Clara to rewrite | producer, quality-checker, qc, critic |
 | [print.md](print.md) | What KDP needs from pages, PDFs and the cover, as our checks enforce it | builder, illustrator, lister, quality-checker, qc |
 | [review.md](review.md) | How to review: checks before eyes, the contact sheet, calibrating to the owner | quality-checker, qc, critic, orchestrator |
+| [marketing.md](marketing.md) | Marketing plans, weekly posts, voice, what we may claim | marketer, quality-checker, qc, critic |
+| [research.md](research.md) | What Scout finds, how to source and date it | scout, orchestrator, critic |
 
 ## Format
 
