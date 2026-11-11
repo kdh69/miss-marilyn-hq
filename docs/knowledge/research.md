@@ -17,7 +17,7 @@ rows; nothing it does moves a task. Outside numbers go stale fast, so every one 
 
 ## What our own runs showed
 
-- No research rows have been checked for this file, and Book 1's research ("comparable friendship / playground picture books") hasn't been asked for yet. [proven, checked 2026-11-11] [handoff](../HANDOFF.md)
+- The `research` tab is empty (read 2026-11-11), so there are no runs to learn from yet, and Book 1's research ("comparable friendship / playground picture books") hasn't been asked for yet. [proven, checked 2026-11-11] [handoff](../HANDOFF.md)
 
 ## Open questions
 
