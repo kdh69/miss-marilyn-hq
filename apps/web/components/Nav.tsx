@@ -38,6 +38,7 @@ export const TABS: Record<View, Tab[]> = {
 
 export const MORE: Record<View, Tab[]> = {
   mom: [
+    { href: "/bible", label: "Miss M's Bible", icon: "star" },
     { href: "/launch", label: "Launch & listings", icon: "rocket" },
     { href: "/books", label: "All books", icon: "book" },
     { href: "/progress", label: "Progress", icon: "track" },
@@ -45,6 +46,7 @@ export const MORE: Record<View, Tab[]> = {
     { href: "/money", label: "Money", icon: "coin" },
   ],
   kyle: [
+    { href: "/bible", label: "Miss M's Bible", icon: "star" },
     { href: "/ideas", label: "Ideas", icon: "bulb" },
     { href: "/script", label: "Script", icon: "script" },
     { href: "/art", label: "Illustrations", icon: "art" },
@@ -52,10 +54,13 @@ export const MORE: Record<View, Tab[]> = {
     { href: "/review", label: "Full book review", icon: "review" },
     { href: "/launch", label: "Launch & listings", icon: "rocket" },
   ],
-  family: [],
+  family: [
+    { href: "/bible", label: "Miss M's Bible", icon: "star" },
+  ],
 };
 
 const ICON = {
+  star: "M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z",
   script: "M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6M8 13h8M8 17h5",
   art: "M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15.5 9.5h.01",
   build: "M12 3l9 5-9 5-9-5zM3 13l9 5 9-5",

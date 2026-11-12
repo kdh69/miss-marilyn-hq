@@ -46,7 +46,7 @@ import { ImageCallError, checkArt, contactSheet, edgeReport, fitToPage, format, 
 import { python } from "./lib/python";
 import { rubricPath } from "./lib/qc";
 import {
-  BOT_ROLES, MAX_IN_PROGRESS, SWEEP_KEY, idList, isBotRole, isPagePicture, isTeamRole, latestReview, mintAssetId, mintCostId, parkedProducts, planMove, planOps,
+  BOT_ROLES, MAX_IN_PROGRESS, SWEEP_KEY, canonFor, idList, isBotRole, isPagePicture, isTeamRole, latestReview, mintAssetId, mintCostId, parkedProducts, planMove, planOps,
   planReview, planSweep, sweepHeldBy,
   type BotRole, type Move, type Op, type Planned, type TeamRole,
 } from "./lib/team";
@@ -157,6 +157,10 @@ function brief(core: Core, role: string, taskId: string) {
   for (const l of core.rows("lessons").filter((l) => l.status === "active" && ["all", task.task_type, task.owner, role].includes(l.applies_to))) {
     console.log(`  ${l.lesson_id} (${l.applies_to}): ${l.rule}`);
   }
+
+  const canon = canonFor(core.rows("canon"), task.product_id);
+  if (canon.length) console.log(`\nMISS M'S BIBLE (the series canon: draw and write these the same way every time; Clara keeps it on the panel)`);
+  for (const c of canon) console.log(`  ${c.canon_id} ${c.name} (${c.kind}${c.applies_to && c.applies_to !== "series" ? `, ${c.applies_to}` : ""}): ${c.look}${c.reference_ids ? `\n    refs: ${c.reference_ids}` : ""}${c.notes ? `\n    note: ${c.notes}` : ""}`);
 
   const outs = task.output_asset_ids.split(",").map((s) => s.trim()).filter(Boolean);
   console.log(`\nOUTPUT FILES (${outs.length})`);
@@ -639,7 +643,7 @@ export async function run(core: Core, role: string, command: string, args: strin
 const TABS: Record<string, string[]> = {
   check: [], edges: [],
   board: ["products", "requests", "tasks", "task_types", "log", "costs", "config"],
-  brief: ["tasks", "products", "task_types", "assets", "lessons", "pages", "log", "config"],
+  brief: ["tasks", "products", "task_types", "assets", "lessons", "canon", "pages", "log", "config"],
   fetch: ["assets"],
   contact: ["tasks", "pages", "assets"],
   verify: ["tasks", "assets", "log", "content", "plans"],
@@ -647,7 +651,7 @@ const TABS: Record<string, string[]> = {
   review: ["tasks", "log", "config"],
   note: ["tasks", "products", "config"],
   sweep: ["config"],
-  apply: ["products", "skus", "tasks", "task_types", "pages", "assets", "requests", "lessons", "plans", "content", "listings", "research", "config"],
+  apply: ["products", "skus", "tasks", "task_types", "pages", "assets", "requests", "lessons", "canon", "plans", "content", "listings", "research", "config"],
   folder: ["tasks", "products", "config"],
   cost: ["tasks", "products", "config", "costs"],
   image: ["tasks", "products", "config", "costs", "log", "assets"],

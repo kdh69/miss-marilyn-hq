@@ -103,7 +103,7 @@ Each step is isolated: one failure is emailed and the rest still run; the Action
 - The team never signs into any store, social, bank or registrar account, and writes the Sheet
   only through `npm run bot`, which checks each role's rights (`apps/backend/src/lib/team.ts`).
 - The panel signs in only the emails in `PANEL_USERS`; without sign-in it's read-only.
-- The panel writes only Clara's answers, messages, page text, photos and (Kyle) pause/accounts —
+- The panel writes only Clara's answers, messages, page text, photos, Miss M's Bible (the series canon) and (Kyle) pause/accounts —
   never `tasks`. Nothing publishes or spends without Clara's Approve.
 - `npm run bot` keeps the team out of backend-only columns; the integrity check catches the rest.
 

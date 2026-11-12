@@ -29,6 +29,9 @@ every agent needs go in the `lessons` tab; the evidence stays here and in `docs/
 | Attempts per page, finals | p3 1, p12 2 (both faulty), p13 1, p14 2, p15 1 (failed); only p3 and p13 were clean first time (2 of 5 pages) | T-0027, T-0032, T-0033 |
 | Money spent on pictures not kept or still faulty | $0.90 on C-0009, C-0010 and C-0012, plus C-0007 kept with two faults; all from faults the draft handed down | 2026-11-11 |
 | Free "shrunk draft on a cream canvas" reference | helped p14 partly (tail clear, a cream vignette added), failed p15 (crowded scene) | T-0033 |
+| Setting sheet (Nano Banana Pro, 2K, 3:2) for the playground | $0.15, first try; passed on every page, the playground matched on 20 of 20 drafts | T-0040, T-0044, 2026-11-12 |
+| Whole-book storyboard of drafts (Nano Banana 2, 1K, 3 to 4 references) | 20 pages + 11 redraws on 9 pages = $2.48, about 25 s a picture; 11 of 20 right first time; p4 (car direction) still wrong after 3 tries | T-0044, 2026-11-12 |
+| Cover drafts to one Kyle liked | 7 drafts, $0.56, plus the $0.15 playground sheet | T-0040, 2026-11-12 |
 
 Planning prices for pictures (list prices, not yet confirmed on a bill): draft $0.08, character
 sheet $0.15, print-size page $0.30. See [knowledge/models.md](knowledge/models.md).
@@ -56,6 +59,8 @@ Planning prices held on the live run: draft $0.08 and final $0.30 matched the co
 | 2026-11-12 | p15 hit the 3-attempt gate (2 drafts and 3 finals counted separately per kind); Kyle raised `maxAttemptsPerImage` to 4 | $0.30 for the fourth final | The gate did its job: it stopped, a person decided. Attempts are counted per task, kind and page |
 | 2026-11-12 | Agent reports miscounted pictures and spend three times (T-0032, T-0033 twice); the costs tab and `kyle board` were right each time | confusion, no money | Always check `kyle rows costs` and the board before relaying a report; Kyle's rule: a dollar maximum, not a picture count (L-0024) |
 | 2026-11-11 | HANDOFF said the author name was open; Clara had answered R-0003 ("Clarette Kiddle") | a stale blocker | L-0025: check requests and mom_queue for Clara's answer before calling a fact open |
+| 2026-11-12 | Book 1's playground, slide colour and swing frame changed from page to page (blue or yellow slide, wood or red metal swings), and the p3 window showed the playground the family only drives to on p4 | a book that didn't feel like one book; p3 and the cover redone | One canon look per character, place and prop with a reference image (series bible section 7b), setting sheets before pages, L-0028 and L-0029 |
+| 2026-11-12 | Storyboard draft faults from wording: "ACHOO!" painted in, "grey cap" drawn as a baseball cap, markings lost mid-sneeze, cream borders, the sheet's layout copied | $0.56 of redraws (7 pictures) | Prompt wording in series bible section 7b and knowledge/illustration.md |
 
 ## After every real sweep
 

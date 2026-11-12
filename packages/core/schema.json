@@ -425,6 +425,198 @@
       }
     },
     {
+      "name": "canon",
+      "group": "work",
+      "id": "canon_id",
+      "headers": [
+        "canon_id",
+        "kind",
+        "name",
+        "look",
+        "reference_ids",
+        "notes",
+        "applies_to",
+        "status",
+        "updated_at",
+        "updated_by"
+      ],
+      "dropdowns": {
+        "kind": "canon_kind",
+        "status": "canon_status",
+        "updated_by": "role"
+      },
+      "seed": [
+        [
+          "CN-01",
+          "character",
+          "Miss Marilyn",
+          "Small fluffy white cat who walks upright. Charcoal-grey fur on the top of her head and both ears (it's fur, never a hat). Large round olive-green eyes. Pink nose with one soft round brown-grey smudge touching the left side of her nose as you look at the picture, about the nose's size: her beauty mark, on every page. Fluffy grey tail with darker stripes. Clearly smaller than Mama and Papa.",
+          "A-T0025-40, A-T0025-46, A-T0040-20313028",
+          "Clara to check against her photos.",
+          "series",
+          "active",
+          "",
+          ""
+        ],
+        [
+          "CN-02",
+          "prop",
+          "Red string",
+          "One thin, wavy red cord like a shoelace, in or looped around a paw on every page she's in. Never a yarn ball, bow or ribbon; the only red thing on her.",
+          "A-T0025-40",
+          "Her comfort object.",
+          "series",
+          "active",
+          "",
+          ""
+        ],
+        [
+          "CN-03",
+          "character",
+          "Mama",
+          "Soft cream cat with pale ginger patches on her head and back, walks upright, about one and a half times Miss Marilyn's height. Never bright orange.",
+          "A-T0025-05, A-T0025-46",
+          "",
+          "series",
+          "active",
+          "",
+          ""
+        ],
+        [
+          "CN-04",
+          "character",
+          "Papa",
+          "Grey tabby with darker grey stripes, walks upright, a little taller than Mama.",
+          "A-T0025-07, A-T0025-46",
+          "",
+          "series",
+          "active",
+          "",
+          ""
+        ],
+        [
+          "CN-05",
+          "character",
+          "Gussie",
+          "Young lean black-and-tan pup, Miss Marilyn's size, on four paws. Tan eyebrow dots, muzzle, cheeks, chest and lower legs; ears folded forward; warm brown eyes; bare neck, no collar.",
+          "A-T0025-15, P-20261030-001",
+          "Drawn from the real Gussie's photos.",
+          "MM-B02",
+          "active",
+          "",
+          ""
+        ],
+        [
+          "CN-06",
+          "character",
+          "Gussie's mum and dad",
+          "Two gentle adult black-and-tan dogs, like a grown-up Gussie. Kept a little off to the side, never looming over the pups.",
+          "A-T0044-211928py",
+          "Clara 11-02: the three dogs together looked a little scary.",
+          "MM-B02",
+          "active",
+          "",
+          ""
+        ],
+        [
+          "CN-07",
+          "character",
+          "Playground kids",
+          "A little brown bunny, a red squirrel and a small hedgehog, small and in the background.",
+          "A-T0044-21183178",
+          "",
+          "MM-B02",
+          "active",
+          "",
+          ""
+        ],
+        [
+          "CN-08",
+          "place",
+          "The window-seat room",
+          "Miss Marilyn's favourite spot at home: cream curtains, a big white-framed window, a wooden window seat in a warm sunbeam by day; at night a soft cushion, moonlight and stars.",
+          "A-T0044-211802k0, A-T0044-2122199u",
+          "Opens and closes Book 1.",
+          "series",
+          "active",
+          "",
+          ""
+        ],
+        [
+          "CN-09",
+          "place",
+          "The home garden",
+          "Seen from her window: green lawn, pink roses, red and yellow tulips, tall sunflowers, a stepping-stone path, a round apple tree, a small birdhouse on a post, a white picket fence. A home garden only, no play equipment.",
+          "A-T0044-211802k0",
+          "Clara 11-12: her own yard with a garden.",
+          "series",
+          "active",
+          "",
+          ""
+        ],
+        [
+          "CN-10",
+          "place",
+          "The house",
+          "Blue walls, red roof, warm lit windows.",
+          "A-T0044-2122051u",
+          "No reference sheet yet: make one before the house is a page's main picture.",
+          "series",
+          "active",
+          "",
+          ""
+        ],
+        [
+          "CN-11",
+          "prop",
+          "The family car",
+          "A little rounded butter-yellow car with round headlights, windows open. Papa drives, Mama sits beside him, Miss Marilyn rides in the back, everyone buckled in. On a trip, show it from behind heading where it's going.",
+          "A-T0044-211816y4",
+          "",
+          "series",
+          "active",
+          "",
+          ""
+        ],
+        [
+          "CN-12",
+          "place",
+          "The playground",
+          "Only these pieces: a honey-wood tower with a red pointed roof and a sky-blue slide; a honey-wood A-frame swing set with two rope swings with flat wooden seats; a honey-wood seesaw on a sky-blue base; an entrance gate with sky-blue posts; a brown wooden rail fence with pink, butter-yellow and white flowers; round soft trees and green hills.",
+          "A-T0040-202906u1",
+          "Book 1's playground.",
+          "MM-B02",
+          "active",
+          "",
+          ""
+        ],
+        [
+          "CN-13",
+          "moment",
+          "The sneeze",
+          "Three steps: a happy tickle face (nose wrinkled, one eye half-closed, a wobbly smile, never scared or angry), then the sneeze (eyes squeezed shut, mouth open, one small soft white puff, bits of grass or petals flying, one paw lifted), then everyone laughing. The word ACHOO is set as text, never painted in.",
+          "A-T0039-13, A-T0044-2119001m",
+          "Clara picked the look of the old p7.",
+          "series",
+          "active",
+          "",
+          ""
+        ],
+        [
+          "CN-14",
+          "style",
+          "The look of the books",
+          "Watercolour and ink, soft warm linework, light paper texture, the style guide's soft palette, the painting fills the page edge to edge.",
+          "A-T0040-20313028, A-T0044-212227ea",
+          "",
+          "series",
+          "active",
+          "",
+          ""
+        ]
+      ]
+    },
+    {
       "name": "accounts",
       "group": "work",
       "id": "account_id",
@@ -972,7 +1164,7 @@
         [
           "drive_photos_inbox_id",
           "1fbw_h8kG2vM1cw1lG8s8hN5Wu1R15Hib",
-          "MM Brand/photos/inbox \u2014 panel uploads land here"
+          "MM Brand/photos/inbox — panel uploads land here"
         ],
         [
           "drive_backups_folder_id",
@@ -1406,6 +1598,17 @@
       "waiting",
       "done",
       "not_needed"
+    ],
+    "canon_kind": [
+      "character",
+      "place",
+      "prop",
+      "moment",
+      "style"
+    ],
+    "canon_status": [
+      "active",
+      "retired"
     ]
   },
   "transitions": {

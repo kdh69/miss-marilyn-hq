@@ -38,8 +38,11 @@ Rules that hold everywhere:
 - Use `Core.update`, which refuses if `updated_at` moved since the snapshot; on `false`, skip
   the row this tick rather than overwriting a bot's write.
 - Nothing publishes, spends money or creates accounts without Clara's Approve in `mom_queue`.
-- The control panel writes only: answers in `mom_queue`, rows/replies in `requests`, and
-  `pages.text_final*`. It never writes `tasks`; the backend and the Orchestrator act on those rows.
+- The control panel writes only: answers in `mom_queue`, rows/replies in `requests`,
+  `pages.text_final*`, and Miss M's Bible (the `canon` tab, page `/bible`). It never writes `tasks`;
+  the backend and the Orchestrator act on those rows.
+- The `canon` tab is the series canon (how every recurring character, place and prop looks, with
+  reference assets). Clara keeps it on the panel; every `bot brief` prints it; lessons L-0028 to L-0030.
 - `pages.text_draft` is AI; `pages.text_final` is Clara's. Print files use text_final only.
 - Times: ISO 8601 UTC in cells; the daily spend cap resets on the New York day.
 

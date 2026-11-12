@@ -4,7 +4,7 @@ import { Core, type Row } from "@mm/core";
 import { CHANNEL, CONTENT_TYPE, STAGE_TRACK, TASK_STATUS, TASK_TYPE, hasWords, stageOfType } from "./labels";
 import { sample } from "./sample";
 
-const TABS = ["tasks", "assets", "products", "skus", "listings", "content", "plans", "mom_queue", "pages", "requests", "research", "accounts", "costs", "transactions", "log", "config"] as const;
+const TABS = ["tasks", "assets", "products", "skus", "listings", "content", "plans", "mom_queue", "pages", "requests", "research", "canon", "accounts", "costs", "transactions", "log", "config"] as const;
 type Tab = (typeof TABS)[number];
 export type Snapshot = Record<Tab, Row[]> & { _sample?: boolean };
 

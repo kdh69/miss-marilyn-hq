@@ -1,8 +1,8 @@
 "use server";
 /**
  * Everything the panel can write (spec §9b). Each action re-checks who is signed in.
- * The panel never touches `tasks`: it writes Clara's answers, her page text and
- * messages; the backend and the Orchestrator act on them.
+ * The panel never touches `tasks`: it writes Clara's answers, her page text, her messages
+ * and Miss M's Bible (the `canon` tab); the backend and the Orchestrator act on them.
  */
 import { revalidateTag } from "next/cache";
 import { cookies, headers } from "next/headers";
@@ -153,6 +153,69 @@ export async function savePageText(pageId: string, text: string): Promise<Result
     return ok ? { ok } : { ok, error: "A bot just updated this page — refresh to see it, then save again." };
   } catch {
     return { ok: false, error: "Couldn't reach the Sheet. Your words are still here — tap Save again in a minute." };
+  }
+}
+
+// ---------- Miss M's Bible (the `canon` tab: how the series always looks) ----------
+
+const CANON_KINDS = ["character", "place", "prop", "moment", "style"];
+type CanonInput = { name: string; look: string; notes?: string; kind?: string; referenceIds?: string; retired?: boolean };
+
+function cleanCanon(input: CanonInput): Result & { row?: Record<string, string> } {
+  const name = input.name.trim(), look = input.look.trim();
+  if (!name) return { ok: false, error: "Give it a name first." };
+  if (!look) return { ok: false, error: "Describe how it looks: the team draws it from these words." };
+  const row: Record<string, string> = { name, look, notes: (input.notes ?? "").trim() };
+  if (input.kind !== undefined) {
+    if (!CANON_KINDS.includes(input.kind)) return { ok: false, error: "Pick what kind of thing it is." };
+    row.kind = input.kind;
+  }
+  if (input.referenceIds !== undefined) {
+    const ids = input.referenceIds.split(/[\s,]+/).filter(Boolean);
+    if (ids.some((id) => !/^[AP]-[\w-]+$/.test(id))) return { ok: false, error: "Pictures are listed by their ID, like A-T0025-40." };
+    row.reference_ids = ids.join(", ");
+  }
+  if (input.retired !== undefined) row.status = input.retired ? "retired" : "active";
+  return { ok: true, row };
+}
+
+/** Clara (or Kyle) updates an entry. The team reads the new words on its next run. */
+export async function saveCanon(canonId: string, input: CanonInput): Promise<Result> {
+  const who = await editor();
+  if (!who) return NOT_SIGNED_IN;
+  const clean = cleanCanon(input);
+  if (!clean.row) return clean;
+  try {
+    const core = await Core.load(["canon"]);
+    if (!core.rows("canon").some((c) => c.canon_id === canonId)) return { ok: false, error: "That entry isn't in the bible any more — refresh." };
+    const ok = await core.update("canon", canonId, clean.row, who.role);
+    refresh();
+    return ok ? { ok } : { ok, error: "Someone just changed this entry — refresh to see it, then save again." };
+  } catch {
+    return { ok: false, error: "Couldn't reach the Sheet. Your words are still here — tap Save again in a minute." };
+  }
+}
+
+/** A new character, place, prop, moment or style rule for the whole series (or one book). */
+export async function addCanon(input: CanonInput & { kind: string; appliesTo?: string }): Promise<Result> {
+  const who = await editor();
+  if (!who) return NOT_SIGNED_IN;
+  const clean = cleanCanon(input);
+  if (!clean.row) return clean;
+  const appliesTo = (input.appliesTo ?? "series").trim() || "series";
+  if (appliesTo !== "series" && !/^[A-Z]{2}-[A-Z]\d{2}$/.test(appliesTo)) return { ok: false, error: "That book isn't in the list." };
+  try {
+    const core = await Core.load(["canon"]);
+    const last = Math.max(0, ...core.rows("canon").map((c) => Number(c.canon_id.match(/^CN-(\d+)$/)?.[1] ?? 0)));
+    await core.append("canon", [{
+      canon_id: `CN-${String(last + 1).padStart(2, "0")}`, kind: clean.row.kind, name: clean.row.name, look: clean.row.look,
+      reference_ids: clean.row.reference_ids ?? "", notes: clean.row.notes, applies_to: appliesTo, status: "active",
+      updated_at: nowIso(), updated_by: who.role,
+    }]);
+    refresh();
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Couldn't reach the Sheet — try again in a minute." };
   }
 }
 

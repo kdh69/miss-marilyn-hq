@@ -1,5 +1,5 @@
 import "server-only";
-import type { Row } from "@mm/core";
+import { headersOf, tabDef, type Row } from "@mm/core";
 import type { Snapshot } from "./data";
 
 /**
@@ -157,6 +157,8 @@ export function sample(): Snapshot {
       ["hashtags", "INSTAGRAM", "On every post", "#picturebooks #newbaby #bigsibling #readaloud"],
       ["kpi", "", "Saves and link clicks", "Checked every Sunday."],
     ].map(([section, channel, title, detail], i) => ({ plan_id: `MP-${i + 1}`, product_id: "OL-B01", task_id: "T-0027", section, channel, title, detail, sort: String(i + 1), status: "approved" }))),
+    // The real seed: Miss M's Bible looks the same in preview as on day one.
+    canon: (tabDef("canon").seed ?? []).map((r) => Object.fromEntries(headersOf(tabDef("canon")).map((h, i) => [h, String(r[i] ?? "")])) as Row),
     accounts: rows([
       { account_id: "A01", service: "Business Gmail", owner: "Clara", purpose: "owns every store and social account", phase: "now", status: "todo", two_factor: "TRUE" },
       { account_id: "A02", service: "Password manager", owner: "Clara", purpose: "shared vault with Kyle", phase: "now", status: "todo", two_factor: "TRUE" },

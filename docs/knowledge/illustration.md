@@ -56,6 +56,19 @@ spend as little as possible finding out a page is wrong.
 - T-0025 (character sheets) passed QC on its third attempt. That was with the Grok image model, so it says little about the current one. [proven, checked 2026-11-01] [handoff](../HANDOFF.md)
 - T-0039 (24 draft pictures) came out on-model and close to final, with three small faults that only a read-through found: no tickle face on p16 before p17's ACHOO, a doodle in the outer 4% of p24, an ink speckle on p10. [proven, checked 2026-11-01] [handoff](../HANDOFF.md)
 
+## Series continuity (Book 1 storyboard v2, 2026-11-12)
+
+- Every recurring character, place and prop has one canon look and a reference image in the series bible, section 7b; pass that reference whenever the thing appears (lessons L-0028 and L-0029). [proven, checked 2026-11-12] [series bible](../brand/series-bible.md)
+- A setting sheet works like a character sheet: one empty wide view of the place (`kind=sheet`, $0.15) passed on every page made the playground match on 20 of 20 drafts; before it, the slide, swings and tower changed from page to page. [proven, checked 2026-11-12] [playbook](../playbook.md)
+- Passed as a reference, a setting sheet's layout gets copied (gate in the same corner, characters small) unless the prompt says to frame close on the characters with the place behind them from a fresh angle. [proven, checked 2026-11-12]
+- A sound word in the prompt gets painted: "ACHOO!" appeared on p7 when the prompt said it; describing "the big sneeze" fixed it. [proven, checked 2026-11-12]
+- "A charcoal-grey cap covering her head" drew a baseball cap on p13; "charcoal-grey fur on the top of her head and both ears" fixed it. Name markings as fur. [proven, checked 2026-11-12]
+- During a sneeze (eyes shut) the model dropped all her markings once (p17); stating that she keeps her markings while sneezing fixed it. [proven, checked 2026-11-12]
+- Some drafts came back with a cream painted border (p6, p15); "the painting fills the square edge to edge" fixed it on the retry. [proven, checked 2026-11-12]
+- An old draft passed as the first reference carries its composition: cover A kept its sky-hung swing ropes. Drop it and describe the layout in words (L-0022). [proven, checked 2026-11-12]
+- Car direction was wrong three times on p4: twice the words "pointing to the right" were ignored, and when the playground was moved to the left the model mirrored the whole scene, car still leaving it. A side or front view lets the model read the road as where the car came from; next method: the car seen from behind, driving up the road toward the playground ahead. [proven, checked 2026-11-12]
+- Measured: 20 page drafts plus 11 redraws, $2.48, about 25 seconds each with Nano Banana 2 at 1K; 9 of 20 pages needed a redraw. [proven, checked 2026-11-12]
+
 ## Open questions
 
 - B2: how many references help? The model takes five; videograph found a third view of a character was paid for and unused. [unproven, checked 2026-11-11]

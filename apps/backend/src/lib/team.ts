@@ -49,6 +49,8 @@ const GRANTS: Record<TeamRole, Record<string, Grant>> = {
     skus: { append: true, update: true },
     requests: { append: true, update: true },
     lessons: { append: true },
+    // The series canon (Miss M's Bible): Clara keeps it on the panel; the Orchestrator adds what Kyle or Clara decide.
+    canon: { append: true, update: true },
   },
   story_producer: { pages: { append: true, update: true, columns: ["product_id", "page_number", "text_draft", "art_brief", "characters"] }, assets: OWN_ASSETS },
   illustrator: { pages: { update: true, columns: ["art_asset_id"] }, assets: OWN_ASSETS },
@@ -61,7 +63,7 @@ const GRANTS: Record<TeamRole, Record<string, Grant>> = {
 };
 
 /** New rows on these tabs always get their ID from the tool. */
-const MINTED_ONLY = ["tasks", "requests", "lessons", "content", "research"];
+const MINTED_ONLY = ["tasks", "requests", "lessons", "content", "research", "canon"];
 /** Tabs where a paused or retired product closes its rows to the team (L-0009). */
 const PRODUCT_WORK = ["tasks", "products", "skus", "pages", "listings", "plans", "content", "assets"];
 /** Set by the tool on every write, never by a role. */
@@ -109,6 +111,7 @@ const MINT: Record<string, (ids: string[], row: Partial<Row>) => string> = {
     return nextId(ids, new RegExp(`^${stem}-(\\d+)$`), (n) => `${stem}-${pad(n, 2)}`);
   },
   research: (ids) => nextId(ids, /^RS-(\d{4})$/, (n) => `RS-${pad(n, 4)}`),
+  canon: (ids) => nextId(ids, /^CN-(\d+)$/, (n) => `CN-${pad(n, 2)}`),
   plans: (ids, row) => nextId(ids, new RegExp(`^MP-${row.product_id}-(\\d+)$`), (n) => `MP-${row.product_id}-${pad(n, 2)}`),
   listings: (_ids, row) => `${row.sku}-${row.channel}`,
 };
@@ -238,6 +241,10 @@ function defaults(board: Board, role: TeamRole, tab: string, row: Partial<Row>, 
   } else if (tab === "content") {
     need("product_id", "task_id", "channel", "content_type", "scheduled_for");
     row.status = "draft";
+  } else if (tab === "canon") {
+    need("kind", "name", "look");
+    row.applies_to ||= "series";
+    row.status ||= "active";
   } else if (tab === "research") {
     need("topic", "research_type", "finding", "confidence");
     Object.assign(row, { date: row.date || nyDay(now), status: "new" });
@@ -385,6 +392,11 @@ export function planReview(board: Board, taskId: string, verdict: string, notes:
 export function isPagePicture(role: string, assetType: string, opts: Record<string, string>, fileName = ""): boolean {
   if (role !== "illustrator" || assetType !== "page_art" || !opts.page) return false;
   return !/ink|lines?$/i.test(opts.version ?? "") && !/[_-]ink\b/i.test(fileName);
+}
+
+/** The active canon rows that apply to a book: the whole series' plus that book's own. */
+export function canonFor(rows: Row[], productId: string): Row[] {
+  return rows.filter((c) => c.status !== "retired" && (!c.applies_to || c.applies_to === "series" || c.applies_to.split(",").map((s) => s.trim()).includes(productId)));
 }
 
 /** A sweep that began longer ago than this is taken as crashed, and a new one may start. */

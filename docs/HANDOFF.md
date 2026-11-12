@@ -93,6 +93,27 @@ dispatcher starts that agent".
 - New lessons: L-0021 to L-0027. `maxAttemptsPerImage` is 4 (was 3) in `formats/picture-book.json`.
 - The author name "Clarette Kiddle" is set on MM-B02 (written through the Orchestrator's role: the `kyle` bot role is read-only; Kyle's own writes are `npm run task/lesson/qc`).
 
+## 2026-11-12 evening: consistency pass (Kyle, in a Claude Code session)
+
+- **Series canon:** `docs/brand/series-bible.md` section 7b lists how every recurring character, place and prop
+  always looks, with its reference asset (Miss M, string, Mama, Papa, Gussie and parents, playground kids, the
+  window-seat room, the home garden, the house, the yellow family car, the playground, the sneeze). Lessons
+  L-0028 (consistency, the playground sheet) and L-0029 (series continuity) carry it into every brief.
+  The Drive copy of the bible (MM Brand) still needs section 7b.
+- **Playground setting sheet** A-T0040-202906u1: pass it on every playground picture.
+- **Miss M's Bible** (panel `/bible`, Clara's More menu, Kyle's too, family read-only): the series canon now lives in
+  MM Core's `canon` tab (14 entries seeded from section 7b; `sheet:setup` ran 11-12). Clara edits or adds entries there;
+  every `bot brief` prints the canon for the task's book; the Orchestrator may add entries (`apply`, IDs CN-NN).
+  Lesson L-0030 holds the prompt wording the model gets wrong.
+- **Cover (T-0040, in_progress):** Kyle chose draft A-T0040-20313028 (Miss M alone on the swing, eyes open,
+  laughing, on the canon playground). The final ($0.30) waits for Kyle's yes.
+- **Storyboard v2 (T-0044, in_progress):** drafts of p1, p3-p7, p9, p10, p12-p23 drawn to the canon, Clara's
+  11-02 and 11-12 notes worked in; sheet A-T0044-212227ea; drafts A-T0044-2117..2122, not on the pages rows
+  yet. Open: p4's car points away from the playground (3 tries; the model mirrors the scene; next try: the car seen from behind, driving up the road to the playground), p21 shows two towers, p18
+  one dog parent. Waiting for Kyle's picks, the p8/p11 cut decision, and a budget for finals.
+- **T-0032** (pp12-13) is `blocked`, parked to free an illustrator slot; nothing in it changed. `start` resumes it.
+- Spend 11-12: $3.19 (estimates, 39 pictures), of which $2.48 storyboard (31 drafts), $0.56 cover drafts, $0.15 playground sheet.
+
 ## Next session starts here
 
 Where we are (2026-11-12): Book 1's final art is done for p3 and p12-p15; Clara's Script step is open and she can

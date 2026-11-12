@@ -104,3 +104,7 @@ export const LINE: Record<string, string> = { OL: "Ollie's Firsts", MM: "The Adv
 /** "Ollie's Firsts · Book 1" — the series and book number, when the Sheet has them. */
 export const bookNumber = (p?: Record<string, string>) =>
   p ? [LINE[p.line] ?? p.line, p.series_no ? `Book ${p.series_no}` : ""].filter(Boolean).join(" · ") : "";
+
+/** Miss M's Bible: the canon tab's kinds, as section titles and as "add" choices. */
+export const CANON_KIND: Record<string, string> = { character: "Characters", place: "Places", prop: "Things", moment: "Moments", style: "The look" };
+export const CANON_KIND_ONE: Record<string, string> = { character: "A character", place: "A place", prop: "A thing", moment: "A moment", style: "The look" };

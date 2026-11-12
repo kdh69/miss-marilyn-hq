@@ -99,6 +99,8 @@ signature: kids wait for it, shout it, and fake-sneeze along.
 - Nobody is hurt or embarrassed in a mean way. Everyone laughs *with* Miss M.
 - The art shows the sneeze as a clear, readable moment: eyes squeezed shut, small puff lines,
   things flying. The word "ACHOO!" is set by the Builder as text, never drawn into the art.
+- The build-up is a happy tickle face (nose wrinkled, one eye half-closed, a wobbly smile), never
+  scared or angry (Clara, 2026-11-02). The sneeze is drawn the same way every time: section 7b.
 
 ## 5. Refrain
 
@@ -123,9 +125,11 @@ classrooms are much easier to draw and read, and the photo page keeps the real-c
 ### Miss Marilyn ("Miss M") — the star
 
 - **Role:** the hero of every book. Every story is told through her eyes (third person).
-- **Looks:** [TO FILL FROM PHOTOS: coat colours and markings], [TO FILL FROM PHOTOS: eye colour],
-  [TO FILL FROM PHOTOS: size and build], [TO FILL: collar colour and any tag/charm],
-  [TO FILL: any signature accessory].
+- **Looks** (as drawn on the character sheets, 2026-11-12; *Clara to confirm against her photos*):
+  a small fluffy white cat with charcoal-grey fur on the top of her head and both ears, large round
+  olive-green eyes, a pink nose with a brown-grey smudge beside it (her beauty mark), and a fluffy
+  grey striped tail; no collar; her signature thing is a thin red string. The full canon is in
+  section 7b.
 - **Personality** (*draft — Clara to confirm*): curious first, cautious second. Asks lots of
   questions. Gets excited fast, worries a little, then tries anyway. Kind, a bit silly, loves a
   cozy spot and a sunbeam. Never naughty on purpose; her mix-ups come from curiosity.
@@ -157,14 +161,16 @@ classrooms are much easier to draw and read, and the photo page keeps the real-c
 
 ### Mama — Miss M's mum (cat)
 
-- **Looks:** [TO FILL: coat colours and markings], [TO FILL: signature item].
+- **Looks:** soft cream with pale ginger patches, about 1.5 x Miss M's height, never bright orange
+  (section 7b). [TO FILL: signature item].
 - **Personality** (*draft — Clara to confirm*): calm, warm, the one who explains things.
   Uses gentle questions ("What do you think will happen next?"). Gives the big hug at the
   worried moment.
 
 ### Papa — Miss M's dad (cat)
 
-- **Looks:** [TO FILL: coat colours and markings], [TO FILL: signature item].
+- **Looks:** grey tabby with darker grey stripes, a little taller than Mama (section 7b).
+  [TO FILL: signature item].
 - **Personality** (*draft — Clara to confirm*): playful and a little goofy. Makes jokes when
   Miss M is nervous, invents silly games for waiting (in line, in the car, on the plane).
   Sometimes gets it a bit wrong and laughs at himself.
@@ -204,13 +210,51 @@ photos are in MM Brand → photos → inbox (`gussie-*`).
 
 ## 7. World and setting
 
-- **Home:** a cozy house with a big sunny window seat (Miss M's favourite spot, *draft*), a
-  garden, a front door with a step. [TO FILL: any real details from Clara's home worth mirroring]
+- **Home:** a cozy house (blue walls, red roof) with a big sunny window seat (Miss M's favourite
+  spot) looking out on the family's own garden, a front door with a step. How each one is drawn:
+  section 7b. [TO FILL: any real details from Clara's home worth mirroring]
 - **Nonna and Poppy's house:** a car ride away; warm kitchen, Poppy's garden and armchair.
 - **Town:** small, friendly, walkable: a school, a park, a little shop, a library. No real
   place names, no real businesses, no logos.
 - **Time:** today-ish but timeless. Phones and screens appear rarely and never as the solution.
 - **Seasons:** each book can sit in a season to match its release (snow, beach, autumn leaves).
+
+## 7b. Continuity: how the series always looks (canon)
+
+Kyle, 2026-11-12: *"It needs to feel like the same book and always be consistent, like a real series."*
+Every recurring character, place and prop is drawn the same way on every page of every book.
+Pass its reference image(s) whenever that thing appears, and describe it in its words.
+
+**The live canon is MM Core's `canon` tab**, which Clara keeps up to date on the panel's
+**Miss M's Bible** page (`/bible`); every `npm run bot -- <role> brief` prints it. The table below
+is the seed it started from on 2026-11-12 and may be older than the tab: when they differ, the tab
+wins. Changing the canon is Clara's or Kyle's call (the Orchestrator adds what they decide). A new
+place or prop that will appear on more than one page gets its own setting sheet first (`kind=sheet`,
+$0.15), is added to the canon, and only then goes into pages. Lessons L-0028 to L-0030 carry the
+short version into every brief.
+
+| What | How it always looks | Reference (asset) |
+|---|---|---|
+| **Miss Marilyn** | Small fluffy white cat, walks upright. Charcoal-grey **fur** on the top of her head and both ears (prompt it as fur: "cap" once drew a baseball cap). Large round olive-green eyes. Pink nose with one soft round brown-grey smudge touching the **left side of the nose as you look at the picture**, about the nose's size (her beauty mark, on every page). Fluffy grey tail with darker horizontal stripes. Clearly smaller than Mama and Papa. | sheet A-T0025-40; expressions A-T0025-42; line-up A-T0025-46; cover A-T0040-20313028 |
+| **Red string** | One thin, wavy red cord like a shoelace (`#D32F2F`), in or looped around a paw on every page she appears. Never a yarn ball, bow or ribbon; the only red thing on her. | A-T0025-40 |
+| **Mama** | Soft cream cat with pale ginger patches on head and back, upright, about 1.5 x Miss M's height. Never bright orange. | A-T0025-05; line-up A-T0025-46 |
+| **Papa** | Grey tabby with darker grey stripes, upright, a little taller than Mama. | A-T0025-07; line-up A-T0025-46 |
+| **Gussie** (Book 1) | Young lean black-and-tan pup, Miss M's size, on four paws, tan eyebrow dots, muzzle, cheeks, chest and lower legs, ears folded forward, warm brown eyes, bare neck (no collar). | A-T0025-15; photos P-20261030-001, -002 |
+| **Gussie's mum and dad** (Book 1) | Two gentle adult black-and-tan dogs, like a grown-up Gussie. Kept a little off to the side, never looming over the pups (Clara, 11-02). | storyboard p10 A-T0044-211928py |
+| **Playground kids** (Book 1) | A little brown bunny, a red squirrel and a small hedgehog, small and in the background. | storyboard p5 A-T0044-21183178 |
+| **The window-seat room** (home) | Cream curtains, a big white-framed window, a wooden window seat in a warm sunbeam by day; at night a soft cushion, moonlight and stars. Miss M's favourite spot; opens and closes the book. | day p3 A-T0044-211802k0; night p23 A-T0044-2122199u |
+| **The home garden** (seen from the window) | Green lawn, pink roses, red and yellow tulips, tall sunflowers, a stepping-stone path, a round apple tree, a small birdhouse on a post, a white picket fence. It is a home garden: no swings, slides or play equipment. | p3 A-T0044-211802k0 |
+| **The house** (outside) | Blue walls, red roof, warm lit windows. No sheet yet: make one before the house is a page's main subject. | p22 A-T0044-2122051u, p23 |
+| **The family car** | A little rounded butter-yellow car with round headlights, windows open. Papa drives, Mama sits beside him, Miss M rides in the back, everyone buckled in. | p4 A-T0044-211816y4 (the look; its direction is wrong) |
+| **The playground** (Book 1) | Only these pieces: honey-wood tower with a red pointed roof and a sky-blue slide; honey-wood A-frame swing set with two rope swings with flat wooden seats; honey-wood seesaw on a sky-blue base; entrance gate with sky-blue posts; brown wooden rail fence with pink, butter-yellow and white flowers; round soft trees and green hills. | setting sheet A-T0040-202906u1 |
+| **The sneeze** | Three steps (section 4): tickle face (nose wrinkled, one eye half-closed, a wobbly happy smile; never scared or angry, Clara 11-02), the sneeze (eyes squeezed shut, mouth open, one small soft white puff, bits of grass or petals flying, one paw lifted), then everyone laughing. No word drawn in. | Clara chose the look of A-T0039-13 (old p7); storyboard p7 A-T0044-2119001m |
+| **Style** | Watercolour and ink, soft warm linework, light paper texture, the style guide's palette, full bleed (no painted border). | cover A-T0040-20313028; storyboard sheet A-T0044-212227ea |
+
+**Prompt wording that works** (measured on the 2026-11-12 storyboard): describe each thing in the
+words above; name her head marking as fur; keep sound words (achoo, whoosh) out of prompts or the
+model paints them; when passing the playground sheet, say "frame close on the characters, the
+playground behind them from a fresh angle", or it copies the sheet's layout; ask for the painting
+to fill the square edge to edge, or some pages come back with a cream border.
 
 ## 8. Tone and writing rules
 

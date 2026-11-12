@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Row } from "../packages/core/src/sheet";
-import { isPagePicture, latestReview, mintAssetId, mintCostId, planMove, planOps, planReview, planSweep, sweepHeldBy, type Board } from "../apps/backend/src/lib/team";
+import { canonFor, isPagePicture, latestReview, mintAssetId, mintCostId, planMove, planOps, planReview, planSweep, sweepHeldBy, type Board } from "../apps/backend/src/lib/team";
 
 const NOW = "2026-11-11T15:00:00Z";
 const task = (over: Partial<Row>): Row => ({
@@ -32,6 +32,26 @@ function board(over: Partial<Record<string, Row[]>> = {}, config: Record<string,
 }
 const log = (actor: string, from: string, to: string, message = ""): Row => ({ ts: NOW, actor, task_id: "T-0026", from_status: from, to_status: to, message });
 const working = [log("orchestrator", "", "todo"), log("illustrator", "todo", "in_progress")];
+
+describe("the series canon (Miss M's Bible)", () => {
+  const canon = [
+    { canon_id: "CN-01", name: "Miss Marilyn", applies_to: "series", status: "active" },
+    { canon_id: "CN-05", name: "Gussie", applies_to: "MM-B02", status: "active" },
+    { canon_id: "CN-09", name: "Old house", applies_to: "", status: "retired" },
+    { canon_id: "CN-10", name: "Grandma's kitchen", applies_to: "MM-B01, MM-B03", status: "active" },
+  ] as Row[];
+  it("a book gets the series canon plus its own entries, never retired ones", () => {
+    expect(canonFor(canon, "MM-B02").map((c) => c.canon_id)).toEqual(["CN-01", "CN-05"]);
+    expect(canonFor(canon, "MM-B01").map((c) => c.canon_id)).toEqual(["CN-01", "CN-10"]);
+  });
+  it("the Orchestrator adds an entry with a minted ID; makers can't write the canon", () => {
+    const b = board({ canon });
+    const [op] = planOps(b, "orchestrator", [{ tab: "canon", set: { kind: "place", name: "The park pond", look: "A round pond with ducks." } }], NOW);
+    expect(op).toMatchObject({ kind: "append", id: "CN-11", row: { canon_id: "CN-11", name: "The park pond", applies_to: "series", status: "active" } });
+    expect(() => planOps(b, "orchestrator", [{ tab: "canon", set: { kind: "place", name: "No words" } }], NOW)).toThrow(/look is required/);
+    expect(() => planOps(b, "illustrator", [{ tab: "canon", id: "CN-01", set: { look: "A tabby." } }], NOW)).toThrow();
+  });
+});
 
 describe("row writes by role", () => {
   it("the Producer writes draft text and never Clara's", () => {
