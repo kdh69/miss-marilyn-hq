@@ -30,7 +30,7 @@ every agent needs go in the `lessons` tab; the evidence stays here and in `docs/
 | Money spent on pictures not kept or still faulty | $0.90 on C-0009, C-0010 and C-0012, plus C-0007 kept with two faults; all from faults the draft handed down | 2026-11-11 |
 | Free "shrunk draft on a cream canvas" reference | helped p14 partly (tail clear, a cream vignette added), failed p15 (crowded scene) | T-0033 |
 | Setting sheet (Nano Banana Pro, 2K, 3:2) for the playground | $0.15, first try; passed on every page, the playground matched on 20 of 20 drafts | T-0040, T-0044, 2026-11-12 |
-| Whole-book storyboard of drafts (Nano Banana 2, 1K, 3 to 4 references) | 20 pages + 11 redraws on 9 pages = $2.48, about 25 s a picture; 11 of 20 right first time; p4 (car direction) still wrong after 3 tries | T-0044, 2026-11-12 |
+| Whole-book storyboard of drafts (Nano Banana 2, 1K, 3 to 4 references) | 20 pages + 12 redraws on 9 pages = $2.56, about 25 s a picture; 11 of 20 right first time; p4 (car direction) took 4 tries, fixed by a view from behind | T-0044, 2026-11-12 |
 | Cover drafts to one Kyle liked | 7 drafts, $0.56, plus the $0.15 playground sheet | T-0040, 2026-11-12 |
 
 Planning prices for pictures (list prices, not yet confirmed on a bill): draft $0.08, character

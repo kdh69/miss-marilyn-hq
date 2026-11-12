@@ -109,10 +109,10 @@ dispatcher starts that agent".
   laughing, on the canon playground). The final ($0.30) waits for Kyle's yes.
 - **Storyboard v2 (T-0044, in_progress):** drafts of p1, p3-p7, p9, p10, p12-p23 drawn to the canon, Clara's
   11-02 and 11-12 notes worked in; sheet A-T0044-212227ea; drafts A-T0044-2117..2122, not on the pages rows
-  yet. Open: p4's car points away from the playground (3 tries; the model mirrors the scene; next try: the car seen from behind, driving up the road to the playground), p21 shows two towers, p18
+  yet. p4 fixed on the 4th try with a view from behind the car (A-T0044-2154002o); storyboard sheet v2 A-T0044-215433bv. Open: p21 shows two towers, p18
   one dog parent. Waiting for Kyle's picks, the p8/p11 cut decision, and a budget for finals.
 - **T-0032** (pp12-13) is `blocked`, parked to free an illustrator slot; nothing in it changed. `start` resumes it.
-- Spend 11-12: $3.19 (estimates, 39 pictures), of which $2.48 storyboard (31 drafts), $0.56 cover drafts, $0.15 playground sheet.
+- Spend 11-12: $3.27 (estimates, 40 pictures), of which $2.56 storyboard (32 drafts), $0.56 cover drafts, $0.15 playground sheet.
 
 ## Next session starts here
 

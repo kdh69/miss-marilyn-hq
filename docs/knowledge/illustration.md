@@ -66,8 +66,8 @@ spend as little as possible finding out a page is wrong.
 - During a sneeze (eyes shut) the model dropped all her markings once (p17); stating that she keeps her markings while sneezing fixed it. [proven, checked 2026-11-12]
 - Some drafts came back with a cream painted border (p6, p15); "the painting fills the square edge to edge" fixed it on the retry. [proven, checked 2026-11-12]
 - An old draft passed as the first reference carries its composition: cover A kept its sky-hung swing ropes. Drop it and describe the layout in words (L-0022). [proven, checked 2026-11-12]
-- Car direction was wrong three times on p4: twice the words "pointing to the right" were ignored, and when the playground was moved to the left the model mirrored the whole scene, car still leaving it. A side or front view lets the model read the road as where the car came from; next method: the car seen from behind, driving up the road toward the playground ahead. [proven, checked 2026-11-12]
-- Measured: 20 page drafts plus 11 redraws, $2.48, about 25 seconds each with Nano Banana 2 at 1K; 9 of 20 pages needed a redraw. [proven, checked 2026-11-12]
+- Car direction was wrong three times on p4: twice the words "pointing to the right" were ignored, and when the playground was moved to the left the model mirrored the whole scene, car still leaving it. Drawing the car from behind, driving up the road to the playground ahead (faces through the side windows), worked first time (A-T0044-2154002o). For a journey, put the camera behind the vehicle. [proven, checked 2026-11-12]
+- Measured: 20 page drafts plus 12 redraws, $2.56 (Kyle approved the last $0.06 over the $2.50 cap), about 25 seconds each with Nano Banana 2 at 1K; 9 of 20 pages needed a redraw. [proven, checked 2026-11-12]
 
 ## Open questions
 
