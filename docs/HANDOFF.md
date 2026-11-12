@@ -111,9 +111,17 @@ continue; S1 (hardening) is built and tested but has never run live.
    notification to Kyle. **Its picture budget is $0** (it plans, reviews, runs QC, applies Clara's answers and reports what art
    is ready and its cost). To let it make pictures, edit the task's prompt (Kyle says "sweep budget $X" and Claude changes it
    with `update_trigger`): suggested $3 a sweep once two sweeps have run clean. First run: 2026-11-12 07:43 New York (changed from 9am/6pm to 8am/5pm by Kyle on 11-12).
+3b. **fal credit: about $15 left (Kyle, 11-12): conserve it.** The Sheet's `config!daily_bot_cap_usd` is **$5 until 00:10 New York
+   on 11-12, then $3**: a one-shot scheduled task `trig_01HVSMCLd2DwScy8eyQJzK6W` lowers it (it refuses if the new day already shows
+   $2.50 spent). Why not $3 at once: the backend's `spendGuard` sets `system_status` to HALT at its next tick when the day's spend
+   is at or above the cap, and that day was already $4.70. Rest of Book 1 is about 17 pictures plus the cover: about $7 if each
+   lands first time, about $10 with retries. Drafts first, show Kyle the draft before each $0.30 final. Check fal's dashboard
+   and tell Claude the real balance.
 4. **Picture budget** is now `perImageCapUsd` = 3.5 x the kind's price per picture a task covers ($1.05 a page), attempts
    4 a round and 6 ever, day cap $15 (`formats/picture-book.json`).
-5. Still open for the remaining pages: p1, p4-p11, p16-p24 and the cover. Clara's eight picture notes of 11-02 (p1, p4-p8,
+5. **Clara's 11-02 notes:** answered 11-12 with request R-0005 (all 24 pages stay for now; her notes get worked into the pictures after
+   she finishes her own wording; pages 8 and 11 get looked at together). The eight notes are marked `seen` (not done): they still
+   decide T-0026 and T-0028-T-0031, and cutting p8 or p11 is Kyle's call. Still open for the remaining pages: p1, p4-p11, p16-p24 and the cover. Clara's eight picture notes of 11-02 (p1, p4-p8,
    p10, p11) are unanswered and decide T-0026 and T-0028-T-0031; T-0034-T-0037 are cleared. T-0032 and T-0033 are `in_progress`
    with review-fail notes (p13 and p14 carry accepted edge exceptions); re-review them first. T-0041-T-0043 are held.
 6. After Clara answers anything, run one backend tick by hand (Actions, MM backend tick); the schedule lags hours.
@@ -272,6 +280,9 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
   from the brief and need only QC-passed art.
 
 ## Code — next up
+
+- **`npm run config -- <key> <value>` for Kyle's own config writes** (none exists; on 11-12 it was a one-off `tsx -e` script through
+  `Core.update`), refusing a daily cap at or below the day's spend so it can't trip the HALT guard.
 
 - **From videograph, not built yet:** a format per product (one `formats/picture-book.json` serves
   every book for now); a second image vendor as fallback (GPT Image 2 there); sweeps that run in
