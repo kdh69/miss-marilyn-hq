@@ -73,5 +73,10 @@ Panel roles: kyle (everything), mom (no costs: Money shows sales only), family (
 what each view shows is `viewer()` in `apps/web/lib/viewer.ts` (Kyle can switch to Clara's view).
 Away from the laptop: see [docs/REMOTE.md](docs/REMOTE.md).
 
-Next up: the first live picture (`FAL_KEY`; `image` is untested against fal from this repo); Etsy publish once API access lands;
-KDP report + Etsy sales import for the Money tab; register photos dropped straight into Drive.
+Consistency is the rule (Kyle, 2026-11-12): every page and every book must look like one series. The canon is
+Miss M's Bible (`canon` tab, panel `/bible`, printed in every brief); lessons L-0028 to L-0030. A new place or prop
+that appears on more than one page gets a setting sheet and a canon entry before any page uses it.
+
+Next up: Kyle picks from Book 1's storyboard v2 (T-0044, sheet A-T0044-215433bv; cover draft A-T0040-20313028),
+decides on cutting p8 and p11, and sets a budget for finals (about $0.30 a page); then finals from the picked drafts.
+Etsy publish once API access lands; KDP report + Etsy sales import for the Money tab; register photos dropped straight into Drive.
