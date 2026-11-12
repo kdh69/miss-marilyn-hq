@@ -199,6 +199,12 @@ Both Miss Marilyn products link the bible in `products.bible_url`.
 11. **Later:** Resend + a verified brand domain (`RESEND_API_KEY`, `NOTIFY_FROM`); a password manager
     (Bitwarden's free plan covers two people); `ANTHROPIC_API_KEY` for automatic QC.
 
+12. **Tidy GitHub branches** (the auto-mode safety check blocked Claude from deleting remote branches on 2026-11-12): delete
+    `claude/festive-cori-oqzavp`, `panel-preview` and `panel-view-toggle` on GitHub (Branches page, trash icon): each has no commit
+    that isn't already on `main`. Decide the Dependabot PR (SDK 1.6, next 15.5.29; green CI, one unmerged commit). Local clones
+    keep only `main`.
+13. **Add `.claude/settings.json`** from spec S1 section 5 (Claude may not write it).
+
 ## Mom — outstanding
 
 - **Read Book 1 on the Script step and rewrite each page in her own words**, then approve it. Builder
