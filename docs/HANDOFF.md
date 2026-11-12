@@ -83,6 +83,17 @@ dispatcher starts that agent".
   - Gussie is a dog, drawn from his photos: assets P-20261030-001/002. Zoey isn't in this book.
 - **Book 2 = MM-B01**: `paused`, `series_no` 2. **Ollie (OL-B01)**: archived. (Unchanged.)
 
+## State at the end of the clean-up (2026-11-12)
+
+- Page pictures now: p3 A-T0027-02, p12 A-T0032-10, p13 A-T0032-13 (4 px of tail fur inside the 4% strip, accepted by Kyle), p15 A-T0033-12
+  (smudge fixed, attempt 4). **p14 is open:** the page shows A-T0033-15, a shrunk and mirror-padded picture with chevron artefacts
+  in the grass; the raw model picture `page_p14_a3.png` (tail 12 px inside the strip, no cream vignette) is only in this session's
+  `.mm-work/` (a cloud session loses it; its recipe is A-T0033-14). Kyle picks: use the raw one with an exception, one more $0.30 final, or keep the padded one.
+- T-0032 and T-0033 stay `in_progress` with review-fail notes; they don't go to Clara. Re-review them after p14 is settled.
+- Spend: $4.62 for 22 pictures on 11-11/11-12 (estimates); the clean-up cap of $3 has $0.56 left. Check fal's dashboard.
+- New lessons: L-0021 to L-0027. `maxAttemptsPerImage` is 4 (was 3) in `formats/picture-book.json`.
+- The author name "Clarette Kiddle" is set on MM-B02 (written through the Orchestrator's role: the `kyle` bot role is read-only; Kyle's own writes are `npm run task/lesson/qc`).
+
 ## Next session starts here
 
 1. Read the playbook's "Costly mistakes" and `knowledge/illustration.md` first. The method that works: **fix the

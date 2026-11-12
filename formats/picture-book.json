@@ -19,7 +19,7 @@
       "pro": { "name": "Nano Banana Pro", "endpoint": "fal-ai/nano-banana-pro", "maxRefs": 5, "usd": { "1K": 0.15, "2K": 0.15, "4K": 0.3 } },
       "fast": { "name": "Nano Banana 2", "endpoint": "fal-ai/nano-banana-2", "maxRefs": 14, "usd": { "1K": 0.08, "2K": 0.12, "4K": 0.16 } }
     },
-    "maxAttemptsPerImage": 3,
+    "maxAttemptsPerImage": 4,
     "taskCapUsd": 6
   }
 }

@@ -23,7 +23,9 @@ every agent needs go in the `lessons` tab; the evidence stays here and in `docs/
 | Final page (Nano Banana Pro, 4K, 3 to 4 references) | 2588 x 2625 px after the crop, no enlargement needed, $0.30 each (C-0006 to C-0009); one page task of one picture took about 2.5 min start to report | T-0027, T-0032, 2026-11-11 |
 | Draft as first reference + "keep this composition" (test B1) | holds at print size, almost pixel for pixel: p3, p12, p13 | T-0027, T-0032 |
 | A fix asked for in words against that reference | ignored: p12 retry kept the tail on the edge and Gussie sitting | T-0032 attempt 2 (C-0009) |
-| The first live sweep's picture spend (estimates, not yet checked against fal's dashboard) | $2.18 of the $3 cap for 8 pictures (1 draft, 7 finals; C-0005 to C-0012) | 2026-11-11 |
+| The first live sweep's picture spend (estimates, not yet checked against fal's dashboard) | $4.62 for 22 pictures (C-0005 to C-0026): $2.18 for the first 8, then $2.44 for the clean-up of p12 to p15 under a second cap | 2026-11-11 to 11-12 |
+| Redraft the draft, then the final (p12, p13, p14, p15) | p12 fixed for $0.46, p15's edge fixed for $0.76, p13 for $0.46 (still 4 px over the 4% strip, accepted by Kyle), p14 for $0.46 (raw tail 12 px over); about $0.45 to $0.80 a page instead of $0.30 to $0.90 of blind retries | T-0032, T-0033 |
+| The model ignores "move her N% right" wording; a layout with explicit positions (x as % of the width) worked on p15 | 3 of 4 tries ignored the shift | T-0032, T-0033 |
 | Attempts per page, finals | p3 1, p12 2 (both faulty), p13 1, p14 2, p15 1 (failed); only p3 and p13 were clean first time (2 of 5 pages) | T-0027, T-0032, T-0033 |
 | Money spent on pictures not kept or still faulty | $0.90 on C-0009, C-0010 and C-0012, plus C-0007 kept with two faults; all from faults the draft handed down | 2026-11-11 |
 | Free "shrunk draft on a cream canvas" reference | helped p14 partly (tail clear, a cream vignette added), failed p15 (crowded scene) | T-0033 |
@@ -48,6 +50,10 @@ Planning prices held on the live run: draft $0.08 and final $0.30 matched the co
 | 2026-11-11 | The Orchestrator cannot set `blocked`, so T-0041 to T-0043 sit in `todo` with "HOLD - DO NOT START" in the brief and show in the board's `start:` line | a risk that a held task is dispatched | Not fixed in code (proposal: a `hold` marker the board respects, or let the Orchestrator move todo to blocked) |
 | 2026-11-11 | The cloud environment didn't allow `missmarilyn.vercel.app` | the panel couldn't be checked | Kyle approved adding the host; check the allowed hosts first on a new environment |
 | 2026-11-11 | A maker reported spending "one more than approved" (3 pictures) when the limit was 2 plus 1 retry | confusion over a cap | L-0024: state the maximum in dollars and pictures, retry included |
+| 2026-11-12 | I called p13 and p15 "good" after looking; the Quality Checker failed them (p13 tail 0.5% from the edge, p15 no nose smudge, a blocking rule) | $0.76 of fixes | L-0027: check each blocking rule one by one before calling a picture good |
+| 2026-11-12 | The Illustrator shrank and mirror-padded p14's final to pull the tail in, leaving chevron artefacts in the grass | a final that can't be used as is | L-0026: final art is the model's output only; stop and ask after the second edge fail |
+| 2026-11-12 | p15 hit the 3-attempt gate (2 drafts and 3 finals counted separately per kind); Kyle raised `maxAttemptsPerImage` to 4 | $0.30 for the fourth final | The gate did its job: it stopped, a person decided. Attempts are counted per task, kind and page |
+| 2026-11-12 | Agent reports miscounted pictures and spend three times (T-0032, T-0033 twice); the costs tab and `kyle board` were right each time | confusion, no money | Always check `kyle rows costs` and the board before relaying a report; Kyle's rule: a dollar maximum, not a picture count (L-0024) |
 | 2026-11-11 | HANDOFF said the author name was open; Clara had answered R-0003 ("Clarette Kiddle") | a stale blocker | L-0025: check requests and mom_queue for Clara's answer before calling a fact open |
 
 ## After every real sweep
