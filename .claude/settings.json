@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": ["Bash(npm run bot *)", "Bash(npm run qc*)", "Bash(npm run doctor*)", "Bash(npm run knowledge*)",
+              "Bash(npm test*)", "Bash(python3 -I apps/backend/preflight/preflight.py *)",
+              "Read(.mm-work/**)", "Write(.mm-work/**)"],
+    "deny": ["Bash(curl *fal.run*)", "Bash(curl *fal.ai*)", "Bash(curl *googleapis*)", "Read(.env)", "Write(.env*)"]
+  },
+  "hooks": { "SessionStart": [{ "hooks": [{ "type": "command", "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/setup.sh\" --quiet", "timeout": 300 }] }] }
+}
