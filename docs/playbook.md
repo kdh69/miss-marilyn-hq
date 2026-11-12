@@ -69,3 +69,14 @@ Planning prices held on the live run: draft $0.08 and final $0.30 matched the co
 - The budget gate could print the remaining dollars and pictures to the maker.
 - A check that `products.author_name` is empty while a request answered it (R-0003).
 - An experiment to run with Kyle's yes (cap $0.70, 3 pictures): on p12, a final with sheets only and the layout in words, against a redrawn $0.08 draft plus a final; whichever fixes the tail and Gussie's pose for less is the method for the rest of the book.
+
+## S1 and the picture ledger (2026-11-12)
+
+- Built and tested in memory (187 tests), never run live: collision-proof costs, content and asset IDs; reserve a costs row
+  before the paid call and settle it after (a refused or failed call is $0, a timeout is billed); a sweep lock
+  (`config!sweep_started_at`, 90 minutes); the review's findings F2 to F12; the budget is 3.5 x the price per picture a task
+  covers (Kyle's call, from the first evening's 3.5 final attempts a page).
+- One slip while building: a test reached the real fal once with no key; refused, no job, nothing billed. The image tests now
+  strip `FAL_KEY` and the Google credentials from the environment and take only a fake generator.
+- The edge check (`edges`, and after every print-size `image`) caught a cream border exactly and missed grey tail fur on an
+  edge until its threshold was lowered: it flags where to look; a person still decides.

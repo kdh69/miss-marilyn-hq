@@ -1,6 +1,6 @@
 # S1 — Hardening before the first live sweep
 
-**Status:** not started · **Repo:** miss-marilyn-hq · **Needs first:** nothing · **Spends:** $0
+**Status:** built 2026-11-12, tested in memory (187 tests), never run live; F6 decided: 3.5 x the price a picture · **Repo:** miss-marilyn-hq · **Needs first:** nothing · **Spends:** $0
 
 ## Why
 

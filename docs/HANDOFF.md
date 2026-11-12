@@ -23,7 +23,7 @@ and [`knowledge/illustration.md`](knowledge/illustration.md); the mistakes are i
 budget gate; art goes sheets → drafts → finals; files are checked for print specs before any review;
 a Stop hook checks each agent's report against the Sheet; a critic writes lessons after each sweep;
 and `docs/knowledge/` holds what is known, labelled and dated. The picture path is ported from code
-that works in videograph but **has not made a picture here yet**: it needs `FAL_KEY` (2).
+that works in videograph and **has now made 22 pictures here** (11-11 and 11-12, $4.62 estimated).
 
 ## How it fits together
 
@@ -86,24 +86,37 @@ dispatcher starts that agent".
 ## State at the end of the clean-up (2026-11-12)
 
 - Page pictures now: p3 A-T0027-02, p12 A-T0032-10, p13 A-T0032-13 (4 px of tail fur inside the 4% strip, accepted by Kyle), p15 A-T0033-12
-  (smudge fixed, attempt 4). **p14 is open:** the page shows A-T0033-15, a shrunk and mirror-padded picture with chevron artefacts
-  in the grass; the raw model picture `page_p14_a3.png` (tail 12 px inside the strip, no cream vignette) is only in this session's
-  `.mm-work/` (a cloud session loses it; its recipe is A-T0033-14). Kyle picks: use the raw one with an exception, one more $0.30 final, or keep the padded one.
-- T-0032 and T-0033 stay `in_progress` with review-fail notes; they don't go to Clara. Re-review them after p14 is settled.
+  (smudge fixed, attempt 4). p14 uses the raw model picture A-T0033-20 (tail 12 px inside the 4% strip, accepted by Kyle 11-12; the shrunk and
+  mirror-padded A-T0033-15 is superseded).
+- T-0032 and T-0033 stay `in_progress` with review-fail notes; they don't go to Clara. p14 now uses the raw model picture (A-T0033-20; tail 12 px inside the strip, accepted).
 - Spend: $4.62 for 22 pictures on 11-11/11-12 (estimates); the clean-up cap of $3 has $0.56 left. Check fal's dashboard.
 - New lessons: L-0021 to L-0027. `maxAttemptsPerImage` is 4 (was 3) in `formats/picture-book.json`.
 - The author name "Clarette Kiddle" is set on MM-B02 (written through the Orchestrator's role: the `kyle` bot role is read-only; Kyle's own writes are `npm run task/lesson/qc`).
 
 ## Next session starts here
 
-1. Read the playbook's "Costly mistakes" and `knowledge/illustration.md` first. The method that works: **fix the
-   draft, then make the final.** Finals copy a draft's composition and its faults (edge contact, a sitting Gussie).
-   A redrawn draft is $0.08; a final is $0.30.
-2. Kyle's yes and a new cap are needed before any picture. Plan he approved in principle: redraw the problem drafts
-   (p12, p15, p16/p17, with margins and Gussie standing written in; about $0.32), look at them, then the finals.
-3. Check the five pictures against fal's dashboard ($1.28 for the first five, $2.18 after the 8th, all estimates).
-4. After Clara answers anything, run one backend tick by hand (Actions, MM backend tick); the schedule lags hours.
+Where we are (2026-11-12): Book 1's final art is done for p3 and p12-p15; Clara's Script step is open and she can
+continue; S1 (hardening) is built and tested but has never run live.
 
+1. **Read first:** the playbook's "Costly mistakes", `knowledge/illustration.md`, lessons L-0021 to L-0027, and the
+   per-page flow in `docs/TEAM.md`. The method: a draft with the layout in words and the margins, measure the edges
+   (`npm run bot -- <role> edges <file>`), check every blocking rule one by one, then the final; change the method on a
+   retry; stop and ask after the second fail of one rule; never edit a picture after the model made it.
+2. **S1 live check, $0.08:** run one draft through `image` (Kyle's yes and a cap first) to see reserve-and-settle work against
+   fal and the real Sheet. Until a live sweep shows it holding, run makers **one at a time** (the sweep skill says so).
+   Then run `npm run sheet:setup` once (it only adds the config row `sweep_started_at`; the bot adds it itself if missing).
+3. **Scheduled sweeps, 9am and 6pm New York** (Kyle likes this): a Claude scheduled task that runs `/sweep` in the
+   `miss-marilyn-hq` cloud environment. Not created yet: first the S1 live check, and a standing budget Kyle sets
+   (for example a dollar maximum per sweep and per page); the sweep stops and tells Kyle beyond it.
+4. **Picture budget** is now `perImageCapUsd` = 3.5 x the kind's price per picture a task covers ($1.05 a page), attempts
+   4 a round and 6 ever, day cap $15 (`formats/picture-book.json`).
+5. Still open for the remaining pages: p1, p4-p11, p16-p24 and the cover. Clara's eight picture notes of 11-02 (p1, p4-p8,
+   p10, p11) are unanswered and decide T-0026 and T-0028-T-0031; T-0034-T-0037 are cleared. T-0032 and T-0033 are `in_progress`
+   with review-fail notes (p13 and p14 carry accepted edge exceptions); re-review them first. T-0041-T-0043 are held.
+6. After Clara answers anything, run one backend tick by hand (Actions, MM backend tick); the schedule lags hours.
+   (Panel-starts-the-tick, spec S3, needs a GitHub token in Vercel; Kyle postponed it.)
+7. **For Kyle to add by hand** (Claude may not write it): `.claude/settings.json` from spec S1 section 5 (allows the team's
+   own commands without prompts, blocks direct calls to fal and Google, runs setup at session start).
 
 ## Rules the bots follow (all in the `lessons` tab)
 

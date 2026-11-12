@@ -1,5 +1,5 @@
 # Image models
-Last reviewed: 2026-11-11
+Last reviewed: 2026-11-12
 
 What `npm run bot -- <role> image` calls, what it costs and how it fails. The models and the fal.ai
 plumbing are the ones Kyle's video repo (videograph) uses for its reference images. The first pictures were made from this repo on 2026-11-11 (one draft, seven finals); what that
@@ -7,7 +7,9 @@ confirmed is marked proven below.
 
 ## Rules
 
-- Every paid picture goes through `image`, never a direct call: it checks the caps first and writes the costs row. [proven, checked 2026-11-11] [bot.ts](../../apps/backend/src/bot.ts)
+- Every paid picture goes through `image`, never a direct call: it checks the caps first and keeps the costs row. [proven, checked 2026-11-11] [bot.ts](../../apps/backend/src/bot.ts)
+- `image` reserves the costs row (note ends `· reserved`) before the call, re-checks the caps against every row reserved meanwhile, and settles the row after: a parallel call can no longer pass on a stale snapshot, and a crash leaves a row, not a paid call with no record. [videograph, checked 2026-11-12] [gates.ts](../../apps/backend/src/lib/gates.ts)
+- A row ending `· unconfirmed (request …)` means fal had the job when the call timed out or the download failed: treat it as billed until fal's dashboard says otherwise, and don't retry at once. [unproven, checked 2026-11-12] [image.ts](../../apps/backend/src/lib/image.ts)
 - Use `kind=draft` while the composition is still open and `kind=page` only for a picture you expect to keep. [proven, checked 2026-11-11] [picture-book.json](../../formats/picture-book.json)
 - On `Forbidden`, stop after one attempt and tell Kyle: it usually means the fal account has no credit. [videograph, checked 2026-11-04]
 - On an empty result, try once more unchanged before rewording. [videograph, checked 2026-11-04]
@@ -23,7 +25,10 @@ confirmed is marked proven below.
 | `page`, `cover` (print) | Nano Banana Pro | 4K, 1:1, then cropped to 2588 x 2625 px | $0.30 | (check live) [official, checked 2026-10-18] |
 
 - A full book at print size is 24 pages x $0.30 = $7.20 if every page lands first time, and 24 drafts are $1.92. [unproven, checked 2026-11-11]
-- A task may spend $6 and a day `config!daily_bot_cap_usd` ($15); `image` refuses the call that would pass either. [proven, checked 2026-11-11] [gates.ts](../../apps/backend/src/lib/gates.ts)
+- A day may spend `config!daily_bot_cap_usd` ($15); `image` refuses the call that would bring it to the cap, one picture short of where the backend's spend guard halts every write. [proven, checked 2026-11-11] [gates.ts](../../apps/backend/src/lib/gates.ts)
+- A task's budget is a cap per picture it covers (`perImageCapUsd`, 3.5 x the kind's price: $1.05 a page), not a flat $6: a 24-page task is $25.20, a two-page task $2.10. [unproven, checked 2026-11-12] [picture-book.json](../../formats/picture-book.json)
+- The first evening's clean-up used 3.5 final attempts a page (T-0033: 7 finals on pages 14 and 15), more than 2.5 x the price pays for, so Kyle set the budget at 3.5 x on 2026-11-12; at 3.5 x the attempt limits (4 a round, 6 ever) stop a page before its budget does. [proven, checked 2026-11-12] [playbook](../playbook.md)
+- Attempts at one picture are counted per round (since the task last went `in_progress`), 4 a round, and 6 rows of any kind in a lifetime; released and failed-not-billed rows aren't attempts. [unproven, checked 2026-11-12] [gates.ts](../../apps/backend/src/lib/gates.ts)
 
 ## Limits and behaviour
 

@@ -995,6 +995,11 @@
           "set by backend"
         ],
         [
+          "sweep_started_at",
+          "",
+          "set by `npm run bot -- orchestrator sweep start`, cleared by `sweep end`; a sweep refuses to start while one began under 90 minutes ago"
+        ],
+        [
           "last_backup_date",
           "",
           "set by backend"

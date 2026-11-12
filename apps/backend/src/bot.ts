@@ -15,7 +15,8 @@
  *   todo <task> "<why>"             qc_fail / changes_requested / blocked → todo (Orchestrator)
  *   cancel <task> "<why>"           → cancelled (Orchestrator)
  *   review <task> pass|fail "…"     the Quality Checker's verdict: a log row, no status change
- *   note <task> "<text>"            a log row that leaves the status alone
+ *   note <task> "<text>"            a log row that leaves the status alone (no from or to status, so the integrity check ignores it)
+ *   sweep start|end                 the Orchestrator's lock (config!sweep_started_at): one sweep at a time, ignored after 90 minutes
  * Rows and files:
  *   apply <ops.json>                [{ "tab", "id"?, "set": {…} }] checked against the role's rights
  *   folder <task>                   the task's Drive folder (made if missing)
@@ -24,7 +25,8 @@
  *   cost <task> <usd> <vendor> "<note>"              a paid call made outside `image`, never Claude itself
  * Pictures and checks (the page taken from the videograph repo):
  *   image <task> <prompt.txt> kind=sheet|draft|page|cover page=N|name=x [ref=<asset ids or files>] [dry=1]
- *                                   one picture from the image model, behind the budget gate; writes its costs row
+ *                                   one picture from the image model, behind the budget gate. The costs row is reserved first
+ *                                   ("· reserved"), re-checked, then settled after the call (docs/TEAM.md, Pictures)
  *   check <file> [kind=interior|cover pages=N]       print specs for a PNG, KDP preflight for a PDF
  *   edges <file>                    the four outer 4% strips: dark and cream shares per side, and a montage to look at (<file>.edges.png)
  *   contact <task> [files…]         every page's art on one sheet, to see drift between pages
@@ -37,13 +39,16 @@ import { basename, extname, resolve } from "node:path";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { Core, driveReader, driveWriter, nowIso, schema, tabDef, writerIdentity, type Row } from "@mm/core";
-import { planImage, verifyClaim } from "./lib/gates";
-import { checkArt, contactSheet, edgeReport, fitToPage, format, generateImage, practiceImage } from "./lib/image";
+import {
+  failedNote, planImage, recheckImage, releasedNote, reservedNote, settledNote, subjectOf, unconfirmedNote, verifyClaim,
+} from "./lib/gates";
+import { ImageCallError, checkArt, contactSheet, edgeReport, fitToPage, format, generateImage, practiceImage } from "./lib/image";
 import { python } from "./lib/python";
 import { rubricPath } from "./lib/qc";
 import {
-  BOT_ROLES, MAX_IN_PROGRESS, idList, isBotRole, isPagePicture, isTeamRole, latestReview, mintAssetId, mintCostId, parkedProducts, planMove, planOps, planReview,
-  type BotRole, type Move, type Op, type TeamRole,
+  BOT_ROLES, MAX_IN_PROGRESS, SWEEP_KEY, idList, isBotRole, isPagePicture, isTeamRole, latestReview, mintAssetId, mintCostId, parkedProducts, planMove, planOps,
+  planReview, planSweep, sweepHeldBy,
+  type BotRole, type Move, type Op, type Planned, type TeamRole,
 } from "./lib/team";
 
 const PREFLIGHT = fileURLToPath(new URL("../preflight/preflight.py", import.meta.url));
@@ -74,6 +79,9 @@ function board(core: Core) {
   const parked = parkedProducts(core);
   const types = new Map(core.rows("task_types").map((t) => [t.task_type, t]));
   console.log(`system_status ${core.config("system_status")} · ${spendToday(core)} · ${nowIso()}`);
+  const sweep = sweepHeldBy(core, Date.now());
+  if (sweep) console.log(`SWEEP IN PROGRESS since ${sweep.since} (${sweep.minutes} min ago): one Orchestrator at a time; \`sweep end\` clears it`);
+  else if (core.config(SWEEP_KEY)) console.log(`(an old sweep lock from ${core.config(SWEEP_KEY)} is ignored: it is past 90 minutes)`);
 
   console.log("\nPRODUCTS (lowest series_no first; paused and retired get no work)");
   const products = [...core.rows("products")].sort((a, b) => Number(a.series_no) - Number(b.series_no));
@@ -262,10 +270,18 @@ async function contact(core: Core, taskId: string, files: string[]) {
   console.log(`${items.length} pictures: ${out.replace(ROOT, "")}\nOpen it and compare every character with its character sheet and with itself across pages.`);
 }
 
-/** One picture from the image model: gate → call → costs row → print-size file in .mm-work/<task>/. */
-async function image(core: Core, role: BotRole, task: Row, promptPath: string, opts: Record<string, string>) {
+/** What a test (or another caller) may stand in for: the model call. */
+export type Deps = { generate?: typeof generateImage };
+
+/**
+ * One picture from the image model, on a ledger (videograph's pattern): gate → reserve the costs row → re-check against
+ * what other processes reserved meanwhile → call → write the file → settle the row. A crash anywhere leaves a row that
+ * says what may have been billed, never a paid call with no record.
+ */
+async function image(core: Core, role: BotRole, task: Row, promptPath: string, opts: Record<string, string>, deps: Deps = {}) {
   const kind = opts.kind ?? "page";
-  const subject = opts.page ? `p${opts.page}` : (opts.name ?? "");
+  if (!promptPath) throw new Error(`usage: image <task> <prompt.txt> kind=${Object.keys(format.image.kinds).join("|")} page=N|name=x [ref=…] [dry=1]`);
+  const subject = subjectOf(opts);
   const prompt = (await readFile(fromCaller(promptPath), "utf8")).trim();
   if (prompt.length < 40) throw new Error("the prompt file is nearly empty");
   const dir = resolve(WORK_DIR, task.task_id);
@@ -273,27 +289,59 @@ async function image(core: Core, role: BotRole, task: Row, promptPath: string, o
 
   if (opts.dry) {
     const spec = format.image.kinds[kind];
-    if (!spec || !subject) throw new Error(`usage: image <task> <prompt.txt> kind=${Object.keys(format.image.kinds).join("|")} page=N|name=x`);
+    if (!spec) throw new Error(`usage: image <task> <prompt.txt> kind=${Object.keys(format.image.kinds).join("|")} page=N|name=x`);
     const out = resolve(dir, `PRACTICE_${kind}_${subject}.png`);
     await writeFile(out, await practiceImage(`${kind} ${subject}`, spec.fitToPage));
     return console.log(`practice (no model called, $0): ${out.replace(ROOT, "")}\nPractice files can't be uploaded.`);
   }
 
+  // 1. The gate, on this process's snapshot: attempts (this round and ever), the task's budget, the day's cap.
   const plan = planImage(core, task, kind, subject, format.image, nyDay());
   const refs: string[] = [];
   for (const ref of idList(opts.ref)) refs.push(existsSync(fromCaller(ref)) ? fromCaller(ref) : await fetchOne(core, ref));
   if (refs.length > plan.model.maxRefs) throw new Error(`${plan.model.name} takes at most ${plan.model.maxRefs} reference images; you gave ${refs.length}`);
 
-  const made = await generateImage({ model: plan.model, prompt, aspect: plan.aspect, resolution: plan.resolution, refs });
-  // The call succeeded, so it is billed: record it before anything else can fail.
+  // 2. Reserve: the row goes in first, at the estimate, so a parallel call or a crash can see it.
   const now = nowIso();
   const cost_id = mintCostId(core.rows("costs").map((c) => c.cost_id));
   await core.append("costs", [{
     cost_id, date: nyDay(), category: "ai_credits", vendor: "fal.ai", amount_usd: plan.usd.toFixed(2), estimated: "TRUE",
-    product_id: task.product_id, sku: task.sku, task_id: task.task_id, role, note: plan.note, entered_by: role, created_at: now,
+    product_id: task.product_id, sku: task.sku, task_id: task.task_id, role, note: reservedNote(plan.note), entered_by: role, created_at: now,
   }]);
+  /** Rewrites this call's costs row. Returns a warning for the caller to print; the row stays as reserved (full price) if it fails. */
+  const settle = async (patch: Partial<Row>): Promise<string> => {
+    try {
+      return (await core.update("costs", cost_id, patch, role)) ? "" : `\n  ! couldn't update ${cost_id} (it moved); it still reads "reserved" at full price: say so in a note`;
+    } catch (e) {
+      return `\n  ! couldn't update ${cost_id}: ${(e as Error).message.slice(0, 200)}. It still reads "reserved" at full price`;
+    }
+  };
 
-  const out = resolve(dir, `${kind}_${subject}_a${plan.attempt}.png`);
+  // 3. Re-check with every row the other processes reserved meanwhile (ours included). Over a limit: release and refuse.
+  let why = "";
+  try {
+    await core.reload(["costs", "config"]);
+    why = recheckImage(core, task, kind, subject, format.image, nyDay());
+  } catch (e) {
+    why = `couldn't re-read the costs to check them (${(e as Error).message.slice(0, 160)})`;
+  }
+  if (why) {
+    const warn = await settle({ amount_usd: "0", note: releasedNote(plan.note) });
+    throw new Error(`${why}\n  ${cost_id} released ($0): another call reserved first, or the limit was reached. Nothing was spent.${warn}`);
+  }
+
+  // 4. The call.
+  let made: Awaited<ReturnType<typeof generateImage>>;
+  try {
+    made = await (deps.generate ?? generateImage)({ model: plan.model, prompt, aspect: plan.aspect, resolution: plan.resolution, refs });
+  } catch (e) {
+    const unconfirmed = e instanceof ImageCallError && e.unconfirmed;
+    const warn = await settle(unconfirmed ? { note: unconfirmedNote(plan.note, (e as ImageCallError).requestId) } : { amount_usd: "0", note: failedNote(plan.note) });
+    throw new Error(`${(e as Error).message}\n  ${cost_id}: ${unconfirmed ? `kept at $${plan.usd.toFixed(2)} as unconfirmed (request ${(e as ImageCallError).requestId || "unknown"}): assumed billed until fal's dashboard shows otherwise. Don't retry at once` : "not billed ($0)"}.${warn}`);
+  }
+
+  // 5. The picture goes to disk before any further Sheet call. The file name carries the costs row's ID, so parallel calls at one picture can't overwrite each other.
+  const out = resolve(dir, `${kind}_${subject}_${cost_id}.png`);
   let png = made.png;
   let warn = "";
   if (plan.fitToPage) {
@@ -307,15 +355,16 @@ async function image(core: Core, role: BotRole, task: Row, promptPath: string, o
   // The recipe: everything needed to make this picture again, or to move it to another model.
   const recipe = out.replace(/\.png$/, ".recipe.json");
   await writeFile(recipe, JSON.stringify({
-    task_id: task.task_id, product_id: task.product_id, kind, subject, attempt: plan.attempt, made_at: now,
+    task_id: task.task_id, product_id: task.product_id, kind, subject, cost_id, attempt: plan.lifetime, made_at: now,
     model: plan.model.name, endpoint: made.endpoint, request_id: made.requestId, resolution: plan.resolution, aspect: plan.aspect,
     fitted_to_page: plan.fitToPage && !warn, usd_estimate: plan.usd, references: idList(opts.ref), prompt,
   }, null, 2));
+
+  // 6. Settle: the call succeeded, so the row is real. (If this fails the row keeps its "reserved" note at the same price.)
+  warn += await settle({ note: settledNote(plan.note) });
   const madeWith = `${plan.model.name} via fal.ai (${made.endpoint})`;
-  const taskRows = core.rows("costs").filter((c) => c.category === "ai_credits" && c.task_id === task.task_id);
-  const onTask = taskRows.reduce((sum, c) => sum + (Number(c.amount_usd) || 0), 0) + (taskRows.some((c) => c.cost_id === cost_id) ? 0 : plan.usd);
-  console.log(`${out.replace(ROOT, "")}  attempt ${plan.attempt} of ${format.image.maxAttemptsPerImage}  $${plan.usd.toFixed(2)} (${cost_id})  ·  ${spendToday(core)}  ·  ${task.task_id} $${onTask.toFixed(2)} of $${format.image.taskCapUsd}, ${format.image.maxAttemptsPerImage - plan.attempt} attempt(s) left on ${subject}${warn}`);
-  if (plan.fitToPage && !warn) {
+  console.log(`${out.replace(ROOT, "")}  attempt ${plan.round} of ${plan.roundLimit} this round (${plan.lifetime} of ${plan.lifetimeLimit} ever)  $${plan.usd.toFixed(2)} (${cost_id})  ·  ${spendToday(core)}  ·  ${task.task_id} $${(plan.budget.spent + plan.usd).toFixed(2)} of $${plan.budget.allowed.toFixed(2)} for ${plan.budget.pictures} ${kind} picture(s), ${plan.roundLimit - plan.round} attempt(s) left on ${subject} this round${warn}`);
+  if (plan.fitToPage && !/Saved as the model returned/.test(warn)) {
     // After the paid call has been recorded, so a failure here can never lose the picture or its cost row.
     try {
       const edges = await edgeReport(png);
@@ -327,23 +376,39 @@ async function image(core: Core, role: BotRole, task: Row, promptPath: string, o
   console.log(`Open it and look before anything else. When it's right, upload its recipe, then the picture:\n  npm run bot -- ${role} upload ${task.task_id} ${recipe.replace(ROOT, "")} page_plan made_with="Claude Code"\n  npm run bot -- ${role} upload ${task.task_id} ${out.replace(ROOT, "")} <asset_type>${opts.page ? ` page=${opts.page}` : ""} made_with="${madeWith}" prompt_ref=<the recipe's asset id>${plan.fitToPage ? "" : " draft=1"}`);
 }
 
-/** Appends the assets row, then puts its ID on the task (and on the page, for an Illustrator's page art). */
-async function register(core: Core, role: BotRole, task: Row, assetType: string, file: { url: string; name: string }, opts: Record<string, string>) {
+const driveId = (url: string) => url.match(/[-\w]{25,}/)?.[0] ?? "";
+
+/** What an assets row must say, checked before anything is uploaded or written. */
+function checkRegister(assetType: string, opts: Record<string, string>) {
   if (!schema.lists.asset_type.includes(assetType)) throw new Error(`asset_type "${assetType}" isn't one of ${schema.lists.asset_type.join(", ")}`);
   const rights = opts.rights_source ?? "AI";
   if (!schema.lists.rights_source.includes(rights)) throw new Error(`rights_source is ${schema.lists.rights_source.join(", ")}`);
   if (!opts.made_with?.trim()) throw new Error('made_with is required: the exact tool and model, e.g. made_with="Claude Code (claude-…)"');
-  const asset_id = mintAssetId(core.rows("assets").map((a) => a.asset_id), task.task_id);
-  const now = nowIso();
-  await core.append("assets", [{
-    asset_id, task_id: task.task_id, product_id: task.product_id, sku: task.sku, asset_type: assetType, page_number: opts.page ?? "",
-    version: `${opts.version ?? "v1"}${opts.draft ? "-draft" : ""}`, file_url: file.url, file_name: file.name, rights_source: rights, rights_note: opts.rights_note ?? "",
-    made_with: opts.made_with, prompt_ref: opts.prompt_ref ?? "", status: "draft", created_by: role, created_at: now, updated_at: now, updated_by: role,
-  }]);
-  const ids = [...task.output_asset_ids.split(",").map((s) => s.trim()).filter(Boolean), asset_id].join(",");
-  const linked = await core.update("tasks", task.task_id, { output_asset_ids: ids }, role);
-  console.log(`${asset_id}  ${assetType}${opts.page ? ` p${opts.page}` : ""}  ${file.url}`);
-  if (!linked) console.log(`  ! ${task.task_id} changed under us: output_asset_ids not updated; run the command again without re-uploading (use \`asset\` with the URL above)`);
+}
+
+/**
+ * Appends the assets row, then puts its ID on the task (and on the page, for an Illustrator's page art). A file that already
+ * has a row for this task (same Drive file) is not added twice: its row is reused and only the links are finished.
+ */
+export async function register(core: Core, role: BotRole, task: Row, assetType: string, file: { url: string; name: string }, opts: Record<string, string>) {
+  checkRegister(assetType, opts);
+  const rights = opts.rights_source ?? "AI";
+  const fileKey = driveId(file.url);
+  const dup = fileKey ? core.rows("assets").find((a) => a.task_id === task.task_id && driveId(a.file_url) === fileKey) : undefined;
+  const asset_id = dup?.asset_id ?? mintAssetId(core.rows("assets").map((a) => a.asset_id), task.task_id);
+  if (!dup) {
+    const now = nowIso();
+    await core.append("assets", [{
+      asset_id, task_id: task.task_id, product_id: task.product_id, sku: task.sku, asset_type: assetType, page_number: opts.page ?? "",
+      version: `${opts.version ?? "v1"}${opts.draft ? "-draft" : ""}`, file_url: file.url, file_name: file.name, rights_source: rights, rights_note: opts.rights_note ?? "",
+      made_with: opts.made_with, prompt_ref: opts.prompt_ref ?? "", status: "draft", created_by: role, created_at: now, updated_at: now, updated_by: role,
+    }]);
+  }
+  const have = idList(task.output_asset_ids);
+  let linked = true;
+  if (!have.includes(asset_id)) linked = await core.update("tasks", task.task_id, { output_asset_ids: [...have, asset_id].join(",") }, role);
+  console.log(`${asset_id}  ${assetType}${opts.page ? ` p${opts.page}` : ""}  ${file.url}${dup ? "  (already registered: not added again)" : ""}`);
+  if (!linked) console.log(`  ! ${task.task_id} changed under us: output_asset_ids not updated; run \`asset ${task.task_id} <this url> ${assetType} …\` again: it reuses ${asset_id} and only links it`);
   if (isPagePicture(role, assetType, opts, file.name)) {
     const page = core.rows("pages").find((p) => p.product_id === task.product_id && Number(p.page_number) === Number(opts.page));
     if (page && (await core.update("pages", page.page_id, { art_asset_id: asset_id }, role))) console.log(`  ${page.page_id}.art_asset_id = ${asset_id}`);
@@ -352,6 +417,9 @@ async function register(core: Core, role: BotRole, task: Row, assetType: string,
 }
 
 async function upload(core: Core, role: BotRole, task: Row, path: string, assetType: string, opts: Record<string, string>) {
+  // Everything the Sheet will insist on is checked before the file goes to Drive, so a refused call leaves no orphan.
+  checkRegister(assetType, opts);
+  if (!path) throw new Error("usage: upload <task> <file> <asset_type> [page=N] [version=v2] made_with=\"…\"");
   const file = fromCaller(path);
   const size = (await stat(file)).size;
   const mime = MIME[extname(file).toLowerCase()] ?? "application/octet-stream";
@@ -365,16 +433,19 @@ async function upload(core: Core, role: BotRole, task: Row, path: string, assetT
   if (fails.length) {
     throw new Error(`${basename(file)} isn't print-ready, so it wasn't uploaded:\n  ${fails.join("\n  ")}${pdfKind ? "" : "\n  (a low-resolution draft picture uploads with draft=1)"}`);
   }
-  const folder = await taskFolder(core, task);
   const name = opts.name ?? basename(file);
+  let url: string, madeName: string, folder = "";
   try {
+    folder = await taskFolder(core, task);
     const made = await driveWriter().files.create({
       requestBody: { name: opts.doc ? name.replace(/\.\w+$/, "") : name, parents: [folder], ...(opts.doc ? { mimeType: DOC } : {}) },
       media: { mimeType: mime, body: createReadStream(file) },
       fields: "id,name,webViewLink",
     });
-    await register(core, role, task, assetType, { url: made.data.webViewLink ?? `https://drive.google.com/file/d/${made.data.id}/view`, name: made.data.name ?? name }, opts);
+    url = made.data.webViewLink ?? `https://drive.google.com/file/d/${made.data.id}/view`;
+    madeName = made.data.name ?? name;
   } catch (e) {
+    // Only Drive's own refusal gets the Drive advice; a Sheets error below is a different thing.
     const m = String((e as { message?: string })?.message ?? e);
     if (!/quota/i.test(m)) throw e;
     throw new Error(
@@ -384,25 +455,70 @@ async function upload(core: Core, role: BotRole, task: Row, path: string, assetT
       `  npm run bot -- ${role} asset ${task.task_id} <drive url> ${assetType} …`,
     );
   }
+  try {
+    await register(core, role, task, assetType, { url, name: madeName }, opts);
+  } catch (e) {
+    throw new Error(`The file is in Drive (${url}) but writing its row to the Sheet failed: ${String((e as { message?: string })?.message ?? e).slice(0, 300)}\n  Don't upload it again: npm run bot -- ${role} asset ${task.task_id} ${url} ${assetType} made_with="…"`);
+  }
 }
 
+const APPLY_USAGE = 'usage: apply <ops.json>, a file holding [{ "tab": "pages", "id": "MM-B02-p03", "set": { "text_draft": "…" } }]';
+
+/** Applies planned writes: one append per tab (atomic), then the updates one at a time. Says exactly what landed. */
 async function apply(core: Core, role: TeamRole, path: string) {
-  const ops = JSON.parse(await readFile(fromCaller(path), "utf8")) as Op[];
-  if (!Array.isArray(ops)) throw new Error('apply takes a JSON array: [{ "tab": "pages", "id": "MM-B02-p03", "set": { "text_draft": "…" } }]');
+  if (!path) throw new Error(APPLY_USAGE);
+  let ops: Op[];
+  try {
+    ops = JSON.parse(await readFile(fromCaller(path), "utf8")) as Op[];
+  } catch (e) {
+    throw new Error(`${APPLY_USAGE}\n  (${(e as Error).message.slice(0, 160)})`);
+  }
+  if (!Array.isArray(ops)) throw new Error(APPLY_USAGE);
   const planned = planOps(core, role, ops, nowIso());
-  let skipped = 0;
-  for (const p of planned) {
-    if (p.kind === "append") {
-      await core.append(p.tab, [p.row]);
-      if (p.tab === "tasks") await core.log(role, p.id, "", "todo", `created: ${one(p.row.title ?? "", 100)}`);
+  const landed: string[] = [];
+  const pending = () => planned.filter((p) => !landed.includes(`${p.tab} ${p.id}`)).map((p) => `${p.tab} ${p.id}`);
+  const stop = (what: string, e: unknown): never => {
+    throw new Error(`${what}: ${String((e as { message?: string })?.message ?? e).slice(0, 300)}\n  Written: ${landed.join(", ") || "nothing"}.\n  NOT written: ${pending().join(", ")}.\n  Run only the rows not written; don't repeat the ones that landed.`);
+  };
+
+  const appends = new Map<string, Planned[]>();
+  for (const p of planned.filter((p) => p.kind === "append")) appends.set(p.tab, [...(appends.get(p.tab) ?? []), p]);
+  for (const [tab, items] of appends) {
+    try {
+      await core.append(tab, items.map((p) => p.row));
+    } catch (e) {
+      stop(`appending to ${tab} failed, none of its ${items.length} rows landed`, e);
+    }
+    for (const p of items) {
+      landed.push(`${p.tab} ${p.id}`);
       console.log(`+ ${p.tab} ${p.id}`);
-    } else if (await core.update(p.tab, p.id, p.row, role)) console.log(`~ ${p.tab} ${p.id}: ${Object.keys(p.row).filter((k) => !k.startsWith("updated_")).join(", ")}`);
-    else { skipped++; console.log(`! ${p.tab} ${p.id} changed since it was read: skipped, run it again`); }
+    }
+    if (tab === "tasks") {
+      try {
+        const ts = nowIso();
+        await core.append("log", items.map((p) => ({ ts, actor: role, task_id: p.id, from_status: "", to_status: "todo", message: `created: ${one(p.row.title ?? "", 100)}` })));
+      } catch (e) {
+        console.log(`! the log rows for ${items.map((p) => p.id).join(", ")} weren't written (${String((e as Error).message).slice(0, 120)}); the backend's next tick backfills them`);
+      }
+    }
+  }
+  let skipped = 0;
+  for (const p of planned.filter((p) => p.kind === "update")) {
+    let ok: boolean;
+    try {
+      ok = await core.update(p.tab, p.id, p.row, role);
+    } catch (e) {
+      return stop(`updating ${p.tab} ${p.id} failed`, e);
+    }
+    if (ok) {
+      landed.push(`${p.tab} ${p.id}`);
+      console.log(`~ ${p.tab} ${p.id}: ${Object.keys(p.row).filter((k) => !k.startsWith("updated_")).join(", ")}`);
+    } else { skipped++; console.log(`! ${p.tab} ${p.id} changed since it was read: skipped, run it again`); }
   }
   if (skipped) process.exitCode = 1;
 }
 
-export async function run(core: Core, role: string, command: string, args: string[]) {
+export async function run(core: Core, role: string, command: string, args: string[], deps: Deps = {}) {
   const words = (from: number) => args.slice(from).join(" ").trim();
   const reads: Record<string, () => unknown> = {
     board: () => board(core),
@@ -411,7 +527,8 @@ export async function run(core: Core, role: string, command: string, args: strin
     fetch: () => fetchFiles(core, args),
     contact: () => contact(core, args[0] ?? "", args.slice(1)),
     edges: async () => {
-      const file = fromCaller(args[0] ?? "");
+      if (!args[0]) throw new Error("usage: edges <picture file>");
+      const file = fromCaller(args[0]);
       const report = await edgeReport(file);
       const out = file.replace(/\.\w+$/, "") + ".edges.png";
       await writeFile(out, report.montage);
@@ -419,6 +536,7 @@ export async function run(core: Core, role: string, command: string, args: strin
       console.log(report.flags.length ? `LOOK AT THE STRIPS (${out.replace(ROOT, "")}):\n  ${report.flags.join("\n  ")}` : `No flags; still open ${out.replace(ROOT, "")} and look.`);
     },
     check: async () => {
+      if (!args[0]) throw new Error("usage: check <file> [kind=interior|cover pages=N]: a PNG or a PDF");
       const fails = await checkFile(fromCaller(args[0] ?? ""), kv(args.slice(1)));
       console.log(fails.length ? `${basename(args[0])}: NOT print-ready\n  ${fails.join("\n  ")}` : `${basename(args[0])}: print-ready`);
       if (fails.length) process.exitCode = 1;
@@ -432,6 +550,14 @@ export async function run(core: Core, role: string, command: string, args: strin
   };
   if (reads[command]) return void (await reads[command]());
 
+  if (command === "sweep") {
+    // Before the HALT check, so a sweep that stops on HALT can still clear its lock.
+    if (role !== "orchestrator") throw new Error("only the Orchestrator's dispatcher starts and ends a sweep: npm run bot -- orchestrator sweep start|end");
+    const plan = planSweep(core, args[0] ?? "", Date.now());
+    if (core.rows("config").some((r) => r.key === SWEEP_KEY)) await core.update("config", SWEEP_KEY, { value: plan.value }, role);
+    else await core.append("config", [{ key: SWEEP_KEY, value: plan.value, note: "set by `bot orchestrator sweep start`, cleared by `sweep end`" }]);
+    return console.log(plan.message);
+  }
   if (core.config("system_status") === "HALT") throw new Error("system_status is HALT: nothing is written until Kyle sets it back to RUN");
   if (role === "critic") {
     if (command !== "apply") throw new Error("the critic reads, and adds lessons with apply; nothing else");
@@ -444,7 +570,13 @@ export async function run(core: Core, role: string, command: string, args: strin
     if (parkedProducts(core).has(t.product_id)) throw new Error(`${t.product_id} is paused or retired`);
     return t;
   };
-  /** Files and costs belong to the task's owner while they work on it. */
+  /** A cost belongs to the task's owner, whatever the task's status. */
+  const owned = () => {
+    const t = task();
+    if (t.owner !== role) throw new Error(`${t.task_id} is ${t.owner}'s task, not ${role}'s: only its owner records what it spent`);
+    return t;
+  };
+  /** Files and pictures belong to the task's owner while they work on it. */
   const mine = () => {
     const t = task();
     if (t.owner !== role) throw new Error(`${t.task_id} is ${t.owner}'s task, not ${role}'s`);
@@ -460,12 +592,14 @@ export async function run(core: Core, role: string, command: string, args: strin
   } else if (command === "review") {
     if (role !== "quality_checker") throw new Error("only the Quality Checker reviews");
     const r = planReview(core, args[0] ?? "", args[1] ?? "", words(2));
-    await core.log(role, args[0], r.status, r.status, r.message);
+    // No from or to status: the integrity check reads the last to_status as the task's status, and a verdict written
+    // while another process moved the task would otherwise carry a stale one.
+    await core.log(role, args[0], "", "", r.message);
     console.log(`${args[0]}: ${one(r.message, 100)}${r.fails >= 2 ? `\n  ${r.fails} fails this round: the Orchestrator sends it to Kyle (L-0014)` : ""}`);
   } else if (command === "note") {
     const t = task();
     if (!words(1)) throw new Error("say what happened");
-    await core.log(role, t.task_id, t.status, t.status, words(1));
+    await core.log(role, t.task_id, "", "", words(1));
     console.log(`${t.task_id}: noted`);
   } else if (command === "apply") {
     await apply(core, role, args[0] ?? "");
@@ -475,14 +609,15 @@ export async function run(core: Core, role: string, command: string, args: strin
   } else if (command === "upload") {
     await upload(core, role, mine(), args[1] ?? "", args[2] ?? "", kv(args.slice(3)));
   } else if (command === "image") {
-    await image(core, role, mine(), args[1] ?? "", kv(args.slice(2)));
+    await image(core, role, mine(), args[1] ?? "", kv(args.slice(2)), deps);
   } else if (command === "asset") {
     const t = mine();
+    checkRegister(args[2] ?? "", kv(args.slice(3)));
     if (!/[-\w]{25,}/.test(args[1] ?? "")) throw new Error("give the file's Drive URL");
     const meta = await driveReader().files.get({ fileId: args[1].match(/[-\w]{25,}/)![0], fields: "name,webViewLink" });
     await register(core, role, t, args[2] ?? "", { url: meta.data.webViewLink ?? args[1], name: meta.data.name ?? "" }, kv(args.slice(3)));
   } else if (command === "cost") {
-    const t = task();
+    const t = owned();
     const usd = Number(args[1]);
     if (!(usd > 0) || !args[2] || !words(3)) throw new Error('usage: cost <task> <usd> <vendor> "<what it paid for>"');
     const now = nowIso();
@@ -497,10 +632,40 @@ export async function run(core: Core, role: string, command: string, args: strin
   }
 }
 
+/**
+ * The tabs a command reads, so it loads those and no more (every tab is a batchGet range, and the log is the longest).
+ * `check` and `edges` work on a local file and load nothing. A command not listed gets every tab.
+ */
+const TABS: Record<string, string[]> = {
+  check: [], edges: [],
+  board: ["products", "requests", "tasks", "task_types", "log", "costs", "config"],
+  brief: ["tasks", "products", "task_types", "assets", "lessons", "pages", "log", "config"],
+  fetch: ["assets"],
+  contact: ["tasks", "pages", "assets"],
+  verify: ["tasks", "assets", "log", "content", "plans"],
+  start: ["tasks", "task_types", "config", "products", "assets", "plans", "content", "log"],
+  review: ["tasks", "log", "config"],
+  note: ["tasks", "products", "config"],
+  sweep: ["config"],
+  apply: ["products", "skus", "tasks", "task_types", "pages", "assets", "requests", "lessons", "plans", "content", "listings", "research", "config"],
+  folder: ["tasks", "products", "config"],
+  cost: ["tasks", "products", "config", "costs"],
+  image: ["tasks", "products", "config", "costs", "log", "assets"],
+  upload: ["tasks", "products", "config", "assets", "pages", "skus"],
+  asset: ["tasks", "products", "config", "assets", "pages"],
+};
+for (const c of ["block", "handin", "todo", "cancel"]) TABS[c] = TABS.start;
+
+export function tabsFor(command: string, args: string[] = []): string[] | undefined {
+  if (command === "rows") return args[0] && schema.tabs.some((t) => t.name === args[0]) ? [args[0]] : undefined; // an unknown tab gets the usual error
+  return TABS[command];
+}
+
 async function main() {
   const [role = "", command = "", ...args] = process.argv.slice(2);
   if (!isTeamRole(role) && role !== "kyle") throw new Error(`usage: npm run bot -- <${BOT_ROLES.join(" | ")}> <command> …  (see apps/backend/src/bot.ts)`);
-  await run(await Core.load(), role, command, args);
+  const tabs = tabsFor(command, args);
+  await run(tabs && !tabs.length ? Core.empty() : await Core.load(tabs), role, command, args);
 }
 
 if (resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) {

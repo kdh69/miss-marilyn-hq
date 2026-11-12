@@ -14,7 +14,7 @@ spend as little as possible finding out a page is wrong.
 - No text, letters or watermark in any picture: the Builder sets all words. [proven, checked 2026-11-11] [art_page checklist](../../apps/backend/rubrics/art_page.md)
 - Keep faces, paws and anything that matters at least 0.375 in inside the trim (out of the outer 4% of the picture), and keep the page's text zone calm. [proven, checked 2026-11-11] [style guide](../brand/style-guide.md)
 - A fix note is concrete and physical: where, what, how big. Never "more consistent". [videograph, checked 2026-11-06]
-- Paid attempts per picture are limited (`maxAttemptsPerImage` in `formats/picture-book.json`: 3, raised to 4 by Kyle on 2026-11-11 for p15 after its third final lacked the nose smudge); then block the task and show a person what keeps going wrong. `image` enforces the limit, counted per task, kind and page. [proven, checked 2026-11-11] [gates.ts](../../apps/backend/src/lib/gates.ts)
+- Paid attempts per picture are limited (`maxAttemptsPerImage` in `formats/picture-book.json`: 3, raised to 4 by Kyle on 2026-11-11 for p15 after its third final lacked the nose smudge); then block the task and show a person what keeps going wrong. `image` enforces the limit, counted per task, kind and page; from 2026-11-12 it counts per round (since the task last went `in_progress`) with 6 rows of any kind ever as the lifetime limit. [proven, checked 2026-11-11] [gates.ts](../../apps/backend/src/lib/gates.ts)
 - Before review, look at the whole book on one contact sheet (`contact`): a reviewer who sees one picture at a time misses drift between them. [videograph, checked 2026-11-05]
 - Show Kyle a failed picture before paying to redo it when the fault is small. [videograph, checked 2026-11-06]
 

@@ -46,9 +46,12 @@ picture. Then:
 npm run bot -- illustrator image <task> .mm-work/<task>/p05.txt kind=page page=5 ref=<draft asset>,<sheet asset>,<photo asset>
 ```
 
-It refuses when the picture is out of attempts (three), or when the call would pass the task's
-cap or the day's cap; otherwise it calls the model, writes the costs row, crops print kinds to
-2588 x 2625 px and prints the file's path. `dry=1` makes a labelled placeholder for $0, to
+It refuses when the picture is out of attempts (four a round, six ever), or when the call would
+pass the task's budget (a cap per picture the task covers) or bring the day to its cap; otherwise
+it reserves the costs row, calls the model, crops print kinds to 2588 x 2625 px, writes the file
+(named with the costs row's ID) and settles the row. `page=05` and `page=5` are one picture;
+`name=` is for things that aren't pages. If a call ends "unconfirmed (request …)", it was probably
+billed: don't retry at once, say so in your report. `dry=1` makes a labelled placeholder for $0, to
 rehearse the steps; placeholders can't be uploaded.
 
 **Open every picture before the next paid call** and compare it with the sheet and the photos:
@@ -61,7 +64,7 @@ around it: `block` the task with that reason.
 
 - The recipe first (`image` writes one beside every picture: prompt, references, model, size), so
   the picture can point at it and anyone can make it again:
-  `npm run bot -- illustrator upload <task> .mm-work/<task>/page_p5_a1.recipe.json page_plan made_with="Claude Code"`
+  `npm run bot -- illustrator upload <task> .mm-work/<task>/<the recipe file image printed> page_plan made_with="Claude Code"`
 - Then the picture, with the `made_with` line the `image` command printed and the recipe's asset
   ID as `prompt_ref`. Page art with `page=N` also lands on that page's row, so Clara sees it.
   Print kinds are checked on upload (size, PNG, RGB); a draft uploads with `draft=1`.
@@ -69,4 +72,4 @@ around it: `block` the task with that reason.
 
 Before you report, make the contact sheet of the task's pictures once more and look for drift
 between pages. Then self-check against the art checklist and report ready for review. If a page
-still isn't right after its three attempts, `block` the task and say what keeps going wrong.
+still isn't right after its attempts, `block` the task and say what keeps going wrong.

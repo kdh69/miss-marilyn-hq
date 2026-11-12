@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Row } from "../packages/core/src/sheet";
-import { isPagePicture, latestReview, mintAssetId, planMove, planOps, planReview, type Board } from "../apps/backend/src/lib/team";
+import { isPagePicture, latestReview, mintAssetId, mintCostId, planMove, planOps, planReview, planSweep, sweepHeldBy, type Board } from "../apps/backend/src/lib/team";
 
 const NOW = "2026-11-11T15:00:00Z";
 const task = (over: Partial<Row>): Row => ({
@@ -80,9 +80,35 @@ describe("row writes by role", () => {
     expect(() => planOps(board(), "scout", [{ tab: "tasks", id: "T-0026", set: { brief: "x" } }], NOW)).toThrow(/can't write/);
   });
 
-  it("mints asset IDs per task", () => {
-    expect(mintAssetId(["A-T0026-01", "A-T0026-07", "A-T0039-51"], "T-0026")).toBe("A-T0026-08");
-    expect(mintAssetId([], "T-0040")).toBe("A-T0040-01");
+  it("mints asset IDs per task from the time and random characters, never 'highest + 1' (F1)", () => {
+    const at = new Date("2026-11-12T03:15:22Z");
+    expect(mintAssetId([], "T-0040", at, () => "k7")).toBe("A-T0040-031522k7");
+    // two uploads to one task in the same second still differ, and never repeat an ID already on the Sheet
+    const a = mintAssetId([], "T-0040", at);
+    const b = mintAssetId([], "T-0040", at);
+    expect(a).not.toBe(b);
+    expect(mintAssetId(["A-T0040-031522k7"], "T-0040", at, (() => { let n = 0; return () => (n++ ? "k8" : "k7"); })())).toBe("A-T0040-031522k8");
+    expect(a).toMatch(/^A-T0040-\d{6}[a-z0-9]{2}$/);
+  });
+
+  it("mints cost IDs from the time and random characters, so two calls never agree (F1)", () => {
+    const at = new Date("2026-11-12T03:15:22Z");
+    expect(mintCostId([], at, () => "ab12")).toBe("C-20261112031522-ab12");
+    const ids = new Set(Array.from({ length: 200 }, () => mintCostId()));
+    expect(ids.size).toBe(200);
+    expect([...ids][0]).toMatch(/^C-\d{14}-[a-z0-9]{4}$/);
+  });
+
+  it("mints content IDs within the task, so two Marketers on two tasks can't collide (F1)", () => {
+    const post = (task_id: string) => ({ tab: "content", set: { product_id: "MM-B02", task_id, channel: "INSTAGRAM", content_type: "post", scheduled_for: "2026-11-20" } });
+    const snapshot = board({ content: [{ content_id: "C-0010", task_id: "T-0010" }, { content_id: "C-T0043-01", task_id: "T-0043" }] as Row[] });
+    const forA = planOps(snapshot, "growth", [post("T-0043"), post("T-0043")], NOW);
+    const forB = planOps(snapshot, "growth", [post("T-0044"), post("T-0044")], NOW);
+    expect(forA.map((p) => p.id)).toEqual(["C-T0043-02", "C-T0043-03"]);
+    expect(forB.map((p) => p.id)).toEqual(["C-T0044-01", "C-T0044-02"]);
+    expect(new Set([...forA, ...forB].map((p) => p.id)).size).toBe(4); // planned on the same snapshot, all different
+    // the panel's "Posted <id> <link>" mark takes any ID of this shape
+    expect(/^(Posted|Live) (\S+)(?: (\S+))?/.exec("Posted C-T0043-01 https://x.example/p")?.[2]).toBe("C-T0043-01");
   });
 });
 
@@ -172,5 +198,54 @@ describe("the Orchestrator holds a task", () => {
     expect(planMove(board(), "orchestrator", "T-0026", "block", "HOLD: Kyle decides Clara's notes")).toMatchObject({ from: "todo", to: "blocked", patch: { blocked_reason: "HOLD: Kyle decides Clara's notes" } });
     expect(() => planMove(board(), "orchestrator", "T-0026", "block", "")).toThrow(/say why/);
     expect(() => planMove(board(), "builder", "T-0026", "block", "no")).toThrow(/illustrator's task/);
+  });
+});
+
+describe("review findings S1", () => {
+  it("F5: the three-in-progress limit ignores tasks on a paused book", () => {
+    const parked = [1, 2, 3].map((n) => task({ task_id: `T-020${n}`, product_id: "MM-B01", status: "in_progress" }));
+    expect(planMove(board({ tasks: [task({}), ...parked] }), "illustrator", "T-0026", "start", "")).toMatchObject({ to: "in_progress" });
+  });
+
+  it("F11: a maker edits its own asset only while the task is in_progress or blocked", () => {
+    const edit = (status: string) => planOps(board({ tasks: [task({ status })] }), "illustrator", [{ tab: "assets", id: "A-T0026-01", set: { file_url: "https://drive.google.com/file/d/y/view" } }], NOW);
+    expect(edit("in_progress")).toHaveLength(1);
+    expect(edit("blocked")).toHaveLength(1);
+    for (const status of ["ready_for_qc", "in_qc", "awaiting_mom", "approved", "done"]) expect(() => edit(status), status).toThrow(/only while its task is in_progress or blocked/);
+  });
+
+  it("F11: `from` is never settable, and reply and reply_by belong to whoever the request is addressed to", () => {
+    expect(() => planOps(board(), "orchestrator", [{ tab: "requests", set: { to: "mom", body: "Which cover?", from: "mom" } }], NOW)).toThrow(/from isn't settable/);
+    expect(() => planOps(board(), "orchestrator", [{ tab: "requests", id: "R-0004", set: { from: "kyle" } }], NOW)).toThrow(/from isn't settable/);
+    // the Orchestrator's own question to Clara: it can't answer itself
+    expect(() => planOps(board(), "orchestrator", [{ tab: "requests", id: "R-0004", set: { reply: "Cover B." } }], NOW)).toThrow(/reply and reply_by are for mom/);
+    expect(() => planOps(board(), "orchestrator", [{ tab: "requests", set: { to: "mom", body: "x", reply_by: "mom" } }], NOW)).toThrow(/reply and reply_by/);
+    // a request addressed to the Orchestrator can be answered by it
+    expect(planOps(board(), "orchestrator", [{ tab: "requests", id: "Q-1", set: { reply: "On it.", reply_by: "orchestrator" } }], NOW)).toHaveLength(1);
+  });
+
+  it("F11: the team can't cancel done work, or work the backend or Clara holds; Kyle can (npm run task)", () => {
+    for (const status of ["done", "in_qc", "awaiting_mom", "approved", "publishing"]) {
+      expect(() => planMove(board({ tasks: [task({ status })] }), "orchestrator", "T-0026", "cancel", "no longer needed"), status).toThrow(/ask Kyle/);
+    }
+    expect(planMove(board({ tasks: [task({ status: "todo" })] }), "orchestrator", "T-0026", "cancel", "dropped")).toMatchObject({ to: "cancelled" });
+    expect(planMove(board({ tasks: [task({ status: "blocked" })] }), "orchestrator", "T-0026", "cancel", "dropped")).toMatchObject({ to: "cancelled" });
+  });
+
+  it("F12: a null entry in ops is a plain error, and `id` on a new pages row fills page_id", () => {
+    expect(() => planOps(board(), "story_producer", [null as never], NOW)).toThrow(/each entry is/);
+    const [row] = planOps(board(), "story_producer", [{ tab: "pages", id: "MM-B02-p04", set: { product_id: "MM-B02", page_number: 4, text_draft: "Hi." } }], NOW);
+    expect(row).toMatchObject({ kind: "append", id: "MM-B02-p04", row: { page_id: "MM-B02-p04", page_number: "4" } });
+  });
+
+  it("F1: the sweep lock refuses a second sweep within 90 minutes and clears on end", () => {
+    const now = Date.parse("2026-11-12T10:00:00Z");
+    const held = (since: string) => board({}, { sweep_started_at: since });
+    expect(planSweep(board(), "start", now)).toMatchObject({ value: "2026-11-12T10:00:00Z" });
+    expect(() => planSweep(held("2026-11-12T09:00:00Z"), "start", now)).toThrow(/60 minutes ago\) and hasn't ended/);
+    expect(planSweep(held("2026-11-12T08:29:00Z"), "start", now).value).toBe("2026-11-12T10:00:00Z"); // 91 minutes: a crashed sweep
+    expect(planSweep(held("2026-11-12T09:59:00Z"), "end", now).value).toBe("");
+    expect(sweepHeldBy(held("garbage"), now)).toBeUndefined();
+    expect(() => planSweep(board(), "restart", now)).toThrow(/usage/);
   });
 });

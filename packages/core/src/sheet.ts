@@ -79,22 +79,34 @@ export class Core {
     private data: Map<string, { headers: string[]; rows: Row[] }>,
   ) {}
 
-  static async load(tabs = schema.tabs.map((t) => t.name)): Promise<Core> {
-    const api = sheetsClient();
-    const id = sheetId();
+  /** `inject` hands in a Sheets API object (tests use an in-memory fake); otherwise the real client. */
+  static async load(tabs = schema.tabs.map((t) => t.name), inject?: { api: sheets_v4.Sheets; id: string }): Promise<Core> {
+    const api = inject?.api ?? sheetsClient();
+    const id = inject?.id ?? sheetId();
+    const core = new Core(api, id, new Map());
+    await core.reload(tabs);
+    return core;
+  }
+
+  /** A Core with no tabs and no connection, for commands that read nothing from the Sheet. */
+  static empty(): Core {
+    return new Core(undefined as unknown as sheets_v4.Sheets, "", new Map());
+  }
+
+  /** Re-reads these tabs from the Sheet (one batchGet), replacing the snapshot of each. */
+  async reload(tabs: string[]): Promise<void> {
+    if (!tabs.length) return;
     await pace("read");
-    const res = await api.spreadsheets.values.batchGet({
-      spreadsheetId: id,
+    const res = await this.api.spreadsheets.values.batchGet({
+      spreadsheetId: this.id,
       ranges: tabs,
       valueRenderOption: "FORMATTED_VALUE",
     });
-    const data = new Map<string, { headers: string[]; rows: Row[] }>();
     res.data.valueRanges?.forEach((vr, i) => {
       const [headers = [], ...body] = (vr.values ?? []) as string[][];
       const rows = body.map((r) => Object.fromEntries(headers.map((h, j) => [h, r[j] ?? ""])));
-      data.set(tabs[i], { headers, rows });
+      this.data.set(tabs[i], { headers, rows });
     });
-    return new Core(api, id, data);
   }
 
   rows(tab: string): Row[] {

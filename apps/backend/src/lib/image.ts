@@ -19,7 +19,7 @@ export type BookFormat = {
   id: string;
   pages: number;
   page: { widthPx: number; heightPx: number; dpi: number };
-  image: { kinds: Record<string, ImageKind>; models: Record<string, ImageModel>; maxAttemptsPerImage: number; taskCapUsd: number };
+  image: { kinds: Record<string, ImageKind>; models: Record<string, ImageModel>; maxAttemptsPerImage: number; maxAttemptsLifetime: number; perImageCapUsd: Record<string, number>; maxPicturesPerTask: number };
 };
 export const format = raw as unknown as BookFormat;
 
@@ -44,31 +44,59 @@ const hint = (message: string) =>
     : /no_media|no image/i.test(message) ? `${message}\n  An empty result can be intermittent or a refusal: one plain retry is worth it before rewording. Failed calls cost $0.`
     : message;
 
+/**
+ * A failed call. `unconfirmed` means fal had taken the job and we can't show it wasn't billed (a timeout, a failed
+ * status poll or download): the ledger keeps the row at full price. Otherwise (a refused submit, a failed job, an
+ * empty result) fal didn't bill it. `requestId` is fal's request, empty when the job was never submitted.
+ */
+export class ImageCallError extends Error {
+  constructor(message: string, readonly requestId = "", readonly unconfirmed = false) {
+    super(message);
+    this.name = "ImageCallError";
+  }
+}
+
+/** The fal client calls generateImage needs, so a test can stand in for fal. */
+export type FalQueue = Pick<typeof fal.queue, "submit" | "status" | "result" | "cancel">;
+
 /** One picture from a prompt and up to `maxRefs` reference images (local files). Returns the PNG bytes. */
-export async function generateImage(opts: { model: ImageModel; prompt: string; aspect: string; resolution: string; refs: string[] }): Promise<{ png: Buffer; endpoint: string; requestId: string }> {
-  const api = client();
+export async function generateImage(
+  opts: { model: ImageModel; prompt: string; aspect: string; resolution: string; refs: string[] },
+  io: { queue?: FalQueue; fetchUrl?: typeof fetch; timeoutMs?: number; pollMs?: number } = {},
+): Promise<{ png: Buffer; endpoint: string; requestId: string }> {
+  const queue = io.queue ?? client().queue;
   const urls = [];
   for (const ref of opts.refs.slice(0, opts.model.maxRefs)) urls.push(await refDataUri(ref));
   const endpoint = urls.length ? `${opts.model.endpoint}/edit` : opts.model.endpoint;
   const input = { prompt: opts.prompt, num_images: 1, aspect_ratio: opts.aspect, resolution: opts.resolution, output_format: "png", ...(urls.length ? { image_urls: urls } : {}) };
+  let requestId = "";
+  let unconfirmed = false;
   try {
-    const { request_id } = await api.queue.submit(endpoint, { input, headers: { "X-Fal-Store-IO": "0" }, storageSettings: { expiresIn: "1d" } } as never);
+    ({ request_id: requestId } = await queue.submit(endpoint, { input, headers: { "X-Fal-Store-IO": "0" }, storageSettings: { expiresIn: "1d" } } as never));
+    unconfirmed = true; // from here fal has the job, so it may bill it
     const started = Date.now();
+    const limit = io.timeoutMs ?? TIMEOUT_MS;
     for (;;) {
-      const status = await api.queue.status(endpoint, { requestId: request_id, logs: false });
+      const status = await queue.status(endpoint, { requestId, logs: false });
       if (status.status === "COMPLETED") break;
-      if (Date.now() - started > TIMEOUT_MS) throw new Error(`still ${status.status} after ${TIMEOUT_MS / 60_000} minutes (request ${request_id})`);
-      await new Promise((r) => setTimeout(r, POLL_MS));
+      if (Date.now() - started > limit) {
+        await queue.cancel(endpoint, { requestId }).catch(() => {}); // stop it if it is still queued or running
+        throw new Error(`still ${status.status} after ${limit / 60_000} minutes (request ${requestId}); cancelled`);
+      }
+      await new Promise((r) => setTimeout(r, io.pollMs ?? POLL_MS));
     }
-    const result = await api.queue.result(endpoint, { requestId: request_id });
+    unconfirmed = false; // a finished job that failed is reported by `result`, and fal doesn't bill failed jobs
+    const result = await queue.result(endpoint, { requestId });
     const url = (result.data as { images?: { url: string }[] })?.images?.[0]?.url;
     if (!url) throw new Error("no image returned");
-    const res = await fetch(url);
+    unconfirmed = true; // it produced a picture: if we can't fetch it, assume it was billed
+    const res = await (io.fetchUrl ?? fetch)(url);
     if (!res.ok) throw new Error(`couldn't download the result (${res.status})`);
-    return { png: Buffer.from(await res.arrayBuffer()), endpoint, requestId: request_id };
+    return { png: Buffer.from(await res.arrayBuffer()), endpoint, requestId };
   } catch (e) {
     const err = e as { body?: { detail?: unknown }; message?: string };
-    throw new Error(hint(`fal ${endpoint}: ${err.body?.detail ? JSON.stringify(err.body.detail) : err.message ?? String(e)}`.slice(0, 800)));
+    const message = hint(`fal ${endpoint}: ${err.body?.detail ? JSON.stringify(err.body.detail) : err.message ?? String(e)}`.slice(0, 800));
+    throw new ImageCallError(message, requestId, unconfirmed);
   }
 }
 

@@ -40,7 +40,7 @@ Kyle's video repo runs a team of agents the same way, and five of its habits are
 
 | Habit | Here |
 |---|---|
-| Every paid call passes a budget gate, and failures stop for a person | `image` checks three caps before calling the model: 3 attempts a picture, $6 a task, the day's cap. It writes the costs row itself |
+| Every paid call passes a budget gate, and failures stop for a person | `image` checks before calling the model: 4 attempts a picture a round and 6 ever, the task's budget (3.5 x the kind's price per picture it covers), and the day's cap one picture short of where the spend guard halts. It reserves the costs row first and settles it after the call (Pictures, below) |
 | Cheap things first: references, then drafts, then the expensive pass | character sheets → drafts of all 24 pages → print-size finals, each stage approved before the next |
 | Deterministic checks before any judge looks | `check` and `upload` refuse a page that isn't 2588 x 2625 px RGB PNG or a PDF that fails KDP preflight |
 | Trust the record, not the agent's report | a Stop hook (`.claude/hooks/gate.mjs`) checks each agent's closing line against MM Core; `verify` does the same by hand |
@@ -78,8 +78,10 @@ the only source of truth, and the panel shows Clara and the family only what is 
    outside the team, or delete or sort rows. Never copy or closely imitate an existing book,
    character, title or a named artist's style.
 9. **Money.** Claude runs on Kyle's subscription, so your own run gets no costs row. Pictures are
-   paid: make them only with `image`, which checks the caps and writes the costs row. Never call
+   paid: make them only with `image`, which checks the caps and keeps the costs row. Never call
    a paid service any other way. When `image` refuses for budget or attempts, stop and `block`.
+   A row ending `· unconfirmed (request …)` was probably billed: don't retry at once.
+   The Orchestrator runs alone: it is the only minter of task and request IDs (`sweep start` / `sweep end`).
 10. **Knowledge.** Read the `docs/knowledge/` files your agent file names before you start, and
     follow their Rules. Proven claims come from our own runs and win over the rest.
 11. **Unsure? Block** with a one-line reason instead of guessing.
@@ -101,16 +103,17 @@ the only source of truth, and the panel shows Clara and the family only what is 
 | `edges <file>` | the four outer 4% strips of a picture: dark and cream share per side, and a montage `<file>.edges.png` to look at; `image` prints the same flags after every print-size picture |
 | `todo` / `cancel <task> "<why>"` | the Orchestrator's; `todo` copies QC's or Clara's note into the brief |
 | `review <task> pass\|fail "<text>"` | the Quality Checker's verdict (a log row) |
-| `note <task> "<text>"` | a log row that leaves the status alone |
+| `note <task> "<text>"` | a log row that leaves the status alone (it carries no from or to status, so the integrity check ignores it) |
+| `sweep start\|end` | the Orchestrator's dispatcher only: `config!sweep_started_at`, so two sweeps never run at once. `start` is refused while one began under 90 minutes ago; `kyle board` shows it |
 | `apply <ops.json>` | row writes: `[{ "tab": "pages", "id": "MM-B02-p03", "set": { "text_draft": "…" } }]`; leave `id` out for a new row on tabs that mint IDs (tasks, requests, lessons, content, research) |
 | `upload <task> <file> <asset_type> [page=N] [version=v2] made_with="…" [doc=1]` | file to the task's Drive folder + its assets row; `doc=1` turns .md / .txt / .html into a Google Doc; an Illustrator's `page_art` with `page=N` also lands on that page |
 | `asset <task> <Drive URL> <asset_type> made_with="…"` | registers a file already in Drive |
 | `folder <task>` | the task's Drive folder, MM Work/products/{product}/{task}/ |
-| `image <task> <prompt.txt> kind=sheet\|draft\|page\|cover page=N\|name=x [ref=ids or files] [dry=1]` | one picture from the image model, behind the budget gate; crops print kinds to page size; writes the costs row; `dry=1` is a $0 placeholder |
+| `image <task> <prompt.txt> kind=sheet\|draft\|page\|cover page=N\|name=x [ref=ids or files] [dry=1]` | one picture from the image model, behind the budget gate; crops print kinds to page size; reserves, then settles, its costs row; `dry=1` is a $0 placeholder; `page=05` and `page=5` are one picture, and `name=page5` is refused |
 | `check <file> [kind=cover pages=N]` | print specs for a PNG, KDP preflight for a PDF |
 | `contact <task> [files…]` | the book's page art (or the files you name) on one sheet |
 | `verify "<an agent's last line>"` | does the board agree with the report? |
-| `cost <task> <usd> <vendor> "<what for>"` | a paid call made outside `image` |
+| `cost <task> <usd> <vendor> "<what for>"` | a paid call made outside `image`; the task's owner only |
 
 Who may write what is in [`apps/backend/src/lib/team.ts`](../apps/backend/src/lib/team.ts), with
 tests in `tests/team.test.ts`. One refused op stops its whole `apply` batch.
@@ -124,6 +127,20 @@ Authorization, prefix Key), which keeps the key out of the session altogether. R
 travel inside the request, so nothing is left on fal's CDN. Every picture gets a recipe file beside
 it (prompt, references, model, size) so it can be made again. The `miss-marilyn-hq` cloud
 environment already allows fal's hosts.
+**Reserve and settle** (videograph's ledger). `image` plans the call (`planImage`, `apps/backend/src/lib/gates.ts`),
+then writes the costs row first at the price estimate, its note ending `· reserved`, so a parallel call or a crash
+can see it. It re-reads `costs` and `config` and checks again with every row the other processes reserved meanwhile
+(`recheckImage`): over a cap, or too many attempts, and it sets the row to $0 with `· released` and refuses. Then it calls
+the model, writes the picture and its recipe to `.mm-work/<task>/` (file name `<kind>_<picture>_<costs id>.png`), and settles:
+success drops `· reserved`; a failed job sets the row to $0 `· failed, not billed`; a timeout or a lost download keeps the
+full price and ends `· unconfirmed (request <id>)` (a timed-out job is cancelled). If the settle write itself fails the
+picture is still on disk and the row keeps `· reserved` at full price. The backend's spend guard sums `ai_credits` rows, so
+a reserved row counts while the call is in flight and a released or failed one counts nothing.
+Limits: attempts at one picture (kind and page or name) are the rows that don't end `released` or `failed, not billed`;
+4 a round (since the task last went `in_progress`), and 6 rows of any kind ever, then a person decides. A task's budget for a
+kind is the per-picture cap (`perImageCapUsd`, 3.5 x the price) times the pictures it covers: the pages named in its title
+("Pages 3-4") plus any it has already drawn, at most 26 a task. Costs IDs are `C-<yyyymmddHHMMSS>-<4 random chars>`, content IDs
+`C-<task>-<nn>` and asset IDs `A-<task>-<HHMMSS><2 chars>`, so no two processes mint the same one.
 Models, sizes, prices and caps are in [`formats/picture-book.json`](../formats/picture-book.json);
 what is known about them is in [`knowledge/models.md`](knowledge/models.md). **No picture has been
 made through it yet**: the first art task is also its first live test.

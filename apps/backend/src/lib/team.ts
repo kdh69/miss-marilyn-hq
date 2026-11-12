@@ -14,6 +14,7 @@
  *   every maker      its own assets rows
  * Statuses move only through `planMove`; the log is append-only and never written through `planOps`.
  */
+import { randomBytes } from "node:crypto";
 import { headersOf, isLegalTransition, schema, tabDef, type Row } from "@mm/core";
 
 export const BOT_ROLES = ["orchestrator", "story_producer", "illustrator", "builder", "publisher", "growth", "quality_checker", "scout"] as const;
@@ -102,18 +103,38 @@ const MINT: Record<string, (ids: string[], row: Partial<Row>) => string> = {
   tasks: (ids) => nextId(ids.filter((id) => id !== "T-9999"), /^T-(\d{4})$/, (n) => `T-${pad(n, 4)}`),
   requests: (ids) => nextId(ids, /^R-(\d{4})$/, (n) => `R-${pad(n, 4)}`),
   lessons: (ids) => nextId(ids, /^L-(\d{4})$/, (n) => `L-${pad(n, 4)}`),
-  content: (ids) => nextId(ids, /^C-(\d{4})$/, (n) => `C-${pad(n, 4)}`),
+  // Counted within the task, so two Marketers on two tasks can't mint the same ID: C-T0043-01.
+  content: (ids, row) => {
+    const stem = `C-${(row.task_id ?? "").replace("-", "")}`;
+    return nextId(ids, new RegExp(`^${stem}-(\\d+)$`), (n) => `${stem}-${pad(n, 2)}`);
+  },
   research: (ids) => nextId(ids, /^RS-(\d{4})$/, (n) => `RS-${pad(n, 4)}`),
-  costs: (ids) => nextId(ids, /^C-(\d{4})$/, (n) => `C-${pad(n, 4)}`),
   plans: (ids, row) => nextId(ids, new RegExp(`^MP-${row.product_id}-(\\d+)$`), (n) => `MP-${row.product_id}-${pad(n, 2)}`),
   listings: (_ids, row) => `${row.sku}-${row.channel}`,
 };
 
-export const mintAssetId = (ids: string[], taskId: string) => {
-  const stem = `A-${taskId.replace("-", "")}`;
-  return nextId(ids, new RegExp(`^${stem}-(\\d+)$`), (n) => `${stem}-${pad(n, 2)}`);
-};
-export const mintCostId = (ids: string[]) => MINT.costs(ids, {});
+const BASE36 = "0123456789abcdefghijklmnopqrstuvwxyz";
+const randomChars = (n: number) => Array.from(randomBytes(n), (b) => BASE36[b % 36]).join("");
+const stamp = (now: Date) => now.toISOString().replace(/\.\d{3}Z$/, "").replace(/\D/g, ""); // yyyymmddHHMMSS, UTC
+const mintedHere = new Set<string>();
+
+/** An ID no other process can mint at the same moment: a time stamp and random characters, never "highest + 1". */
+function unique(ids: string[], make: () => string): string {
+  for (;;) {
+    const id = make();
+    if (ids.includes(id) || mintedHere.has(id)) continue;
+    mintedHere.add(id);
+    return id;
+  }
+}
+
+/** `A-T0026-<HHMMSS><2 random chars>`: per task, and safe when two uploads to one task overlap. */
+export const mintAssetId = (ids: string[], taskId: string, now = new Date(), rand: (n: number) => string = randomChars) =>
+  unique(ids, () => `A-${taskId.replace("-", "")}-${stamp(now).slice(8)}${rand(2)}`);
+
+/** `C-<yyyymmddHHMMSS>-<4 random base36 chars>`: costs rows are appended by every maker, in parallel. */
+export const mintCostId = (ids: string[] = [], now = new Date(), rand: (n: number) => string = randomChars) =>
+  unique(ids, () => `C-${stamp(now)}-${rand(4)}`);
 
 /**
  * Checks a batch of row writes for a role and resolves it into appends and updates with IDs,
@@ -128,8 +149,9 @@ export function planOps(board: Board, role: TeamRole, ops: Op[], now: string): P
   const idsOf = (tab: string) => [...board.rows(tab).map((r) => r[tabDef(tab).id!]), ...(minted.get(tab) ?? [])];
 
   ops.forEach((op, i) => {
-    const at = `#${i + 1} ${op.tab}${op.id ? ` ${op.id}` : ""}`;
+    const at = `#${i + 1} ${op?.tab ?? ""}${op?.id ? ` ${op.id}` : ""}`;
     const fail = (why: string) => void errs.push(`${at}: ${why}`);
+    if (!op || typeof op !== "object" || Array.isArray(op)) return fail('each entry is { "tab": …, "id"?: …, "set": { … } }');
     const grant = GRANTS[role][op?.tab];
     if (!grant) return fail(`${role} can't write ${op?.tab ?? "(no tab)"}`);
     if (op.tab === "assets" && !op.id) return fail("new files are registered with `upload` or `asset`");
@@ -142,6 +164,7 @@ export function planOps(board: Board, role: TeamRole, ops: Op[], now: string): P
       if (col === def.id && (!existing || set[col] === op.id)) continue;
       if (!allowed.includes(col)) fail(`${col} isn't ${role}'s to set`);
     }
+    if (op.tab === "requests" && "from" in set && set.from !== existing?.from) fail("from isn't settable: the tool fills it with the role that wrote the request");
     for (const [col, list] of Object.entries(def.dropdowns ?? {})) {
       if (set[col] && !schema.lists[list].includes(set[col])) fail(`${col}="${set[col]}" isn't in ${list} (${schema.lists[list].join(", ")})`);
     }
@@ -153,6 +176,7 @@ export function planOps(board: Board, role: TeamRole, ops: Op[], now: string): P
     } else {
       if (!grant.append) return fail(op.id ? `no ${op.tab} row ${op.id}` : `${role} can't add ${op.tab} rows`);
       if (op.id && MINTED_ONLY.includes(op.tab)) return fail(`no ${op.tab} row ${op.id}; a new row gets its id from the tool, so leave id out`);
+      if (op.id && def.id && !row[def.id]) row[def.id] = op.id; // "id" on a new row is its ID column
       defaults(board, role, op.tab, row, now, fail);
       const id = MINTED_ONLY.includes(op.tab) ? MINT[op.tab](idsOf(op.tab), row) : (op.id ?? row[def.id!] ?? MINT[op.tab]?.(idsOf(op.tab), row));
       if (!id || /undefined/.test(id)) return fail(`needs an id (${def.id})`);
@@ -229,8 +253,10 @@ function rules(board: Board, role: TeamRole, tab: string, existing: Row | undefi
     if (after.owner && !isBotRole(after.owner) && after.owner !== "mom") fail(`owner "${after.owner}" isn't on the team`);
   } else if (tab === "requests") {
     if (!existing && !["mom", "kyle"].includes(after.to ?? "")) fail("the Orchestrator's own requests go to mom or kyle");
+    // A reply belongs to whoever the request is addressed to, never to the one who wrote it.
+    if (("reply" in row || "reply_by" in row) && after.to !== role) fail(`reply and reply_by are for ${after.to || "the person it is addressed to"} to fill in, not ${role}`);
     if (existing && existing.from !== role) {
-      for (const col of Object.keys(row)) if (!["status", "task_id"].includes(col)) fail(`${col}: on someone else's request only status and task_id change`);
+      for (const col of Object.keys(row)) if (!["status", "task_id", "reply", "reply_by"].includes(col)) fail(`${col}: on someone else's request only status and task_id change`);
     }
   } else if (tab === "lessons") {
     const who = ["all", ...schema.lists.role, ...schema.lists.task_type];
@@ -252,6 +278,9 @@ function rules(board: Board, role: TeamRole, tab: string, existing: Row | undefi
     if (after.scheduled_for && !/^\d{4}-\d{2}-\d{2}$/.test(after.scheduled_for)) fail("scheduled_for is YYYY-MM-DD");
   } else if (tab === "assets") {
     if (existing?.created_by !== role) fail(`belongs to ${existing?.created_by || "someone else"}`);
+    // After the hand-in the files are QC's, Clara's and the backend's to judge: a maker edits its own only while the work is open.
+    const owner = board.rows("tasks").find((t) => t.task_id === existing?.task_id);
+    if (existing && !["in_progress", "blocked"].includes(owner?.status ?? "")) fail(`${existing.task_id} is ${owner?.status ?? "not on the board"}; a file is edited only while its task is in_progress or blocked`);
   }
 }
 
@@ -303,13 +332,17 @@ export function planMove(board: Board, role: TeamRole, taskId: string, move: Mov
   if (planner && role !== "orchestrator") throw no(`only the Orchestrator sends a task back to todo or cancels it`);
   if (!planner && !holds && task.owner !== role) throw no(`it's ${task.owner}'s task, not ${role}'s`);
 
+  // Cancelling closes work that has been judged or is with the backend or Clara: that is Kyle's call (npm run task).
+  if (move === "cancel" && ["done", ...HELD].includes(task.status)) throw no(`${task.status} work isn't cancelled by the team: ask Kyle (npm run task -- ${taskId} cancelled "<why>")`);
+
   const to = move === "start" ? "in_progress" : move === "block" ? "blocked" : move === "todo" ? "todo" : move === "cancel" ? "cancelled" : needsQc ? "ready_for_qc" : "done";
   if (!isLegalTransition("bot", task.status, to, { needsQc }) || task.status === to) throw no(`${task.status} → ${to} isn't a move the team can make`);
   if (move !== "start" && !note.trim()) throw no(move === "handin" ? 'add the self-check line: "self-check: …"' : "say why in one line");
 
   const patch: Partial<Row> = { status: to };
   if (move === "start") {
-    const busy = board.rows("tasks").filter((t) => t.owner === role && t.status === "in_progress").length;
+    const parked = parkedProducts(board); // a paused book's work doesn't count, as on the board
+    const busy = board.rows("tasks").filter((t) => t.owner === role && t.status === "in_progress" && !parked.has(t.product_id)).length;
     if (busy >= MAX_IN_PROGRESS) throw no(`${role} already has ${busy} tasks in progress (max ${MAX_IN_PROGRESS})`);
     patch.blocked_reason = "";
   }
@@ -352,4 +385,31 @@ export function planReview(board: Board, taskId: string, verdict: string, notes:
 export function isPagePicture(role: string, assetType: string, opts: Record<string, string>, fileName = ""): boolean {
   if (role !== "illustrator" || assetType !== "page_art" || !opts.page) return false;
   return !/ink|lines?$/i.test(opts.version ?? "") && !/[_-]ink\b/i.test(fileName);
+}
+
+/** A sweep that began longer ago than this is taken as crashed, and a new one may start. */
+export const SWEEP_LOCK_MINUTES = 90;
+export const SWEEP_KEY = "sweep_started_at";
+
+/** What the sweep lock says now: "" when free, else who holds it and how long ago it began. */
+export function sweepHeldBy(board: Board, nowMs: number): { since: string; minutes: number } | undefined {
+  const since = board.config(SWEEP_KEY).trim();
+  const began = Date.parse(since);
+  if (!since || Number.isNaN(began)) return undefined;
+  const minutes = Math.floor((nowMs - began) / 60_000);
+  return minutes < SWEEP_LOCK_MINUTES ? { since, minutes } : undefined;
+}
+
+/**
+ * `sweep start` writes config!sweep_started_at; `sweep end` clears it. A start is refused while another sweep began
+ * under 90 minutes ago and hasn't ended: one Orchestrator at a time, because it is the only minter of task and request IDs.
+ */
+export function planSweep(board: Board, action: string, nowMs: number): { value: string; message: string } {
+  if (action === "end") return { value: "", message: "sweep ended: the lock is clear" };
+  if (action !== "start") throw new Error('usage: sweep start | sweep end');
+  const held = sweepHeldBy(board, nowMs);
+  if (held) {
+    throw new Error(`a sweep began at ${held.since} (${held.minutes} minutes ago) and hasn't ended. Two Orchestrators would mint the same task IDs: wait for it, or ask Kyle to clear config!${SWEEP_KEY} if it crashed (a lock older than ${SWEEP_LOCK_MINUTES} minutes is ignored)`);
+  }
+  return { value: new Date(nowMs).toISOString().replace(/\.\d{3}Z$/, "Z"), message: "sweep started: nothing else may run an Orchestrator until `sweep end`" };
 }

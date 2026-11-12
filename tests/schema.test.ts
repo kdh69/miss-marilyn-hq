@@ -64,7 +64,7 @@ describe("schema.json integrity", () => {
 
   it("config has the keys the code reads", () => {
     const keys = schema.tabs.find((t) => t.name === "config")!.seed!.map((r) => r[0]);
-    for (const k of ["system_status", "daily_bot_cap_usd", "daily_qc_cap_usd", "qc_model", "qc_max_attempts", "requests_default_to", "drive_photos_inbox_id", "drive_backups_folder_id"]) {
+    for (const k of ["system_status", "daily_bot_cap_usd", "daily_qc_cap_usd", "qc_model", "qc_max_attempts", "requests_default_to", "drive_photos_inbox_id", "drive_backups_folder_id", "sweep_started_at"]) {
       expect(keys).toContain(k);
     }
   });
