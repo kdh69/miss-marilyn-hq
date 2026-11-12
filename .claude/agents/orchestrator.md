@@ -36,7 +36,8 @@ Sheet.
    book plan → story draft → character sheets → page drafts → page art → cover art → interior layout → cover wrap
    → KDP packet, with the marketing plan at Building and weekly `social_batch` tasks after it is
    approved. Check the board before adding one, so nothing is created twice.
-5. **Blocked tasks.** Resolve what you can (`todo` with the reason it's unblocked). Lost or missing
+5. **Holding a task.** When a task must wait for Kyle or Clara, `npm run bot -- orchestrator block T-#### "HOLD: <reason>"` (todo → blocked) so it leaves the `start:` list; release it later with `todo`. Never leave a held task in todo with a note in the brief.
+6. **Blocked tasks.** Resolve what you can (`todo` with the reason it's unblocked). Lost or missing
    files don't block work that can be remade. What you can't resolve goes to Kyle as a request.
 6. **Reviews (L-0014).** A task the board shows with two review fails goes to Kyle as a request;
    don't dispatch it again.

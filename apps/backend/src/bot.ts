@@ -26,6 +26,7 @@
  *   image <task> <prompt.txt> kind=sheet|draft|page|cover page=N|name=x [ref=<asset ids or files>] [dry=1]
  *                                   one picture from the image model, behind the budget gate; writes its costs row
  *   check <file> [kind=interior|cover pages=N]       print specs for a PNG, KDP preflight for a PDF
+ *   edges <file>                    the four outer 4% strips: dark and cream shares per side, and a montage to look at (<file>.edges.png)
  *   contact <task> [files…]         every page's art on one sheet, to see drift between pages
  *   verify "<an agent's last line>" does the board agree with what the agent says it did? (the Stop hook)
  */
@@ -37,7 +38,7 @@ import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { Core, driveReader, driveWriter, nowIso, schema, tabDef, writerIdentity, type Row } from "@mm/core";
 import { planImage, verifyClaim } from "./lib/gates";
-import { checkArt, contactSheet, fitToPage, format, generateImage, practiceImage } from "./lib/image";
+import { checkArt, contactSheet, edgeReport, fitToPage, format, generateImage, practiceImage } from "./lib/image";
 import { python } from "./lib/python";
 import { rubricPath } from "./lib/qc";
 import {
@@ -311,7 +312,18 @@ async function image(core: Core, role: BotRole, task: Row, promptPath: string, o
     fitted_to_page: plan.fitToPage && !warn, usd_estimate: plan.usd, references: idList(opts.ref), prompt,
   }, null, 2));
   const madeWith = `${plan.model.name} via fal.ai (${made.endpoint})`;
-  console.log(`${out.replace(ROOT, "")}  attempt ${plan.attempt} of ${format.image.maxAttemptsPerImage}  $${plan.usd.toFixed(2)} (${cost_id})  ·  ${spendToday(core)}${warn}`);
+  const taskRows = core.rows("costs").filter((c) => c.category === "ai_credits" && c.task_id === task.task_id);
+  const onTask = taskRows.reduce((sum, c) => sum + (Number(c.amount_usd) || 0), 0) + (taskRows.some((c) => c.cost_id === cost_id) ? 0 : plan.usd);
+  console.log(`${out.replace(ROOT, "")}  attempt ${plan.attempt} of ${format.image.maxAttemptsPerImage}  $${plan.usd.toFixed(2)} (${cost_id})  ·  ${spendToday(core)}  ·  ${task.task_id} $${onTask.toFixed(2)} of $${format.image.taskCapUsd}, ${format.image.maxAttemptsPerImage - plan.attempt} attempt(s) left on ${subject}${warn}`);
+  if (plan.fitToPage && !warn) {
+    // After the paid call has been recorded, so a failure here can never lose the picture or its cost row.
+    try {
+      const edges = await edgeReport(png);
+      console.log(edges.flags.length ? `Edge check, LOOK AT THE STRIPS (npm run bot -- ${role} edges ${out.replace(ROOT, "")}):\n  ${edges.flags.join("\n  ")}` : "Edge check: no flags (still look at the strips).");
+    } catch (e) {
+      console.log(`Edge check didn't run (${(e as Error).message}); run: npm run bot -- ${role} edges ${out.replace(ROOT, "")}`);
+    }
+  }
   console.log(`Open it and look before anything else. When it's right, upload its recipe, then the picture:\n  npm run bot -- ${role} upload ${task.task_id} ${recipe.replace(ROOT, "")} page_plan made_with="Claude Code"\n  npm run bot -- ${role} upload ${task.task_id} ${out.replace(ROOT, "")} <asset_type>${opts.page ? ` page=${opts.page}` : ""} made_with="${madeWith}" prompt_ref=<the recipe's asset id>${plan.fitToPage ? "" : " draft=1"}`);
 }
 
@@ -398,6 +410,14 @@ export async function run(core: Core, role: string, command: string, args: strin
     rows: () => rows(core, role, args[0] ?? "", args.slice(1)),
     fetch: () => fetchFiles(core, args),
     contact: () => contact(core, args[0] ?? "", args.slice(1)),
+    edges: async () => {
+      const file = fromCaller(args[0] ?? "");
+      const report = await edgeReport(file);
+      const out = file.replace(/\.\w+$/, "") + ".edges.png";
+      await writeFile(out, report.montage);
+      for (const [side, v] of Object.entries(report.sides)) console.log(`  ${side.padEnd(6)} dark ${(100 * v.dark).toFixed(1)}%  cream ${(100 * v.cream).toFixed(0)}%`);
+      console.log(report.flags.length ? `LOOK AT THE STRIPS (${out.replace(ROOT, "")}):\n  ${report.flags.join("\n  ")}` : `No flags; still open ${out.replace(ROOT, "")} and look.`);
+    },
     check: async () => {
       const fails = await checkFile(fromCaller(args[0] ?? ""), kv(args.slice(1)));
       console.log(fails.length ? `${basename(args[0])}: NOT print-ready\n  ${fails.join("\n  ")}` : `${basename(args[0])}: print-ready`);

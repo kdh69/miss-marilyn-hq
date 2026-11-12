@@ -9,6 +9,11 @@ describe("status rules (spec §6)", () => {
     expect(isLegalTransition("bot", "qc_fail", "todo")).toBe(true);
   });
 
+  it("a todo task can be held (blocked) and released back to todo", () => {
+    expect(isLegalTransition("bot", "todo", "blocked")).toBe(true);
+    expect(isLegalTransition("bot", "blocked", "todo")).toBe(true);
+  });
+
   it("bots can never approve, publish or skip QC", () => {
     for (const to of ["in_qc", "awaiting_mom", "approved", "publishing"]) {
       expect(isLegalTransition("bot", "ready_for_qc", to)).toBe(false);

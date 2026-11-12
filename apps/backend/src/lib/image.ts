@@ -121,3 +121,50 @@ export async function contactSheet(items: { label: string; image: Buffer }[], co
   }));
   return sharp({ create: { width, height, channels: 3, background: "#e9e9e9" } }).composite(tiles.flat()).png().toBuffer();
 }
+
+export type EdgeSide = "top" | "bottom" | "left" | "right";
+export type EdgeReport = { sides: Record<EdgeSide, { dark: number; cream: number }>; flags: string[]; montage: Buffer };
+
+/**
+ * Where to look before a picture moves on: for each of the four outer strips (4% of the width by
+ * default), the share of dark pixels (ink, dark fur: luminance under 80) and of paper-cream pixels
+ * (a vignette). It flags a side, it does not judge it: a dark tree trunk flags too. The montage
+ * stacks the four strips so a person can look at all of them at once.
+ */
+export async function edgeReport(input: Buffer | string, share = 0.04): Promise<EdgeReport> {
+  const buf = typeof input === "string" ? await readFile(input) : input;
+  const { width = 0, height = 0 } = await sharp(buf).metadata();
+  const band = Math.max(1, Math.round(width * share));
+  const regions: Record<EdgeSide, { left: number; top: number; width: number; height: number }> = {
+    top: { left: 0, top: 0, width, height: band },
+    bottom: { left: 0, top: height - band, width, height: band },
+    left: { left: 0, top: 0, width: band, height },
+    right: { left: width - band, top: 0, width: band, height },
+  };
+  const sides = {} as EdgeReport["sides"];
+  const flags: string[] = [];
+  const strips: Buffer[] = [];
+  const pct = Math.round(share * 100);
+  for (const side of Object.keys(regions) as EdgeSide[]) {
+    // Cut the strip out first, then work on it as its own picture: sharp rotates before it extracts inside one pipeline.
+    const strip = sharp(await sharp(buf).extract(regions[side]).removeAlpha().toColourspace("srgb").png().toBuffer());
+    const { data, info } = await strip.clone().raw().toBuffer({ resolveWithObject: true });
+    let dark = 0, cream = 0;
+    const n = info.width * info.height;
+    for (let i = 0; i < data.length; i += info.channels) {
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      if (0.299 * r + 0.587 * g + 0.114 * b < 80) dark++;
+      if (Math.abs(r - 251) < 12 && Math.abs(g - 244) < 12 && Math.abs(b - 233) < 12) cream++;
+    }
+    sides[side] = { dark: dark / n, cream: cream / n };
+    if (dark / n > 0.005) flags.push(`${side}: ${(100 * dark / n).toFixed(1)}% dark pixels in the outer ${pct}%: look at the strip (a tail, a paw or an ink line; or only a tree)`);
+    if (cream / n > 0.3) flags.push(`${side}: ${(100 * cream / n).toFixed(0)}% paper-cream in the outer ${pct}%: a cream border or vignette? The scene should be painted to the edge`);
+    const flat = side === "left" || side === "right" ? strip.clone().rotate(90) : strip.clone();
+    strips.push(await flat.resize(width, band, { fit: "fill" }).png().toBuffer());
+  }
+  const gap = 8;
+  const montage = await sharp({ create: { width, height: 4 * band + 3 * gap, channels: 3, background: "#ff00ff" } })
+    .composite(strips.map((strip, i) => ({ input: strip, left: 0, top: i * (band + gap) })))
+    .png().toBuffer();
+  return { sides, flags, montage };
+}

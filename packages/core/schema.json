@@ -1410,6 +1410,10 @@
         "in_progress"
       ],
       [
+        "todo",
+        "blocked"
+      ],
+      [
         "in_progress",
         "blocked"
       ],

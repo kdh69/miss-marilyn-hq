@@ -166,3 +166,11 @@ describe("isPagePicture", () => {
     expect(isPagePicture("builder", "page_art", { page: "3" }, "x.png")).toBe(false);
   });
 });
+
+describe("the Orchestrator holds a task", () => {
+  it("blocks someone else's todo task with a reason, and only the Orchestrator may", () => {
+    expect(planMove(board(), "orchestrator", "T-0026", "block", "HOLD: Kyle decides Clara's notes")).toMatchObject({ from: "todo", to: "blocked", patch: { blocked_reason: "HOLD: Kyle decides Clara's notes" } });
+    expect(() => planMove(board(), "orchestrator", "T-0026", "block", "")).toThrow(/say why/);
+    expect(() => planMove(board(), "builder", "T-0026", "block", "no")).toThrow(/illustrator's task/);
+  });
+});

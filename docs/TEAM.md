@@ -97,7 +97,8 @@ the only source of truth, and the panel shows Clara and the family only what is 
 | `brief <task>` | everything for one task |
 | `rows <tab> [col=value …]` | rows of a tab as JSON |
 | `fetch <asset_id or Drive URL> …` | downloads files to `.mm-work/` |
-| `start` / `block` / `handin <task> "<note>"` | the owner's status changes |
+| `start` / `block` / `handin <task> "<note>"` | the owner's status changes; the Orchestrator can also `block` someone's todo task (a hold) and release it with `todo` |
+| `edges <file>` | the four outer 4% strips of a picture: dark and cream share per side, and a montage `<file>.edges.png` to look at; `image` prints the same flags after every print-size picture |
 | `todo` / `cancel <task> "<why>"` | the Orchestrator's; `todo` copies QC's or Clara's note into the brief |
 | `review <task> pass\|fail "<text>"` | the Quality Checker's verdict (a log row) |
 | `note <task> "<text>"` | a log row that leaves the status alone |

@@ -298,8 +298,10 @@ export function planMove(board: Board, role: TeamRole, taskId: string, move: Mov
   if (board.config("system_status") === "HALT") throw no("system_status is HALT; nothing moves until Kyle sets RUN");
   if (move !== "cancel" && parkedProducts(board).has(task.product_id)) throw no(`${task.product_id} is paused or retired`);
   const planner = move === "todo" || move === "cancel";
+  // The Orchestrator may also hold someone else's task (todo → blocked, with the reason); `todo` releases it.
+  const holds = move === "block" && role === "orchestrator";
   if (planner && role !== "orchestrator") throw no(`only the Orchestrator sends a task back to todo or cancels it`);
-  if (!planner && task.owner !== role) throw no(`it's ${task.owner}'s task, not ${role}'s`);
+  if (!planner && !holds && task.owner !== role) throw no(`it's ${task.owner}'s task, not ${role}'s`);
 
   const to = move === "start" ? "in_progress" : move === "block" ? "blocked" : move === "todo" ? "todo" : move === "cancel" ? "cancelled" : needsQc ? "ready_for_qc" : "done";
   if (!isLegalTransition("bot", task.status, to, { needsQc }) || task.status === to) throw no(`${task.status} → ${to} isn't a move the team can make`);
