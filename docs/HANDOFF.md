@@ -106,11 +106,11 @@ continue; S1 (hardening) is built and tested but has never run live.
    no reserved rows left; the budget and attempts-left line printed. Only the success path ran live (release, failed and
    unconfirmed paths are tested in memory only). Run makers **one at a time** until a live sweep has run clean (the sweep
    skill says so). `npm run sheet:setup` is optional (adds only the config row `sweep_started_at`; the bot adds it if missing).
-3. **Scheduled sweeps are ON:** a Claude scheduled task, `trig_015Tyx6Hrf1SCRFoAGvGNCEM`, "Miss Marilyn sweep (9am and 6pm NY)",
-   runs at 8:43 and 17:43 New York every day in the `miss-marilyn-hq` cloud environment, new session each time, push
+3. **Scheduled sweeps are ON:** a Claude scheduled task, `trig_015Tyx6Hrf1SCRFoAGvGNCEM`, "Miss Marilyn sweep (8am and 5pm NY)",
+   runs at 7:43 and 16:43 New York every day in the `miss-marilyn-hq` cloud environment, new session each time, push
    notification to Kyle. **Its picture budget is $0** (it plans, reviews, runs QC, applies Clara's answers and reports what art
    is ready and its cost). To let it make pictures, edit the task's prompt (Kyle says "sweep budget $X" and Claude changes it
-   with `update_trigger`): suggested $3 a sweep once two sweeps have run clean. First run: 2026-11-12 08:43 New York.
+   with `update_trigger`): suggested $3 a sweep once two sweeps have run clean. First run: 2026-11-12 07:43 New York (changed from 9am/6pm to 8am/5pm by Kyle on 11-12).
 4. **Picture budget** is now `perImageCapUsd` = 3.5 x the kind's price per picture a task covers ($1.05 a page), attempts
    4 a round and 6 ever, day cap $15 (`formats/picture-book.json`).
 5. Still open for the remaining pages: p1, p4-p11, p16-p24 and the cover. Clara's eight picture notes of 11-02 (p1, p4-p8,

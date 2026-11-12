@@ -101,7 +101,7 @@ rebuildable from `schema.json`, CI on every push, every knowledge claim dated an
 | L2 | First sweep without art: deliver the 11-01 decisions, create the rest of Book 1's chain, draft the KDP packet, Scout's first topic | Each of those roles has taken a task to `ready_for_qc` and through QC |
 | L3 | First pictures, cap $3: tests B1 and B3 on two pages | The contact sheet shows Grok-made drafts next to the new ones, and Kyle says keep or change | **Done 2026-11-11/12:** B1 yes (a draft's composition and faults carry into the final), 22 pictures for $4.62; see the playbook.
 | L4 | The owner token for uploads | `upload` works without the Drive connector |
-| L5 | Scheduled sweeps, 9am and 6pm New York | Two days of unattended sweeps with a clean report | **Kyle chose 9am and 6pm NY on 2026-11-12; not created yet (after the S1 live check and a standing budget).**
+| L5 | Scheduled sweeps, 9am and 6pm New York | Two days of unattended sweeps with a clean report | **Kyle chose 8am and 5pm NY on 2026-11-12; created that day (runs 7:43 and 16:43) with a $0 picture budget until two sweeps run clean.**
 | L6 | The panel starts a backend tick when Clara answers (a `workflow_dispatch` call from the panel's save action; needs a GitHub token in Vercel) | Her Approve shows as applied within a few minutes. Measured 11-08 to 11-11: GitHub ran the "every 30 minutes" schedule 12 times in three days |
 
 ### Phase 2: recreatable (R1 to R8, R2 first)
