@@ -80,3 +80,6 @@ Planning prices held on the live run: draft $0.08 and final $0.30 matched the co
   strip `FAL_KEY` and the Google credentials from the environment and take only a fake generator.
 - The edge check (`edges`, and after every print-size `image`) caught a cream border exactly and missed grey tail fur on an
   edge until its threshold was lowered: it flags where to look; a person still decides.
+- Live check of the ledger, 2026-11-12: one $0.08 draft (`name=ledger-test`, T-0033), C-20261112014408-lc50, settled cleanly. Day total $4.70 for 23 pictures.
+- Scheduled sweeps went on 2026-11-12 (8:43 and 17:43 New York) at a $0 picture budget: the first runs show whether the flow holds
+  without Kyle. Raise the budget in the task's prompt only after two clean sweeps.
