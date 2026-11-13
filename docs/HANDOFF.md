@@ -111,6 +111,13 @@ dispatcher starts that agent".
   11-02 and 11-12 notes worked in; sheet A-T0044-212227ea; drafts A-T0044-2117..2122, not on the pages rows
   yet. p4 fixed on the 4th try with a view from behind the car (A-T0044-2154002o); storyboard sheet v2 A-T0044-215433bv. Open: p21 shows two towers, p18
   one dog parent. Waiting for Kyle's picks, the p8/p11 cut decision, and a budget for finals.
+- **Clara's 11-12 page notes, done the same evening (Kyle: "do what she said"):** she cut pp. 8, 11, 13, 15, 19, 20 as separate
+  pages. Book 1 stays at 24 pages (KDP minimum): each cut page is now the other half of a two-page picture with its neighbour
+  (pp. 8-9, 10-11, 12-13, 14-15, 18-19, 20-21), drawn with the new `spread_draft` kind and split onto the pages; p10 Gussie alone;
+  p20-21 all parents smiling; p22 cozy table with bowls of milk; p23 dream bubble with Book 2's little plane (canon CN-15).
+  All on the pages rows as drafts; whole-book sheet A-T0044-234346l6. Kyle's replies are on each of her 10 notes plus one
+  overview message; R-0005 closed. p20's text_final is a duplicate of p21's: never print it (T-0041 note). Spread finals need a
+  print-size spread kind first. Spend 11-12 total: $4.15.
 - **T-0032** (pp12-13) is `blocked`, parked to free an illustrator slot; nothing in it changed. `start` resumes it.
 - Spend 11-12: $3.27 (estimates, 40 pictures), of which $2.56 storyboard (32 drafts), $0.56 cover drafts, $0.15 playground sheet.
 

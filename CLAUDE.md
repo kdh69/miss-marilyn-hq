@@ -77,6 +77,6 @@ Consistency is the rule (Kyle, 2026-11-12): every page and every book must look 
 Miss M's Bible (`canon` tab, panel `/bible`, printed in every brief); lessons L-0028 to L-0030. A new place or prop
 that appears on more than one page gets a setting sheet and a canon entry before any page uses it.
 
-Next up: Kyle picks from Book 1's storyboard v2 (T-0044, sheet A-T0044-215433bv; cover draft A-T0040-20313028),
-decides on cutting p8 and p11, and sets a budget for finals (about $0.30 a page); then finals from the picked drafts.
+Next up: Clara checks Book 1 on the panel (her 11-12 notes are done: six two-page pictures, whole-book sheet A-T0044-234346l6;
+cover draft A-T0040-20313028); then Kyle sets a budget for finals (about $0.30 a page) and a print-size spread kind is added.
 Etsy publish once API access lands; KDP report + Etsy sales import for the Money tab; register photos dropped straight into Drive.

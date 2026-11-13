@@ -31,6 +31,7 @@ every agent needs go in the `lessons` tab; the evidence stays here and in `docs/
 | Free "shrunk draft on a cream canvas" reference | helped p14 partly (tail clear, a cream vignette added), failed p15 (crowded scene) | T-0033 |
 | Setting sheet (Nano Banana Pro, 2K, 3:2) for the playground | $0.15, first try; passed on every page, the playground matched on 20 of 20 drafts | T-0040, T-0044, 2026-11-12 |
 | Whole-book storyboard of drafts (Nano Banana 2, 1K, 3 to 4 references) | 20 pages + 12 redraws on 9 pages = $2.56, about 25 s a picture; 11 of 20 right first time; p4 (car direction) took 4 tries, fixed by a view from behind | T-0044, 2026-11-12 |
+| Clara's 11-12 notes: 6 two-page drafts + p22 + p23 | 11 pictures, $0.88 (3 redraws for a duplicated slide or seesaw and a doubled string), about 25 s each | T-0044, 2026-11-12 |
 | Cover drafts to one Kyle liked | 7 drafts, $0.56, plus the $0.15 playground sheet | T-0040, 2026-11-12 |
 
 Planning prices for pictures (list prices, not yet confirmed on a bill): draft $0.08, character

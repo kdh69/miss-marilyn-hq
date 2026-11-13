@@ -69,6 +69,14 @@ spend as little as possible finding out a page is wrong.
 - Car direction was wrong three times on p4: twice the words "pointing to the right" were ignored, and when the playground was moved to the left the model mirrored the whole scene, car still leaving it. Drawing the car from behind, driving up the road to the playground ahead (faces through the side windows), worked first time (A-T0044-2154002o). For a journey, put the camera behind the vehicle. [proven, checked 2026-11-12]
 - Measured: 20 page drafts plus 12 redraws, $2.56 (Kyle approved the last $0.06 over the $2.50 cap), about 25 seconds each with Nano Banana 2 at 1K; 9 of 20 pages needed a redraw. [proven, checked 2026-11-12]
 
+## Two-page pictures (Book 1, Clara's 11-12 notes)
+
+- A page Clara cuts can join the facing page as one two-page picture (pp. 8-9, 10-11, 12-13, 14-15, 18-19, 20-21 in Book 1), which keeps the book at KDP's 24-page minimum and keeps her words on their pages. Draw it as one wide `spread_draft` (16:9) and split it down the middle onto the two pages. [proven, checked 2026-11-12] [picture-book.json](../../formats/picture-book.json)
+- In a wide picture the model paints a thin line where it guesses the fold is (4 of 6); it falls on the cut, so the split hides it. Asking for "one seamless panorama" did not stop it. [proven, checked 2026-11-12]
+- Wide pictures duplicate playground pieces: two slides (pp. 8-9) and two seesaws (pp. 14-15, 20-21) on first tries; "exactly one slide / one seesaw in the whole picture" fixed two of three. [proven, checked 2026-11-12]
+- Say on which half the words go ("the top third of the left half is calm sky") and keep faces out of the middle 8%; a character can still land near the fold (pp. 8-9), so check the centre strip before a final. [proven, checked 2026-11-12]
+- A dream bubble added to an existing page (p23) held the page's composition when that page's draft was the first reference ("keep everything, one change"). [proven, checked 2026-11-12]
+
 ## Open questions
 
 - B2: how many references help? The model takes five; videograph found a third view of a character was paid for and unused. [unproven, checked 2026-11-11]

@@ -8,12 +8,13 @@
   "maxWordsPerSpread": 50,
   "page": { "widthIn": 8.625, "heightIn": 8.75, "dpi": 300, "widthPx": 2588, "heightPx": 2625, "artSafeIn": 0.375, "textSafeIn": 0.5 },
   "image": {
-    "$comment": "What `npm run bot -- <role> image` asks for and what it may spend. Prices are fal.ai list prices read 2026-10-18 in the videograph repo; check them on fal's pages before raising a cap. maxAttemptsPerImage counts live paid attempts at one picture (a kind and a page or name) since its task last went in_progress; maxAttemptsLifetime counts every row, failures included, and only a person lifts it. perImageCapUsd is 3.5 x the kind's price (raised from 2.5 by Kyle on 2026-11-12: the first evening used 3.5 final attempts a page): a task may spend that much per picture it covers, per kind, in place of a flat task cap. maxPicturesPerTask stops a task growing its budget by inventing names.",
+    "$comment": "What `npm run bot -- <role> image` asks for and what it may spend. Prices are fal.ai list prices read 2026-10-18 in the videograph repo; check them on fal's pages before raising a cap. maxAttemptsPerImage counts live paid attempts at one picture (a kind and a page or name) since its task last went in_progress; maxAttemptsLifetime counts every row, failures included, and only a person lifts it. perImageCapUsd is 3.5 x the kind's price (raised from 2.5 by Kyle on 2026-11-12: the first evening used 3.5 final attempts a page): a task may spend that much per picture it covers, per kind, in place of a flat task cap. maxPicturesPerTask stops a task growing its budget by inventing names. spread_draft (2026-11-12): one picture for a facing pair of pages (e.g. pp. 8-9), drawn wide and split down the middle into the left and right page; nothing that matters in the middle 8% (the fold). Its print-size kind comes with the first spread final.",
     "kinds": {
       "sheet": { "model": "pro", "resolution": "2K", "aspect": "3:2", "fitToPage": false },
       "draft": { "model": "fast", "resolution": "1K", "aspect": "1:1", "fitToPage": false },
       "page": { "model": "pro", "resolution": "4K", "aspect": "1:1", "fitToPage": true },
-      "cover": { "model": "pro", "resolution": "4K", "aspect": "1:1", "fitToPage": true }
+      "cover": { "model": "pro", "resolution": "4K", "aspect": "1:1", "fitToPage": true },
+      "spread_draft": { "model": "fast", "resolution": "1K", "aspect": "16:9", "fitToPage": false }
     },
     "models": {
       "pro": { "name": "Nano Banana Pro", "endpoint": "fal-ai/nano-banana-pro", "maxRefs": 5, "usd": { "1K": 0.15, "2K": 0.15, "4K": 0.3 } },
@@ -21,7 +22,7 @@
     },
     "maxAttemptsPerImage": 4,
     "maxAttemptsLifetime": 6,
-    "perImageCapUsd": { "sheet": 0.525, "draft": 0.28, "page": 1.05, "cover": 1.05 },
+    "perImageCapUsd": { "sheet": 0.525, "draft": 0.28, "page": 1.05, "cover": 1.05, "spread_draft": 0.28 },
     "maxPicturesPerTask": 26
   }
 }
