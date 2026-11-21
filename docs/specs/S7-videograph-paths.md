@@ -1,6 +1,6 @@
 # S7: where its videograph paths are now
 
-On 20 Nov 2026 the videograph repo (kdh69/dino-video) became two folders: `app/` (everything that makes the videos)
+On 20 Nov 2026 the videograph repo (Kyle's private video repo) became two folders: `app/` (everything that makes the videos)
 and `channels/` (one folder per channel). [S7](S7-videograph-channel.md) was written before that and names the old
 places. Read it with this table. Nothing in this repo's code reads these paths.
 
