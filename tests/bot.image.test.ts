@@ -1,4 +1,5 @@
 import { FakeSheets, seeded } from "./helpers/fakeSheets"; // first: it removes live credentials and the call pacing
+import { fileURLToPath } from "node:url";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { existsSync, readdirSync } from "node:fs";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
@@ -10,7 +11,7 @@ import { ImageCallError } from "../apps/backend/src/lib/image";
 
 /** `image` on a ledger: reserve the costs row, re-check, call, write the file, settle. No fal is ever called: `generate` is a fake. */
 const TASK = "T-9002";
-const WORK = new URL(`../.mm-work/${TASK}/`, import.meta.url).pathname;
+const WORK = fileURLToPath(new URL(`../.mm-work/${TASK}/`, import.meta.url));
 const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
 
 let fake: FakeSheets;

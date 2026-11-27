@@ -1,4 +1,5 @@
 import { FakeSheets, seeded } from "./helpers/fakeSheets"; // first: it removes live credentials and the call pacing
+import { fileURLToPath } from "node:url";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { existsSync } from "node:fs";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
@@ -15,7 +16,7 @@ import { run, tabsFor } from "../apps/backend/src/bot";
 let fake: FakeSheets;
 let dir: string;
 const TASK = "T-0001";
-const WORK = new URL("../.mm-work/", import.meta.url).pathname;
+const WORK = fileURLToPath(new URL("../.mm-work/", import.meta.url));
 
 const out: string[] = [];
 const err: string[] = [];
