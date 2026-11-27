@@ -1,12 +1,14 @@
 # Story and page plan
-Last reviewed: 2026-11-11
+Last reviewed: 2026-11-27
 
 What a Miss Marilyn story has to be, and what Book 1's drafts taught. The series bible says what
 the books are; this file holds the evidence behind the numbers and the open questions.
 
 ## Rules
 
-- 24 pages including the title and copyright pages: 10 story spreads, story text on 11 to 15 pages, 250 to 400 words in all, under 50 words a spread. [proven, checked 2026-11-01] [handoff](../HANDOFF.md)
+- 24 pages including the title and copyright pages, 250 to 400 words in all, under 50 words on two facing pages. [proven, checked 2026-11-01] [handoff](../HANDOFF.md)
+- Every page with its own picture gets words: Clara reads a page with a picture and no words as blank or repeated. Book 1 now has 18 text pages, about 328 words on pp. 3-23, the largest facing pair 48. (This replaces "story text on 11 to 15 pages".) [proven, checked 2026-11-27] T-0047
+- A rewrite that moves words to another page leaves Clara's old text_final on the page they came from, and her saved words show before the draft, so the moved lines can print twice (pp. 14, 18, 20, 21 in T-0047). Name every such page in the layout hold; the panel now makes her choose "Use the new words" or "Keep my words". [proven, checked 2026-11-27] T-0047, [BookSpreads.tsx](../../apps/web/components/BookSpreads.tsx)
 - One adventure, one lesson, the "Achoo!" gag at least once, and the "Meet the Real Miss Marilyn" page last, with a photo placeholder. [proven, checked 2026-11-11] [story checklist](../../apps/backend/rubrics/story.md)
 - Count the words yourself, per page, per spread and in total, before saying you're done. [proven, checked 2026-11-11] [story checklist](../../apps/backend/rubrics/story.md)
 - At most 5 lines of body text on a page, about 35 to 45 characters a line. A page that needs more is too long: shorten the text, never the font. [proven, checked 2026-11-11] [style guide](../brand/style-guide.md)

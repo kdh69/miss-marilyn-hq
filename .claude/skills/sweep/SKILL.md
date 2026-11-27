@@ -15,7 +15,9 @@ Agent to start for each Sheet role: `orchestrator` → orchestrator, `story_prod
 ## Steps
 
 1. **Check the door.** `bash .claude/setup.sh` (installs what's missing, lists which keys this
-   session has), then `npm run bot -- kyle board`. If it fails for missing keys
+   session has, says whether this copy is behind GitHub). If it says BEHIND, run
+   `git pull --ff-only` first; if that fails, stop and tell Kyle (an old copy runs old agents and
+   old bot code). Then `npm run bot -- kyle board`. If it fails for missing keys
    (`GOOGLE_SERVICE_ACCOUNT_JSON is not set`), stop and tell Kyle what this session needs
    (`docs/REMOTE.md`); if it says HALT, stop and say so. Then take the lock:
    `npm run bot -- orchestrator sweep start`. If it refuses (a sweep began under 90 minutes ago and

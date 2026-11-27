@@ -18,6 +18,9 @@ every agent needs go in the `lessons` tab; the evidence stays here and in `docs/
 | `npm run sim` (a book through every step after the script, live Sheet) | about 4 min, 183 rows written and removed | first live run, 2026-11-01 |
 | Sheets API pace that stays under the quota | 50 calls a minute per process | 2026-11-01 |
 | Story draft that passed QC | about 270 words, 15 text pages, longest spread 49 words | T-0038 |
+| Story rewrite from Clara's page notes, start to her card | about 15 min (self-check 6 min, one review, QC 2 min after hand-in), 10 page rows, $0 | T-0047, 2026-11-27 |
+| Clara's 11 page notes to a task created | 13 min | 2026-11-27 |
+| Re-holding 14 tasks to refresh their reasons | 28 log rows, about 4 min (bounces each task through todo) | 2026-11-27 |
 | Character sheets | passed QC on attempt 3 (Grok image model) | T-0025 |
 | First picture through `image` (fal, Nano Banana 2, draft 1K, 2 references) | worked first call, 1024 x 1024 px, on-model, $0.08 (C-0005) | T-0026 test, 2026-11-11 |
 | Final page (Nano Banana Pro, 4K, 3 to 4 references) | 2588 x 2625 px after the crop, no enlargement needed, $0.30 each (C-0006 to C-0009); one page task of one picture took about 2.5 min start to report | T-0027, T-0032, 2026-11-11 |
@@ -62,6 +65,10 @@ Planning prices held on the live run: draft $0.08 and final $0.30 matched the co
 | 2026-11-11 | HANDOFF said the author name was open; Clara had answered R-0003 ("Clarette Kiddle") | a stale blocker | L-0025: check requests and mom_queue for Clara's answer before calling a fact open |
 | 2026-11-12 | Book 1's playground, slide colour and swing frame changed from page to page (blue or yellow slide, wood or red metal swings), and the p3 window showed the playground the family only drives to on p4 | a book that didn't feel like one book; p3 and the cover redone | One canon look per character, place and prop with a reference image (series bible section 7b), setting sheets before pages, L-0028 and L-0029 |
 | 2026-11-12 | Storyboard draft faults from wording: "ACHOO!" painted in, "grey cap" drawn as a baseball cap, markings lost mid-sneeze, cream borders, the sheet's layout copied | $0.56 of redraws (7 pictures) | Prompt wording in series bible section 7b and knowledge/illustration.md |
+| 2026-11-12 to 11-27 | Six cut pages joined into two-page pictures, and the panel showed each half as its own page: Clara saw blank and repeated pages for 16 days, 10 questions went unanswered | a same-day panel rebuild, 3 two-page pictures undone, 4 new drafts ($0.48 asked) | L-0035; the panel shows a two-page picture once (`lib/spreads.ts`, tested) |
+| 2026-11-27 | A sweep ran a whole round on a laptop copy 14 commits behind GitHub (old agents, old bot.ts); found only when the push was refused | nothing broke | `setup.sh` says BEHIND and the sweep skill pulls first |
+| 2026-11-27 | The panel's first "team suggests" pass offered old drafts on any page changed after her words; caught by eye before push | none | The rule is `teamSuggestion` in `lib/spreads.ts`, with tests |
+| 2026-11-27 | Two tests failed on Windows: `new URL(...).pathname` gives `/C:/...` | none | `fileURLToPath` |
 
 ## After every real sweep
 

@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useTransition } from "react";
 import { approvePage, savePageText, sendMessage } from "@/app/actions";
-import { bookMoments, type Moment } from "@/lib/spreads";
+import { bookMoments, teamSuggestion, type Moment } from "@/lib/spreads";
 import { Art } from "./BookWorkspace";
 import { AllText } from "./ScriptTabs";
 import { btn } from "./ui";
@@ -74,7 +74,7 @@ export function BookSpreads({ productId, pages, approved, canWrite, rewriteSince
         </div>
       </div>
 
-      <OnePage key={m.key} productId={productId} m={m} canWrite={canWrite} checked={!!checked[m.key]} rewriteSince={rewriteSince}
+      <OnePage key={m.key} productId={productId} m={m} canWrite={canWrite} checked={!!checked[m.key]} rewriteSince={rewriteSince} approvedPics={ok}
         onDone={(approvedPages) => {
           setOk((o) => ({ ...o, ...Object.fromEntries(approvedPages.map((n) => [n, true])) }));
           setChecked((c) => ({ ...c, [m.key]: true }));
@@ -95,8 +95,8 @@ export function BookSpreads({ productId, pages, approved, canWrite, rewriteSince
   );
 }
 
-function OnePage({ productId, m, canWrite, checked, rewriteSince, onDone, onSent }: {
-  productId: string; m: Moment; canWrite: boolean; checked: boolean; rewriteSince: string; onDone: (approvedPages: string[]) => void; onSent: () => void;
+function OnePage({ productId, m, canWrite, checked, rewriteSince, approvedPics, onDone, onSent }: {
+  productId: string; m: Moment; canWrite: boolean; checked: boolean; rewriteSince: string; approvedPics: Record<string, boolean>; onDone: (approvedPages: string[]) => void; onSent: () => void;
 }) {
   const page = wordPage(m);
   const [text, setText] = useState(words(page));
@@ -107,11 +107,10 @@ function OnePage({ productId, m, canWrite, checked, rewriteSince, onDone, onSent
   const [pending, start] = useTransition();
   const box = useRef<HTMLTextAreaElement>(null);
   const changed = text.trim() !== (saved || words(page)).trim();
-  // The team is rewriting and wrote this page after she made it hers: offer it, never swap it in on
-  // its own. Only during an open rewrite, so old drafts never come back.
-  const draft = (page.text_draft || "").trim();
-  const at = page.updated_at || "";
-  const suggestion = rewriteSince && page.text_final && draft && draft !== page.text_final.trim() && page.updated_by === "story_producer" && at > rewriteSince && at > (page.text_final_at || "") ? draft : "";
+  // The team rewrote this page after she made it hers: she chooses, nothing is swapped in on its own.
+  // Until she chooses, "Looks good" would keep old lines that may now also be on the next page.
+  const suggestion = teamSuggestion(page, rewriteSince);
+  const choosing = !!suggestion && text.trim() !== suggestion && text.trim() === (page.text_final || "").trim();
   const where = m.spread ?`pages ${m.pages[0].page_number}–${m.pages[1].page_number}` : `page ${page.page_number}`;
 
   // The box grows with the words, like a page, instead of scrolling.
@@ -134,16 +133,17 @@ function OnePage({ productId, m, canWrite, checked, rewriteSince, onDone, onSent
     return () => clearTimeout(t);
   }, [text, saved, changed, canWrite, page.page_id]);
 
-  const looksGood = () => start(async () => {
+  const looksGood = (value = text) => start(async () => {
     setMsg("");
     // Her words: whatever is on the page now becomes hers.
-    if (text.trim() && text.trim() !== saved.trim()) {
-      const r = await savePageText(page.page_id, text).catch(() => ({ ok: false, error: "" }));
+    if (value.trim() && value.trim() !== saved.trim()) {
+      const r = await savePageText(page.page_id, value).catch(() => ({ ok: false, error: "" }));
       if (!r.ok) { setMsg("Couldn't save — check the connection and tap again"); return; }
-      setSaved(text);
+      setSaved(value);
     }
+    // Pictures: approve each drawn half once; an approval already on file isn't written again.
     const drawn = m.pages.filter((p) => p.art_id).map((p) => p.page_number);
-    for (const n of drawn) {
+    for (const n of drawn.filter((n) => !approvedPics[n])) {
       const r = await approvePage(productId, n, "picture").catch(() => ({ ok: false, error: "" }));
       if (!r.ok) { setMsg("Couldn't save — check the connection and tap again"); return; }
     }
@@ -164,11 +164,11 @@ function OnePage({ productId, m, canWrite, checked, rewriteSince, onDone, onSent
             aria-label={`The words on ${where}`} placeholder={canWrite ? "No words on this page. Tap here to add some." : "No words on this page."}
             className="w-full resize-none overflow-hidden rounded-xl border-2 border-dashed border-transparent bg-transparent p-2 font-serif text-[20px] leading-relaxed text-[var(--ink)] outline-none transition placeholder:text-base placeholder:italic hover:border-black/10 focus:border-orange-300 focus:bg-white/60 disabled:opacity-100" />
           {canWrite && <p className="mt-1 px-2 text-xs text-[var(--quiet)]">{pending ? "Saving…" : msg || "Tap the words to change them."}</p>}
-          {suggestion && text.trim() !== suggestion && (
-            <div className="mt-3 rounded-2xl bg-white/70 p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">The team suggests</p>
-              <p className="mt-1 whitespace-pre-line font-serif text-[16px] leading-relaxed">{suggestion}</p>
-              {canWrite && <button onClick={() => setText(suggestion)} className="mt-2 min-h-9 rounded-full bg-violet-600 px-4 text-sm font-semibold text-white">Use these words</button>}
+          {choosing && (
+            <div className="mt-3 rounded-2xl bg-white/80 p-3 ring-2 ring-violet-300">
+              <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">New words from the team</p>
+              <p className="mt-1 whitespace-pre-line font-serif text-[17px] leading-relaxed">{suggestion}</p>
+              <p className="mt-2 text-xs text-[var(--quiet)]">They rewrote this page from your notes. Pick one below.</p>
             </div>
           )}
           <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-8 bg-gradient-to-l from-black/[0.07] to-transparent md:block" />
@@ -181,9 +181,20 @@ function OnePage({ productId, m, canWrite, checked, rewriteSince, onDone, onSent
         </div>
       </div>
 
-      {canWrite && !asking && (
+      {canWrite && !asking && choosing && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <button disabled={pending} onClick={looksGood} className="min-h-14 rounded-2xl bg-emerald-600 px-5 text-[17px] font-semibold text-white shadow-sm disabled:opacity-50">
+          <button disabled={pending} onClick={() => { setText(suggestion); looksGood(suggestion); }} className="min-h-14 rounded-2xl bg-emerald-600 px-5 text-[17px] font-semibold text-white shadow-sm disabled:opacity-50">
+            ✓ Use the new words
+          </button>
+          <button disabled={pending} onClick={() => looksGood()} className="min-h-14 rounded-2xl bg-white px-5 text-[17px] font-semibold text-[var(--ink)] shadow-sm ring-1 ring-black/10 disabled:opacity-50">
+            Keep my words
+          </button>
+          <button disabled={pending} onClick={() => setAsking(true)} className="min-h-11 text-sm text-[var(--quiet)] underline sm:col-span-2">Something&apos;s wrong</button>
+        </div>
+      )}
+      {canWrite && !asking && !choosing && (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <button disabled={pending} onClick={() => looksGood()} className="min-h-14 rounded-2xl bg-emerald-600 px-5 text-[17px] font-semibold text-white shadow-sm disabled:opacity-50">
             {checked && !changed ? "✓ Looks good — next page" : "✓ Looks good"}
           </button>
           <button disabled={pending} onClick={() => setAsking(true)} className="min-h-14 rounded-2xl bg-white px-5 text-[17px] font-semibold text-[var(--ink)] shadow-sm ring-1 ring-black/10 disabled:opacity-50">

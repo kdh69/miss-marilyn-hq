@@ -1,5 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { bookMoments, partnerOf } from "../apps/web/lib/spreads";
+import { bookMoments, partnerOf, teamSuggestion } from "../apps/web/lib/spreads";
+
+describe("teamSuggestion", () => {
+  const since = "2026-11-27T19:38:00Z";
+  const p = { page_number: "14", text_final: "Her old words.", text_final_at: "2026-11-12T22:33:14Z", text_draft: "The new words.", updated_at: "2026-11-27T19:49:50Z", updated_by: "story_producer" };
+  it("offers the Producer's rewrite from the open story task", () => expect(teamSuggestion(p, since)).toBe("The new words."));
+  it("never offers a draft when no rewrite is open", () => expect(teamSuggestion(p, "")).toBe(""));
+  it("ignores a row changed by someone else (a new picture)", () => expect(teamSuggestion({ ...p, updated_by: "illustrator" }, since)).toBe(""));
+  it("ignores drafts older than the rewrite or than her words", () => {
+    expect(teamSuggestion({ ...p, updated_at: "2026-11-12T23:42:05Z" }, since)).toBe("");
+    expect(teamSuggestion({ ...p, text_final_at: "2026-11-27T20:00:00Z" }, since)).toBe("");
+  });
+  it("offers nothing when her words already match or the page isn't hers", () => {
+    expect(teamSuggestion({ ...p, text_draft: "Her old words." }, since)).toBe("");
+    expect(teamSuggestion({ ...p, text_final: "" }, since)).toBe("");
+  });
+});
 
 const page = (n: number, extra: Record<string, string> = {}) => ({ page_id: `P${n}`, page_number: String(n), art_brief: "", art_file: "", ...extra });
 

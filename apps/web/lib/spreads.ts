@@ -42,6 +42,20 @@ export function partnerOf(p: Page): number | null {
   return null;
 }
 
+/**
+ * The team's new words for a page that is already Clara's, if there are any to offer: only drafts
+ * the Producer wrote during the story rewrite that is open now (`rewriteSince` = when it started),
+ * and after her own words. Any other change to the row (a new picture) never brings an old draft back.
+ */
+export function teamSuggestion(p: Page, rewriteSince: string): string {
+  const draft = (p.text_draft ?? "").trim();
+  const final = (p.text_final ?? "").trim();
+  const at = p.updated_at ?? "";
+  if (!rewriteSince || !final || !draft || draft === final) return "";
+  if (p.updated_by !== "story_producer" || at <= rewriteSince || at <= (p.text_final_at ?? "")) return "";
+  return draft;
+}
+
 /** Group pages (sorted by number) into moments: spreads where a pair names each other, else single pages. */
 export function bookMoments(pages: Page[]): Moment[] {
   const sorted = [...pages].sort((a, b) => num(a) - num(b));

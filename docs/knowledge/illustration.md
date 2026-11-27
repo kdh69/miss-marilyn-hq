@@ -72,6 +72,7 @@ spend as little as possible finding out a page is wrong.
 ## Two-page pictures (Book 1, Clara's 11-12 notes)
 
 - A page Clara cuts can join the facing page as one two-page picture (pp. 8-9, 10-11, 12-13, 14-15, 18-19, 20-21 in Book 1), which keeps the book at KDP's 24-page minimum and keeps her words on their pages. Draw it as one wide `spread_draft` (16:9) and split it down the middle onto the two pages. [proven, checked 2026-11-12] [picture-book.json](../../formats/picture-book.json)
+- But with each half shown as its own page, Clara read the wordless halves as blank or repeated and asked twice to delete p9 (11-13 and 11-27). 3 of the 6 (14-15, 18-19, 20-21) went back to single pages; 8-9, 10-11 and 12-13 stay, with the words on the left page. The panel now shows a two-page picture once. [proven, checked 2026-11-27] T-0047, T-0044
 - In a wide picture the model paints a thin line where it guesses the fold is (4 of 6); it falls on the cut, so the split hides it. Asking for "one seamless panorama" did not stop it. [proven, checked 2026-11-12]
 - Wide pictures duplicate playground pieces: two slides (pp. 8-9) and two seesaws (pp. 14-15, 20-21) on first tries; "exactly one slide / one seesaw in the whole picture" fixed two of three. [proven, checked 2026-11-12]
 - Say on which half the words go ("the top third of the left half is calm sky") and keep faces out of the middle 8%; a character can still land near the fold (pp. 8-9), so check the centre strip before a final. [proven, checked 2026-11-12]
