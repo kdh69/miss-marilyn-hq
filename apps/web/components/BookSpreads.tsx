@@ -19,8 +19,10 @@ const wordPage = (m: Moment) => m.pages.find((p) => words(p)) ?? m.pages[0];
  * the page. Two buttons: "Looks good" (the words become hers, the picture is approved) and
  * "Something's wrong" (one box to say what). Either one turns to the next page.
  */
-export function BookSpreads({ productId, pages, approved, canWrite }: {
-  productId: string; pages: Page[]; approved: Record<string, string>; notes?: Page[]; canWrite: boolean; viewer?: string;
+export function BookSpreads({ productId, pages, approved, canWrite, rewriteSince = "" }: {
+  productId: string; pages: Page[]; approved: Record<string, string>; canWrite: boolean;
+  /** When the open story rewrite started; its new drafts are offered on pages that are already hers. */
+  rewriteSince?: string;
 }) {
   const router = useRouter();
   const moments = useMemo(() => bookMoments(pages), [pages]);
@@ -72,7 +74,7 @@ export function BookSpreads({ productId, pages, approved, canWrite }: {
         </div>
       </div>
 
-      <OnePage key={m.key} productId={productId} m={m} canWrite={canWrite} checked={!!checked[m.key]}
+      <OnePage key={m.key} productId={productId} m={m} canWrite={canWrite} checked={!!checked[m.key]} rewriteSince={rewriteSince}
         onDone={(approvedPages) => {
           setOk((o) => ({ ...o, ...Object.fromEntries(approvedPages.map((n) => [n, true])) }));
           setChecked((c) => ({ ...c, [m.key]: true }));
@@ -93,8 +95,8 @@ export function BookSpreads({ productId, pages, approved, canWrite }: {
   );
 }
 
-function OnePage({ productId, m, canWrite, checked, onDone, onSent }: {
-  productId: string; m: Moment; canWrite: boolean; checked: boolean; onDone: (approvedPages: string[]) => void; onSent: () => void;
+function OnePage({ productId, m, canWrite, checked, rewriteSince, onDone, onSent }: {
+  productId: string; m: Moment; canWrite: boolean; checked: boolean; rewriteSince: string; onDone: (approvedPages: string[]) => void; onSent: () => void;
 }) {
   const page = wordPage(m);
   const [text, setText] = useState(words(page));
@@ -105,7 +107,12 @@ function OnePage({ productId, m, canWrite, checked, onDone, onSent }: {
   const [pending, start] = useTransition();
   const box = useRef<HTMLTextAreaElement>(null);
   const changed = text.trim() !== (saved || words(page)).trim();
-  const where = m.spread ? `pages ${m.pages[0].page_number}–${m.pages[1].page_number}` : `page ${page.page_number}`;
+  // The team is rewriting and wrote this page after she made it hers: offer it, never swap it in on
+  // its own. Only during an open rewrite, so old drafts never come back.
+  const draft = (page.text_draft || "").trim();
+  const at = page.updated_at || "";
+  const suggestion = rewriteSince && page.text_final && draft && draft !== page.text_final.trim() && page.updated_by === "story_producer" && at > rewriteSince && at > (page.text_final_at || "") ? draft : "";
+  const where = m.spread ?`pages ${m.pages[0].page_number}–${m.pages[1].page_number}` : `page ${page.page_number}`;
 
   // The box grows with the words, like a page, instead of scrolling.
   useLayoutEffect(() => {
@@ -157,6 +164,13 @@ function OnePage({ productId, m, canWrite, checked, onDone, onSent }: {
             aria-label={`The words on ${where}`} placeholder={canWrite ? "No words on this page. Tap here to add some." : "No words on this page."}
             className="w-full resize-none overflow-hidden rounded-xl border-2 border-dashed border-transparent bg-transparent p-2 font-serif text-[20px] leading-relaxed text-[var(--ink)] outline-none transition placeholder:text-base placeholder:italic hover:border-black/10 focus:border-orange-300 focus:bg-white/60 disabled:opacity-100" />
           {canWrite && <p className="mt-1 px-2 text-xs text-[var(--quiet)]">{pending ? "Saving…" : msg || "Tap the words to change them."}</p>}
+          {suggestion && text.trim() !== suggestion && (
+            <div className="mt-3 rounded-2xl bg-white/70 p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">The team suggests</p>
+              <p className="mt-1 whitespace-pre-line font-serif text-[16px] leading-relaxed">{suggestion}</p>
+              {canWrite && <button onClick={() => setText(suggestion)} className="mt-2 min-h-9 rounded-full bg-violet-600 px-4 text-sm font-semibold text-white">Use these words</button>}
+            </div>
+          )}
           <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-8 bg-gradient-to-l from-black/[0.07] to-transparent md:block" />
         </div>
         <div className="relative order-1 flex items-center md:order-2">

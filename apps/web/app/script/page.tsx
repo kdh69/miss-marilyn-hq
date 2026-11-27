@@ -42,6 +42,9 @@ function BookView({ s, id, view, canWrite }: { s: Awaited<ReturnType<typeof getS
   const drawn = pages.filter((p) => p.art_id).length;
   const pics = pages.filter((p) => p.art_id && approved[p.page_number]).length;
   const left = wordy.length - yours;
+  // A rewrite in progress: drafts the Producer writes after this are offered on pages already hers.
+  const rewriteSince = s.tasks.filter((t) => t.product_id === id && t.task_type === "story_draft" && !["done", "cancelled"].includes(t.status))
+    .map((t) => t.created_at).sort().pop() ?? "";
   const status = !task ? "The team hasn't started the words yet."
     : task.status === "done" ? "Words approved. The pictures are being finished."
     : task.status === "awaiting_mom" ? "Go through it one page at a time. Change any words right on the page, then tap Looks good or Something's wrong."
@@ -74,7 +77,7 @@ function BookView({ s, id, view, canWrite }: { s: Awaited<ReturnType<typeof getS
       </Card>
 
       {pages.length ? (
-        <BookSpreads productId={id} pages={pages} approved={approved} canWrite={canWrite} />
+        <BookSpreads productId={id} pages={pages} approved={approved} canWrite={canWrite} rewriteSince={rewriteSince} />
       ) : <Card><Empty>The pages show up here as soon as the team writes them.</Empty></Card>}
 
       {(scriptAsk || artAsk) && (
