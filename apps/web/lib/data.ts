@@ -82,7 +82,7 @@ export function needsYou(s: Snapshot, view: string | null): NeedsYouItem[] {
     : [];
   const questions: NeedsYouItem[] = s.requests
     .filter((r) => r.to === view && !r.reply && !["done", "wont_do"].includes(r.status))
-    .map((r) => ({ kind: "question", id: r.request_id, productId: r.product_id, title: r.body, request: r, href: r.product_id ? `/books/${r.product_id}` : "/" }));
+    .map((r) => ({ kind: "question", id: r.request_id, productId: r.product_id, title: r.body, request: r, href: r.product_id ? (view === "mom" ? `/script?book=${r.product_id}` : `/books/${r.product_id}`) : "/" }));
   return [...approvals, ...questions];
 }
 
@@ -144,7 +144,7 @@ export function bookPages(s: Snapshot, productId: string) {
     .sort((a, b) => Number(a.page_number) - Number(b.page_number))
     .map((p) => {
       const art = assets.get(p.art_asset_id) ?? latestArt.get(p.page_number);
-      return { ...p, art_id: driveId(art?.file_url), art_at: art?.created_at ?? "", text: p.text_final || p.text_draft } as Row;
+      return { ...p, art_id: driveId(art?.file_url), art_at: art?.created_at ?? "", art_file: art?.file_name ?? "", text: p.text_final || p.text_draft } as Row;
     });
 }
 
@@ -198,14 +198,14 @@ export function upNext(s: Snapshot) {
     const toPost = bookListings(s, id).find((l) => l.status === "approved" && !done.has(l.listing_id));
     let line: { step: string; text: string; href: string; mine: boolean };
     if (ask("review")) line = { step: "Review", text: "Read the finished book and give the final OK", href: at("review"), mine: true };
+    else if (ask("build")) line = { step: "Build", text: "Look over the layout and approve it", href: at("build"), mine: true };
+    else if (ask("art")) line = { step: "Pages", text: "Approve the cover", href: at("art"), mine: true };
+    else if (ask("script")) line = { step: "Pages", text: "Read the book page by page, fix any words, then approve them", href: at("script"), mine: true };
+    else if (st.key === "script" && draftOnly) line = { step: "Pages", text: `Make the words yours — page ${draftOnly.page_number} is next`, href: at("script"), mine: true };
+    else if (st.key === "art" && unapproved(id, "picture")) line = { step: "Pages", text: `Approve ${unapproved(id, "picture")} picture${unapproved(id, "picture") > 1 ? "s" : ""}`, href: at("art"), mine: true };
+    else if (st.key === "build" && unapproved(id, "layout")) line = { step: "Build", text: `Look over ${unapproved(id, "layout")} finished page${unapproved(id, "layout") > 1 ? "s" : ""}`, href: at("build"), mine: true };
     else if (ask("launch")) line = { step: "Launch", text: "Approve the marketing plan or the next week's posts", href: at("launch"), mine: true };
     else if (toPost) line = { step: "Launch", text: `Put it up on ${CHANNEL[toPost.channel] ?? toPost.channel} — the copy is ready to paste`, href: at("launch"), mine: true };
-    else if (ask("build")) line = { step: "Build", text: "Look over the layout and approve it", href: at("build"), mine: true };
-    else if (ask("art")) line = { step: "Art", text: "Approve the cover", href: at("art"), mine: true };
-    else if (ask("script")) line = { step: "Script", text: "Read the script and approve it", href: at("script"), mine: true };
-    else if (st.key === "script" && draftOnly) line = { step: "Script", text: `Make the script yours — page ${draftOnly.page_number} is next`, href: at("script"), mine: true };
-    else if (st.key === "art" && unapproved(id, "picture")) line = { step: "Art", text: `Approve ${unapproved(id, "picture")} picture${unapproved(id, "picture") > 1 ? "s" : ""}`, href: at("art"), mine: true };
-    else if (st.key === "build" && unapproved(id, "layout")) line = { step: "Build", text: `Look over ${unapproved(id, "layout")} finished page${unapproved(id, "layout") > 1 ? "s" : ""}`, href: at("build"), mine: true };
     else if (st.key === "review") line = { step: "Review", text: "Read the whole book, start to finish", href: at("review"), mine: true };
     else if (st.key === "idea") line = { step: "Idea", text: "The team is planning it", href: "/ideas", mine: false };
     else if (st.key === "done") line = { step: "Done", text: "On sale", href: `/books/${id}`, mine: false };

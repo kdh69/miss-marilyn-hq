@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { viewer, viewerName } from "@/lib/viewer";
 import { MessageBox } from "@/components/MessageBox";
-import { NeedsYou } from "@/components/NeedsYou";
+import { NeedsYou, NeedsYouList } from "@/components/NeedsYou";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { Card, Empty, PageHeader, StageTrack, StatRow, btn } from "@/components/ui";
 import { Table } from "@/components/Table";
@@ -35,6 +35,90 @@ export default async function Overview() {
   const tick = lastTick(s);
   const count = kyle ? toRoute.length + stuck.length : items.length;
 
+  if (v.view === "mom") {
+    // Clara: one clear next step, then a short list of the rest. No numbers to decode.
+    const start = next.find((n) => n.mine);
+    const rest = start ? items.filter((n) => !(n.kind === "approve" && n.href === start.href && n.productId === start.id)) : items;
+    return (
+      <div className="flex flex-col gap-4">
+        <PageHeader title={`${greeting()}${name ? `, ${name}` : ""}`}
+          sub={start ? "Here's what to do next. Everything else can wait." : count ? `${count} thing${count > 1 ? "s" : ""} to look at when you have a minute.` : "Nothing needs you right now. The team is working."} />
+        {s._sample && <p className="-mt-2 px-1 text-xs text-[var(--quiet)]">Sample data — the Sheet isn't connected yet.</p>}
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+          <div className="flex flex-col gap-4 lg:col-span-3">
+            {start ? (
+              <section className="rounded-3xl bg-gradient-to-br from-orange-500 to-orange-400 p-5 text-white shadow-[0_14px_34px_-16px_rgb(234_88_12/0.7)] md:p-6">
+                <p className="text-xs font-semibold uppercase tracking-wide opacity-90">Your next step · {start.title}</p>
+                <p className="mt-2 text-xl font-semibold leading-snug md:text-2xl">{start.text}</p>
+                <Link href={start.href} className="mt-4 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 text-[16px] font-semibold text-orange-700 shadow-sm">Start →</Link>
+              </section>
+            ) : (
+              <Card><Empty>All caught up. Nothing needs your OK right now.</Empty></Card>
+            )}
+
+            {rest.length > 0 && (
+              <Card title={`Also waiting on you · ${rest.length}`}>
+                <p className="-mt-1 mb-1 text-sm text-[var(--quiet)]">No rush. Tap one to see it and answer right here.</p>
+                <NeedsYouList items={rest} viewer="mom" titles={titles} />
+              </Card>
+            )}
+
+            {toPost.length > 0 && (
+              <Link href="/social" className="glass flex items-center gap-3 rounded-3xl p-4">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-lg" aria-hidden>📣</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[15px] font-semibold">{toPost.length} post{toPost.length > 1 ? "s" : ""} to share today</span>
+                  <span className="block truncate text-xs text-[var(--quiet)]">{[...new Set(toPost.map((c) => CHANNEL[c.channel] ?? c.channel))].join(" · ")} · ready to paste</span>
+                </span>
+                <span className="text-[var(--quiet)]">›</span>
+              </Link>
+            )}
+
+            <details className="glass group rounded-3xl p-4 md:p-5">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-[15px] font-semibold">
+                <span>Tell the team something</span><span className="text-[var(--quiet)] transition group-open:rotate-90">›</span>
+              </summary>
+              <div className="mt-3"><MessageBox placeholder="Anything — a change, an idea, a question…" /></div>
+            </details>
+            <details className="glass group rounded-3xl p-4 md:p-5">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-[15px] font-semibold">
+                <span>Send photos of Miss M</span><span className="text-[var(--quiet)] transition group-open:rotate-90">›</span>
+              </summary>
+              <div className="mt-3"><PhotoUpload /></div>
+            </details>
+          </div>
+
+          <div className="flex flex-col gap-4 lg:col-span-2">
+            <Card title="Your books">
+              <div className="flex flex-col gap-4">
+                {books.map((p) => {
+                  const st = bookStage(s, p.product_id);
+                  return (
+                    <div key={p.product_id}>
+                      <Link href={`/books/${p.product_id}`} className="font-semibold hover:text-orange-700">{p.title}</Link>
+                      <div className="my-2"><StageTrack index={st.index} book={p.product_id} /></div>
+                      <p className="text-sm text-[var(--quiet)]">{p.status === "paused" ? "Paused for now." : st.now}</p>
+                    </div>
+                  );
+                })}
+                {!books.length && <Empty>No books yet.</Empty>}
+              </div>
+            </Card>
+            {scout && (
+              <Card>
+                <p className="text-xs font-semibold text-violet-600">Idea from the team</p>
+                <p className="mt-1 font-semibold">{scout.topic}</p>
+                <p className="line-clamp-3 text-sm text-[var(--quiet)]">{scout.finding}</p>
+                <Link href="/ideas" className={`${btn.quiet} mt-3 min-h-9 text-sm`}>See it in Ideas</Link>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -64,25 +148,6 @@ export default async function Overview() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
         {/* Left: what to do */}
         {!family && <div className="flex flex-col gap-4 lg:col-span-3">
-          {v.view === "mom" && next.length > 0 && (
-            <Card title="Up next">
-              <ul className="flex flex-col divide-y divide-black/5">
-                {next.map((n) => (
-                  <li key={n.id}>
-                    <Link href={n.href} className="flex items-center gap-3 py-3">
-                      <span className={`w-16 shrink-0 rounded-full px-2 py-1 text-center text-[11px] font-semibold ${n.mine ? "bg-orange-500 text-white" : "bg-black/5 text-[var(--quiet)]"}`}>{n.step}</span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-[15px] font-semibold leading-snug">{n.text}</span>
-                        <span className="block text-xs text-[var(--quiet)]">{n.title}</span>
-                      </span>
-                      <span className="text-[var(--quiet)]">›</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          )}
-
           {toPost.length > 0 && (
             <Link href="/social" className="glass flex items-center gap-3 rounded-3xl p-4">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-lg" aria-hidden>📣</span>

@@ -43,8 +43,8 @@ export const CHANNEL: Record<string, string> = {
  */
 export const STAGE_TRACK: { key: string; label: string; short: string; href: string; types: string[]; blurb: string }[] = [
   { key: "idea", label: "Idea", short: "Idea", href: "/ideas", types: ["book_plan"], blurb: "Jot it down; the team turns it into a plan." },
-  { key: "script", label: "Script", short: "Script", href: "/script", types: ["story_draft"], blurb: "Read the script, make the words yours, then approve it." },
-  { key: "art", label: "Illustrations", short: "Art", href: "/art", types: ["art_page", "art_cover"], blurb: "The approved script gets its pictures. Look them over and approve the cover." },
+  { key: "script", label: "Words & pictures", short: "Script", href: "/script", types: ["story_draft"], blurb: "Each page as it will look in the book: the words on the left, the picture on the right. Change the words right on the page, approve each picture or ask for a change." },
+  { key: "art", label: "Illustrations", short: "Art", href: "/script", types: ["art_page", "art_cover"], blurb: "The approved script gets its pictures. Look them over and approve the cover." },
   { key: "build", label: "Building", short: "Build", href: "/build", types: ["interior_layout", "cover_wrap", "printable_set"], blurb: "Words and pictures are put together into the printed book and its cover." },
   { key: "review", label: "Full book review", short: "Review", href: "/review", types: ["kdp_packet", "etsy_listing"], blurb: "Read the finished book start to finish, then give the final OK." },
   { key: "launch", label: "Launch", short: "Launch", href: "/launch", types: ["marketing_plan", "social_batch"], blurb: "Put the book up for sale with the copy ready to paste, and get its marketing plan going." },

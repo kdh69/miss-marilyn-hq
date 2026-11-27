@@ -32,6 +32,47 @@ export function NeedsYou({ items, viewer, titles = {}, showBook = true }: { item
   );
 }
 
+/**
+ * Clara's home: everything else waiting on her as short rows, one line each. Tap a row to open it
+ * right there (the approve buttons or the answer box), or follow the link to where it's done.
+ */
+export function NeedsYouList({ items, viewer, titles = {} }: { items: NeedsYouItem[]; viewer: "mom" | "kyle" | "family"; titles?: Record<string, string> }) {
+  const [open, setOpen] = useState<string | null>(null);
+  const [all, setAll] = useState(false);
+  if (!items.length) return null;
+  const shown = all ? items : items.slice(0, 5);
+  return (
+    <ul className="flex flex-col divide-y divide-black/5">
+      {shown.map((n) => {
+        const text = n.kind === "approve" ? n.item.summary : n.request.body;
+        const label = n.kind === "approve" ? (MOM_ITEM[n.item.item_type] ?? "To approve") : "Question";
+        const isOpen = open === n.id;
+        return (
+          <li key={n.id} className="py-1">
+            <button type="button" onClick={() => setOpen(isOpen ? null : n.id)} aria-expanded={isOpen} className="flex w-full items-start gap-3 py-2 text-left">
+              <span className={`mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${n.kind === "approve" ? "bg-orange-500 text-white" : "bg-violet-500/15 text-violet-800"}`}>{label}</span>
+              <span className="min-w-0 flex-1">
+                <span className={`text-[15px] leading-snug ${isOpen ? "block" : "line-clamp-2"}`}>{text}</span>
+                {n.productId && titles[n.productId] && <span className="block text-xs text-[var(--quiet)]">{titles[n.productId]}</span>}
+              </span>
+              <span className={`mt-0.5 text-[var(--quiet)] transition ${isOpen ? "rotate-90" : ""}`}>›</span>
+            </button>
+            {isOpen && (
+              <div className="mb-2 flex flex-col gap-2">
+                {n.kind === "approve" ? <Approval item={n.item} /> : <MessageItem r={n.request} viewer={viewer} compact />}
+                <Link href={n.href} className="self-start text-sm text-orange-700 underline">Open {n.productId && titles[n.productId] ? titles[n.productId] : "it"} →</Link>
+              </div>
+            )}
+          </li>
+        );
+      })}
+      {items.length > shown.length && (
+        <li><button type="button" onClick={() => setAll(true)} className="min-h-11 w-full text-sm text-orange-700 underline">Show all {items.length}</button></li>
+      )}
+    </ul>
+  );
+}
+
 /** One ask from the team: what it is, one button, and "Ask for changes" where that applies. */
 export function Approval({ item, book, labels }: { item: Row; book?: { href: string; title: string }; labels?: { yes?: string; changes?: string } }) {
   const [note, setNote] = useState("");

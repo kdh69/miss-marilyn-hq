@@ -2,40 +2,15 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { savePageText, sendMessage } from "@/app/actions";
-import { PageText } from "./BookWorkspace";
 import { btn } from "./ui";
 
 type Page = Record<string, string>;
 const PIC = "Picture idea for page";
 
 /**
- * The Script step's two views. "Page by page": each page with its picture plan, her words (folding
- * to a thin Approved line once saved) and a place to suggest the picture. "All text": the whole
- * script in one box, split by "Page N" lines; saving sends each changed page back to its row.
+ * Pieces of the old Script step that live on: the picture plan with a box for her ideas (used by
+ * Building) and the whole script in one box (the "Just the words" tab of Words & pictures).
  */
-export function ScriptTabs({ productId, pages, notes, canWrite }: { productId: string; pages: Page[]; notes: Page[]; canWrite: boolean }) {
-  const [tab, setTab] = useState<"pages" | "all">("pages");
-  const tabBtn = (id: "pages" | "all", label: string) => (
-    <button type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)}
-      className={`min-h-10 flex-1 rounded-full px-4 text-sm transition ${tab === id ? "bg-white font-semibold shadow-sm" : "text-[var(--quiet)]"}`}>{label}</button>
-  );
-  return (
-    <div className="flex flex-col gap-3">
-      <div role="tablist" className="flex gap-1 rounded-full bg-black/5 p-1 md:max-w-sm">{tabBtn("pages", "Page by page")}{tabBtn("all", "All text")}</div>
-      {tab === "pages" ? (
-        <ol className="flex flex-col gap-3">
-          {pages.map((p) => (
-            <li key={p.page_id} className="glass rounded-3xl p-4 md:p-5">
-              <p className="mb-2 text-sm font-semibold">Page {p.page_number}</p>
-              <PicturePlan productId={productId} page={p} ideas={notes.filter((n) => n.page_number === p.page_number && n.body.startsWith(PIC))} canWrite={canWrite} />
-              <PageText key={`${p.page_id}:${p.text_final}`} page={p} canEdit={canWrite} compact />
-            </li>
-          ))}
-        </ol>
-      ) : <AllText pages={pages} canWrite={canWrite} />}
-    </div>
-  );
-}
 
 /**
  * What the picture on this page will show, her notes about it so far, and a box to add one.
@@ -104,7 +79,7 @@ function parse(doc: string, pages: Page[]): Map<string, string> | null {
 }
 
 /** The whole script in one box. Only pages she changed are saved; untouched draft pages stay drafts. */
-function AllText({ pages, canWrite }: { pages: Page[]; canWrite: boolean }) {
+export function AllText({ pages, canWrite }: { pages: Page[]; canWrite: boolean }) {
   const router = useRouter();
   const start0 = useMemo(() => toDoc(pages), [pages]);
   const [doc, setDoc] = useState(start0);

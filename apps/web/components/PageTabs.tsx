@@ -102,7 +102,7 @@ export function PrintedPage({ page, large = false }: { page: Page; large?: boole
       <div className={large ? "overflow-hidden rounded-t-2xl" : ""}><Art id={page.art_id} brief={page.art_brief} /></div>
       <div className={large ? "px-6 py-5" : "px-3 py-2.5"}>
         <p className={`font-serif leading-relaxed text-[var(--ink)] ${large ? "text-[19px]" : "line-clamp-3 text-[13px]"} ${page.text_final ? "" : "opacity-60"}`}>{page.text || "—"}</p>
-        {!page.text_final && <p className={`mt-1.5 text-orange-800 ${large ? "text-sm" : "text-[11px]"}`}>Still the draft&apos;s words — won&apos;t print until you make them yours in Script.</p>}
+        {!page.text_final && <p className={`mt-1.5 text-orange-800 ${large ? "text-sm" : "text-[11px]"}`}>Still the draft&apos;s words — won&apos;t print until you make them yours in Words &amp; pictures.</p>}
       </div>
     </div>
   );

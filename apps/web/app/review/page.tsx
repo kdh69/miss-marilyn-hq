@@ -32,8 +32,8 @@ export default async function Review({ searchParams }: { searchParams: Promise<{
   const ask = stepAsk(s, id, "review");
   const published = stepTask(s, id, "review")?.status === "done";
   const checks = [
-    { ok: wordy.length > 0 && hers === wordy.length, text: hers === wordy.length && hers ? `All ${hers} pages with words are in your words` : `${hers} of ${wordy.length} pages in your words — the rest won't print`, href: `/script?book=${id}`, step: "Script" },
-    { ok: n > 0 && pics === n, text: `${pics} of ${n} pictures approved`, href: `/art?book=${id}`, step: "Illustrations" },
+    { ok: wordy.length > 0 && hers === wordy.length, text: hers === wordy.length && hers ? `All ${hers} pages with words are in your words` : `${hers} of ${wordy.length} pages in your words — the rest won't print`, href: `/script?book=${id}`, step: "Words & pictures" },
+    { ok: n > 0 && pics === n, text: `${pics} of ${n} pictures approved`, href: `/script?book=${id}`, step: "Words & pictures" },
     { ok: n > 0 && laid === n, text: `${laid} of ${n} finished pages approved`, href: `/build?book=${id}`, step: "Building" },
     { ok: layoutOk, text: layoutOk ? "Layout and cover approved" : "Layout and cover not approved yet", href: `/build?book=${id}`, step: "Building" },
   ];

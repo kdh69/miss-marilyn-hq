@@ -4,11 +4,15 @@ import { PageHeader } from "@/components/ui";
 import { activeBooks, bookStage, needsYou, type Snapshot } from "@/lib/data";
 import { STAGE_TRACK } from "@/lib/labels";
 
+/** Steps that share one page: Illustrations lives inside Words & pictures. */
+const keysOn = (step: string) => STAGE_TRACK.filter((x) => x.href === STAGE_TRACK.find((y) => y.key === step)?.href).map((x) => x.key);
+
 /** The book a step page shows: ?book= if given, else the first book on this step, else none. */
 export function pickBook(s: Snapshot, key: string, wanted?: string) {
   const books = activeBooks(s);
   if (wanted && books.some((b) => b.product_id === wanted)) return wanted;
-  return books.find((b) => bookStage(s, b.product_id).key === key)?.product_id;
+  const keys = keysOn(key);
+  return books.find((b) => keys.includes(bookStage(s, b.product_id).key))?.product_id;
 }
 
 /**
@@ -19,8 +23,9 @@ export function StepShell({ step, s, view, selected, children }: { step: string;
   const i = STAGE_TRACK.findIndex((x) => x.key === step);
   const st = STAGE_TRACK[i];
   const books = activeBooks(s).map((b) => ({ product_id: b.product_id, title: b.title, stage: bookStage(s, b.product_id) }));
-  const here = books.filter((b) => b.stage.key === step);
-  const elsewhere = books.filter((b) => b.stage.key !== step);
+  const keys = keysOn(step);
+  const here = books.filter((b) => keys.includes(b.stage.key));
+  const elsewhere = books.filter((b) => !keys.includes(b.stage.key));
   const waiting = new Set(needsYou(s, view).filter((n) => n.href.startsWith(`${st.href}?`)).map((n) => n.productId));
 
   const chip = (b: (typeof books)[number], dim: boolean) => (
@@ -48,8 +53,10 @@ export function StepShell({ step, s, view, selected, children }: { step: string;
 
 /** Bottom of every step page: back to the step before and on to the next one, for the same book. */
 function StepNav({ step, book }: { step: number; book: string }) {
-  const prev = STAGE_TRACK[step - 1];
-  const next = STAGE_TRACK[step + 1];
+  // Skip steps that live on this same page (Illustrations inside Words & pictures).
+  const here = STAGE_TRACK[step].href;
+  const prev = STAGE_TRACK.slice(0, step).reverse().find((x) => x.href !== here);
+  const next = STAGE_TRACK.slice(step + 1).find((x) => x.href !== here);
   const href = (st: (typeof STAGE_TRACK)[number]) => (st.key === "idea" ? st.href : `${st.href}?book=${book}`);
   return (
     <nav className="mt-2 flex items-stretch justify-between gap-3" aria-label="Steps">

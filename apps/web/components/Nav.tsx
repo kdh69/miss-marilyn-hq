@@ -14,8 +14,7 @@ export const TABS: Record<View, Tab[]> = {
   mom: [
     { href: "/", label: "Overview", icon: "home" },
     { href: "/ideas", label: "Ideas", icon: "bulb" },
-    { href: "/script", label: "Script", icon: "script" },
-    { href: "/art", label: "Art", long: "Illustrations", icon: "art" },
+    { href: "/script", label: "Pages", long: "Words & pictures", icon: "script" },
     { href: "/build", label: "Build", long: "Building", icon: "build" },
     { href: "/review", label: "Review", long: "Full book review", icon: "review" },
     { href: "/social", label: "Social", icon: "megaphone" },
@@ -48,8 +47,7 @@ export const MORE: Record<View, Tab[]> = {
   kyle: [
     { href: "/bible", label: "Miss M's Bible", icon: "star" },
     { href: "/ideas", label: "Ideas", icon: "bulb" },
-    { href: "/script", label: "Script", icon: "script" },
-    { href: "/art", label: "Illustrations", icon: "art" },
+    { href: "/script", label: "Words & pictures", icon: "script" },
     { href: "/build", label: "Building", icon: "build" },
     { href: "/review", label: "Full book review", icon: "review" },
     { href: "/launch", label: "Launch & listings", icon: "rocket" },
