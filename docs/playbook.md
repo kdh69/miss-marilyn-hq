@@ -20,6 +20,12 @@ every agent needs go in the `lessons` tab; the evidence stays here and in `docs/
 | Story draft that passed QC | about 270 words, 15 text pages, longest spread 49 words | T-0038 |
 | Story rewrite from Clara's page notes, start to her card | about 15 min (self-check 6 min, one review, QC 2 min after hand-in), 10 page rows, $0 | T-0047, 2026-11-27 |
 | Clara's 11 page notes to a task created | 13 min | 2026-11-27 |
+| Single-page drafts p14, p15, p19, p20 (Nano Banana 2, 1K) | 7 pictures, $0.56; attempts p14 1, p19 1, p20 2, p15 3 (2 of 4 right first time) | T-0044, 2026-11-28 |
+| p1 final (Nano Banana Pro, 4K) | 1 attempt, $0.30, print-ready; start to hand-in about 15 min | T-0026, 2026-11-28 |
+| A Quality Checker review | 5 to 7 min | 2026-11-28 |
+| Consistency stretch (01:50 to 04:00Z): pictures | 8 paid, $1.58; kept 3 for $0.53 (p4 final, p2 draft, Miss M sheet); $1.05 not kept (p5 finals $0.60, sheet try 1 $0.15, line-up $0.30) | T-0028, T-0048, T-0049, 2026-11-28 |
+| Three finals in one task | about 20 min | T-0028, 2026-11-28 |
+| A one-draft task, start to hand-in | 11.5 min (review about 3.5 min), done at QC 13 min later | T-0048, 2026-11-28 |
 | Re-holding 14 tasks to refresh their reasons | 28 log rows, about 4 min (bounces each task through todo) | 2026-11-27 |
 | Character sheets | passed QC on attempt 3 (Grok image model) | T-0025 |
 | First picture through `image` (fal, Nano Banana 2, draft 1K, 2 references) | worked first call, 1024 x 1024 px, on-model, $0.08 (C-0005) | T-0026 test, 2026-11-11 |
@@ -69,6 +75,12 @@ Planning prices held on the live run: draft $0.08 and final $0.30 matched the co
 | 2026-11-27 | A sweep ran a whole round on a laptop copy 14 commits behind GitHub (old agents, old bot.ts); found only when the push was refused | nothing broke | `setup.sh` says BEHIND and the sweep skill pulls first |
 | 2026-11-27 | The panel's first "team suggests" pass offered old drafts on any page changed after her words; caught by eye before push | none | The rule is `teamSuggestion` in `lib/spreads.ts`, with tests |
 | 2026-11-27 | Two tests failed on Windows: `new URL(...).pathname` gives `/C:/...` | none | `fileURLToPath` |
+| 2026-11-27 | p15 drawn with p14 as its face reference came back a copy of p14 (83.5% of pixels); the Illustrator saw it and still reported ready | $0.08 redraw and a review round | L-0041: never the facing page as a reference; a fault the self-check finds is reported with the redraw's price |
+| 2026-11-27 | An Illustrator run died offline; T-0044 sat in_progress for about 4 hours and the 90-minute sweep lock expired mid-sweep | $0 | Check spend and files before restarting; proposed: board flags a stalled in_progress task |
+| 2026-11-27 | Clara retyped p14 with all four lines at 20:14, minutes before the "Use the new words / Keep my words" choice was deployed | p14 and p15 overlap; one question to her (R-0027) | Deploy a panel feature before the step that invites her to use it |
+| 2026-11-28 | p5's finals repeated three faults already in Clara's approved sketch; canon text and an extra face reference didn't override it | $0.60 | L-0046: a $0 sketch-versus-canon check before any final |
+| 2026-10-30 to 11-28 | Miss M's references disagreed with her real look (tail, eyes, Papa's height) and no photo of her was on file; 12 of 24 sketches off canon | at least $0.96 of redraws plus Clara's re-approvals | Canon v2 from her photos (T-0049), L-0044, L-0045, `cast=` |
+| 2026-11-28 | The new sheet's known back-view flaw stayed in CN-01's first reference and the line-up copied it within minutes | $0.15 | L-0048: pass a crop without the wrong view |
 
 ## After every real sweep
 

@@ -24,7 +24,9 @@
  *   asset <task> <drive url> <asset_type> [k=v …]    register a file that's already in Drive
  *   cost <task> <usd> <vendor> "<note>"              a paid call made outside `image`, never Claude itself
  * Pictures and checks (the page taken from the videograph repo):
- *   image <task> <prompt.txt> kind=sheet|draft|page|cover page=N|name=x [ref=<asset ids or files>] [dry=1]
+ *   image <task> <prompt.txt> kind=sheet|draft|page|cover page=N|name=x cast=<canon ids or names> [ref=<asset ids or files>] [dry=1]
+ *         cast= adds each member's canon look word for word and its canon references (lib/cast.ts); required
+ *         whenever the prompt names a canon character, except on a character sheet (kind=sheet)
  *                                   one picture from the image model, behind the budget gate. The costs row is reserved first
  *                                   ("· reserved"), re-checked, then settled after the call (docs/TEAM.md, Pictures)
  *   check <file> [kind=interior|cover pages=N]       print specs for a PNG, KDP preflight for a PDF
@@ -43,6 +45,7 @@ import {
   failedNote, planImage, recheckImage, releasedNote, reservedNote, settledNote, subjectOf, unconfirmedNote, verifyClaim,
 } from "./lib/gates";
 import { ImageCallError, checkArt, contactSheet, edgeReport, fitToPage, format, generateImage, practiceImage } from "./lib/image";
+import { castFor } from "./lib/cast";
 import { python } from "./lib/python";
 import { rubricPath } from "./lib/qc";
 import {
@@ -284,10 +287,22 @@ export type Deps = { generate?: typeof generateImage };
  */
 async function image(core: Core, role: BotRole, task: Row, promptPath: string, opts: Record<string, string>, deps: Deps = {}) {
   const kind = opts.kind ?? "page";
-  if (!promptPath) throw new Error(`usage: image <task> <prompt.txt> kind=${Object.keys(format.image.kinds).join("|")} page=N|name=x [ref=…] [dry=1]`);
+  if (!promptPath) throw new Error(`usage: image <task> <prompt.txt> kind=${Object.keys(format.image.kinds).join("|")} page=N|name=x cast=CN-01,… [ref=…] [dry=1]`);
   const subject = subjectOf(opts);
-  const prompt = (await readFile(fromCaller(promptPath), "utf8")).trim();
-  if (prompt.length < 40) throw new Error("the prompt file is nearly empty");
+  const written = (await readFile(fromCaller(promptPath), "utf8")).trim();
+  if (written.length < 40) throw new Error("the prompt file is nearly empty");
+  // The series canon goes in by the tool, word for word, with the same references every time (mythofex's continuity
+  // pattern). A character sheet is where a look comes from, so it may draw without a cast; given one (a line-up of
+  // characters who already have sheets), it gets the canon like any other picture.
+  const maxRefs = format.image.models[format.image.kinds[kind]?.model]?.maxRefs ?? 5;
+  const cast = kind === "sheet" && !opts.cast ? undefined : castFor({
+    canon: core.rows("canon"), productId: task.product_id, cast: opts.cast, prompt: written,
+    refs: idList(opts.ref), maxRefs, page: Number(opts.page) || undefined, assets: core.rows("assets"), kind,
+  });
+  if (cast?.errors.length) throw new Error(`Not drawn ($0):\n  ${cast.errors.join("\n  ")}`);
+  const prompt = written + (cast?.text ?? "");
+  const refIds = cast ? cast.refs : idList(opts.ref);
+  if (cast?.members.length) console.log(`cast: ${cast.members.map((m) => `${m.canon_id} ${m.name}`).join(", ")}  ·  refs: ${refIds.join(", ")}${cast.dropped.length ? `  (left out, model limit ${maxRefs}: ${cast.dropped.join(", ")})` : ""}`);
   const dir = resolve(WORK_DIR, task.task_id);
   await mkdir(dir, { recursive: true });
 
@@ -302,7 +317,7 @@ async function image(core: Core, role: BotRole, task: Row, promptPath: string, o
   // 1. The gate, on this process's snapshot: attempts (this round and ever), the task's budget, the day's cap.
   const plan = planImage(core, task, kind, subject, format.image, nyDay());
   const refs: string[] = [];
-  for (const ref of idList(opts.ref)) refs.push(existsSync(fromCaller(ref)) ? fromCaller(ref) : await fetchOne(core, ref));
+  for (const ref of refIds) refs.push(existsSync(fromCaller(ref)) ? fromCaller(ref) : await fetchOne(core, ref));
   if (refs.length > plan.model.maxRefs) throw new Error(`${plan.model.name} takes at most ${plan.model.maxRefs} reference images; you gave ${refs.length}`);
 
   // 2. Reserve: the row goes in first, at the estimate, so a parallel call or a crash can see it.
@@ -361,7 +376,7 @@ async function image(core: Core, role: BotRole, task: Row, promptPath: string, o
   await writeFile(recipe, JSON.stringify({
     task_id: task.task_id, product_id: task.product_id, kind, subject, cost_id, attempt: plan.lifetime, made_at: now,
     model: plan.model.name, endpoint: made.endpoint, request_id: made.requestId, resolution: plan.resolution, aspect: plan.aspect,
-    fitted_to_page: plan.fitToPage && !warn, usd_estimate: plan.usd, references: idList(opts.ref), prompt,
+    fitted_to_page: plan.fitToPage && !warn, usd_estimate: plan.usd, references: refIds, cast: cast?.members.map((m) => m.canon_id) ?? [], prompt,
   }, null, 2));
 
   // 6. Settle: the call succeeded, so the row is real. (If this fails the row keeps its "reserved" note at the same price.)
@@ -654,7 +669,7 @@ const TABS: Record<string, string[]> = {
   apply: ["products", "skus", "tasks", "task_types", "pages", "assets", "requests", "lessons", "canon", "plans", "content", "listings", "research", "config"],
   folder: ["tasks", "products", "config"],
   cost: ["tasks", "products", "config", "costs"],
-  image: ["tasks", "products", "config", "costs", "log", "assets"],
+  image: ["tasks", "products", "config", "costs", "log", "assets", "canon"],
   upload: ["tasks", "products", "config", "assets", "pages", "skus"],
   asset: ["tasks", "products", "config", "assets", "pages"],
 };

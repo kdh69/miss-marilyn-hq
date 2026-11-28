@@ -38,3 +38,17 @@ describe("edgeReport", () => {
     expect(r.flags.filter((f) => /cream/.test(f)).length).toBe(4);
   });
 });
+
+import { manualVerdict } from "../apps/backend/src/lib/qc";
+
+describe("manualVerdict (npm run qc)", () => {
+  const long = "p2 sketch: no characters, swing set matches the sheet, top half clear for the words.";
+  it("keeps the reviewer's sentence on a pass, not just 'ok'", () => {
+    expect(manualVerdict("pass", long)).toEqual({ result: "pass", notes: `manual QC: ${long}`, summaryForMom: long });
+  });
+  it("refuses a verdict that doesn't say what was checked", () => {
+    expect(() => manualVerdict("pass", "ok")).toThrow(/at least 40 characters/);
+    expect(() => manualVerdict("fail", "")).toThrow(/what needs fixing/);
+    expect(() => manualVerdict("maybe", long)).toThrow(/pass or fail/);
+  });
+});

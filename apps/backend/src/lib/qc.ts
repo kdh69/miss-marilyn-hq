@@ -114,3 +114,18 @@ async function logCost(core: Core, task: Row, usage: Anthropic.Usage, model: str
     note: `${model} ${usage.input_tokens}in/${usage.output_tokens}out`, entered_by: "backend", created_at: now,
   }]);
 }
+
+/**
+ * The verdict `npm run qc` records. The reviewer's sentence is kept in qc_notes on a pass too (it was
+ * dropped for "manual QC: ok" until 2026-11-28, so passes on tasks without a Clara card said nothing),
+ * and a verdict must say what was checked: at least 40 characters.
+ */
+export function manualVerdict(verdict: string, text: string): { result: "pass" | "fail"; notes: string; summaryForMom: string } {
+  if (verdict !== "pass" && verdict !== "fail") throw new Error(`verdict must be pass or fail, got "${verdict}"`);
+  const t = text.trim();
+  if (!t) throw new Error(verdict === "pass" ? "add a one-sentence summary for Clara" : "add what needs fixing");
+  if (t.length < 40) throw new Error(`say what you checked (at least 40 characters; got ${t.length}): "ok" is not a QC record`);
+  return verdict === "pass"
+    ? { result: "pass", notes: `manual QC: ${t}`, summaryForMom: t }
+    : { result: "fail", notes: `manual QC: ${t}`, summaryForMom: "" };
+}

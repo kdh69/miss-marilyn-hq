@@ -46,6 +46,8 @@ confirmed is marked proven below.
 - GPT Image 2 (edit) through fal is videograph's fallback when Google refuses; it isn't wired in here. [videograph, checked 2026-10-19]
 
 - Nano Banana Pro at 4K held steady across 7 finals at $0.30 each (estimate): no refusals, no empty results, no `Forbidden`. [proven, checked 2026-11-11] [playbook](../playbook.md)
+- Nano Banana Pro /edit took two real photos of Miss M among 5 references at 2K with no refusal; 4 sheets at $0.15 and 3 finals at $0.30 on 11-28, no empty results. [proven, checked 2026-11-28] T-0049, T-0028
+- A maker's run that dies on a network error (ENOTFOUND, laptop offline) before its first call costs $0 and leaves no costs row, but the task sits in_progress with no log row (4 hours on T-0044). Check spend and the work folder before restarting it. [proven, checked 2026-11-27] T-0044
 
 ## Privacy
 

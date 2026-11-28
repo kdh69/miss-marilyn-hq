@@ -28,9 +28,12 @@ For the Quality Checker, Claude's QC, the critic and the dispatcher. The checkli
 - Claude's QC on story v2 recorded its own counts (about 270 words, the longest spread 49) and still noted p14 at 6 lines against a limit of 5: count lines as well as words. [proven, checked 2026-11-01] [handoff](../HANDOFF.md)
 - The read-through of the 24 drafts found three faults no single-page check would (a missing set-up on p16, a doodle in the outer 4% of p24, a speckle on p10). [proven, checked 2026-11-01] [handoff](../HANDOFF.md)
 - Clara answers with notes on the page she is looking at, not long questions: 10 open questions (R-0004 to R-0015) got no reply in up to 13 days, while 11 page notes in 5 minutes settled 7 of them. Ask about a page on that page. [proven, checked 2026-11-27] T-0047
+- The Illustrator and the canon audit both called Miss M's white forehead wedge a fault because a lesson and the canon text said "unbroken crown"; the photos show the wedge and Kyle confirmed it. Where a real photo exists, judge against the photo and send a disagreement to Kyle (L-0047). [proven, checked 2026-11-28] T-0049
 - Grok-era log rows carried made-up from-statuses and timestamps, and one verdict was overwritten. Rows written through `npm run bot` can't be: it only appends, with the real status and time. [proven, checked 2026-11-11] [bot.ts](../../apps/backend/src/bot.ts)
 
 ## Open questions
 
 - How often does the Quality Checker pass something Claude's QC then fails? Two reviews by the same model may be one too many, or the second may earn its keep; the critic counts it per sweep. [unproven, checked 2026-11-11]
   - 2026-11-27: 1 task (T-0047), both passed, no disagreement. [proven, checked 2026-11-27]
+  - 2026-11-28 stretch 3: 1 task (T-0048), both passed, no disagreement; its QC verdict was again only "manual QC: ok", the last before `manualVerdict` kept the sentence (lib/qc.ts, at least 40 characters, tested). [proven, checked 2026-11-28]
+  - 2026-11-27 sweep 2: 2 tasks (T-0026, T-0044). The Quality Checker failed T-0044 once, correctly (p15 copied p14), and passed it on round 2; QC passed both, no disagreement. Both QC verdicts were logged as only "manual QC: ok": a pass should name its checks. [proven, checked 2026-11-27]

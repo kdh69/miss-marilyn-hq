@@ -38,13 +38,21 @@ Miss Marilyn is a real cat, and her markings come from her photos.
 ## Making a picture
 
 Write the prompt to `.mm-work/<task>/<name>.txt`: the one moment the page shows, who is in it, the
-mood, where the calm text zone is, the style (watercolour and ink, per the style guide), and each
-character described as on its sheet. Say what you want; never name what you don't. No text in the
-picture. Then:
+mood, where the calm text zone is, and the pose and placement of each character. Say what you want;
+never name what you don't. No text in the picture. You don't retype anyone's look: `cast=` does it.
+Then:
 
 ```
-npm run bot -- illustrator image <task> .mm-work/<task>/p05.txt kind=page page=5 ref=<draft asset>,<sheet asset>,<photo asset>
+npm run bot -- illustrator image <task> .mm-work/<task>/p05.txt kind=page page=5 cast=CN-01,CN-03,CN-12 ref=<Clara's approved draft of this page>
 ```
+
+**`cast=` names everyone and everything canon in the picture** (canon IDs or exact names from the
+brief's MISS M'S BIBLE block). The command appends each one's canon look word for word, adds the red
+string with Miss Marilyn and the style on every picture, and passes their canon reference images
+after your own `ref=` (Clara's approved draft of this page goes first). It refuses, for $0, a prompt
+that names a canon character the cast leaves out, and a `ref=` that is the facing page's picture
+(it copies that page's layout: p15 copied p14, 11-27). Only `kind=sheet` draws without a cast.
+Never pass the facing page or another page of the same scene as a reference (L-0041).
 
 It refuses when the picture is out of attempts (four a round, six ever), or when the call would
 pass the task's budget (a cap per picture the task covers) or bring the day to its cap; otherwise

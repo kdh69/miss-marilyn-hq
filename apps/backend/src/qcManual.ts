@@ -10,7 +10,7 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { Core } from "@mm/core";
 import { qcGate } from "./jobs/gatekeeper";
-import { activeLessons, parkedBooks, rubricPath } from "./lib/qc";
+import { activeLessons, manualVerdict, parkedBooks, rubricPath } from "./lib/qc";
 
 async function list(core: Core) {
   const types = new Map(core.rows("task_types").map((t) => [t.task_type, t]));
@@ -44,12 +44,7 @@ async function record(core: Core, taskId: string, verdict: string, text: string)
   const task = core.rows("tasks").find((t) => t.task_id === taskId);
   if (!task) throw new Error(`no task ${taskId}`);
   if (task.status !== "ready_for_qc") throw new Error(`${taskId} is ${task.status}, not ready_for_qc`);
-  if (verdict !== "pass" && verdict !== "fail") throw new Error(`verdict must be pass or fail, got "${verdict}"`);
-  if (!text) throw new Error(verdict === "pass" ? "add a one-sentence summary for Clara" : "add what needs fixing");
-
-  const result = verdict === "pass"
-    ? { result: "pass" as const, notes: "manual QC: ok", summaryForMom: text }
-    : { result: "fail" as const, notes: `manual QC: ${text}`, summaryForMom: "" };
+  const result = manualVerdict(verdict, text);
   await qcGate(core, true, taskId, async () => result);
 
   const after = (await Core.load(["tasks"])).rows("tasks").find((t) => t.task_id === taskId);

@@ -125,11 +125,13 @@ classrooms are much easier to draw and read, and the photo page keeps the real-c
 ### Miss Marilyn ("Miss M") — the star
 
 - **Role:** the hero of every book. Every story is told through her eyes (third person).
-- **Looks** (as drawn on the character sheets, 2026-11-12; *Clara to confirm against her photos*):
-  a small fluffy white cat with charcoal-grey fur on the top of her head and both ears, large round
-  olive-green eyes, a pink nose with a brown-grey smudge beside it (her beauty mark), and a fluffy
-  grey striped tail; no collar; her signature thing is a thin red string. The full canon is in
-  section 7b.
+- **Looks** (from two real photos of her, 2026-11-28; the photos win over every drawing): a small,
+  long-haired, very fluffy white cat with a big chest ruff; charcoal-grey patches over the top of her
+  head and both ears, split by a white wedge up the middle of her forehead; large round green eyes; a
+  pink nose with a dark grey-brown smudge touching its left side as you look (her beauty mark);
+  and a huge, very bushy plumed tail as fluffy as her body, smoky charcoal grey, darkest toward the
+  tip, with soft lighter silver-grey bands near the base. No collar; her signature thing is a thin
+  red string. The full canon is in section 7b.
 - **Personality** (*draft — Clara to confirm*): curious first, cautious second. Asks lots of
   questions. Gets excited fast, worries a little, then tries anyway. Kind, a bit silly, loves a
   cozy spot and a sunbeam. Never naughty on purpose; her mix-ups come from curiosity.
@@ -235,7 +237,7 @@ short version into every brief.
 
 | What | How it always looks | Reference (asset) |
 |---|---|---|
-| **Miss Marilyn** | Small fluffy white cat, walks upright. Charcoal-grey **fur** on the top of her head and both ears (prompt it as fur: "cap" once drew a baseball cap). Large round olive-green eyes. Pink nose with one soft round brown-grey smudge touching the **left side of the nose as you look at the picture**, about the nose's size (her beauty mark, on every page). Fluffy grey tail with darker horizontal stripes. Clearly smaller than Mama and Papa. | sheet A-T0025-40; expressions A-T0025-42; line-up A-T0025-46; cover A-T0040-20313028 |
+| **Miss Marilyn** | Small, long-haired, very fluffy white cat with a big chest ruff, walks upright. Charcoal-grey **fur** patches over the top of her head and both ears, split by a white wedge up the middle of her forehead (prompt it as fur: "cap" once drew a baseball cap). Large round green eyes. Pink nose with one dark grey-brown smudge touching the **left side of the nose as you look at the picture**, about the nose's size (her beauty mark, on every page). A huge, very bushy plumed tail as fluffy as her body: smoky charcoal grey, darkest toward the tip, soft lighter silver-grey bands near the base. Clearly smaller than Mama and Papa (Mama about 1.5 times her height). From her real photos, 2026-11-28. | sheet A-T0025-40; expressions A-T0025-42; line-up A-T0025-46; cover A-T0040-20313028 |
 | **Red string** | One thin, wavy red cord like a shoelace (`#D32F2F`), in or looped around a paw on every page she appears. Never a yarn ball, bow or ribbon; the only red thing on her. | A-T0025-40 |
 | **Mama** | Soft cream cat with pale ginger patches on head and back, upright, about 1.5 x Miss M's height. Never bright orange. | A-T0025-05; line-up A-T0025-46 |
 | **Papa** | Grey tabby with darker grey stripes, upright, a little taller than Mama. | A-T0025-07; line-up A-T0025-46 |
