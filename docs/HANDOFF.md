@@ -1,4 +1,34 @@
-# Handoff — where things stand (2026-11-11, evening)
+# Handoff — where things stand (2026-11-28)
+
+## Start here: 2026-11-27/28 (laptop session, two sweeps, $2.44 of pictures)
+
+- **Panel (live):** Clara's home is one "Your next step" card plus a short list. Script and Illustrations
+  are one step, **Words & pictures** (`/script`; `/art` redirects): one page at a time like the open book,
+  words left, picture right, edited in place; **Looks good** (words become hers, picture approved) or
+  **Something's wrong**. Two-page pictures show once (`lib/spreads.ts`). A team rewrite on a page that is
+  already hers shows **Use the new words / Keep my words** (`teamSuggestion`), so moved lines can't print twice.
+- **Consistency (Kyle: "absurdly consistent", from mythofex):** `npm run bot -- illustrator image … cast=<canon ids>`
+  appends each character's canon look word for word and passes its canon references, each character's
+  sheet right after the caller's first ref (`lib/cast.ts`). It refuses for $0 a prompt naming an uncast
+  character and a facing-page reference. Miss Marilyn's look is now from two **real photos** (white forehead
+  wedge, green eyes, smudge left of the nose as you look, huge smoky plumed tail): photos A-T0049-030950ju,
+  -030940h5; new sheet **A-T0049-034028c7** (its back view wrongly shows a white head). The photos win over
+  every drawing.
+- **Finals copy their approved sketch exactly, faults included** (p5 twice). So: fix sketches against the
+  canon first ($0.08), then finals ($0.30). A $0 audit found 12 sketches off canon (p5–8, 13, 16, 18–23)
+  and 2 finals (p1 parents too small and old tail; p4 loose string). All held until Kyle sets that cap.
+- **Made:** p1 and p4 finals, new sketches p2, p14, p15, p19, p20, T-0047 story v3 (on Clara's step).
+  **Blocked:** T-0049's family line-up (smudge on the wrong side twice; $0.38 of its $0.98 left); the car
+  waits for it. T-0030–32 need a print-size two-page `image` kind.
+- **Kyle, in the Sheet:** retire L-0042, L-0043, L-0045 (three versions of her look; L-0043's "unbroken crown"
+  is wrong); clear text_final on p9 ("C") and p11 (a copy of p10); name the copyright holder for p2;
+  repoint CN-03/CN-04 when a new line-up passes; cancel T-0038's old script card.
+- **Clara:** T-0047 words, T-0045 marketing plan, R-0011 cover, R-0014 p24 photo, R-0027 doubled lines,
+  and a look at her new sheet. Measured numbers and mistakes: [`playbook.md`](playbook.md).
+- `npm run qc` now keeps the reviewer's sentence (at least 40 characters). The sweep's setup check says
+  BEHIND when this copy is behind GitHub; the sweep pulls first.
+
+## Earlier (2026-11-11, evening)
 
 Read this first when picking the project back up. Setup steps in full: [`SETUP.md`](SETUP.md).
 Working away from the laptop: [`REMOTE.md`](REMOTE.md). The team: [`TEAM.md`](TEAM.md). The plan:
